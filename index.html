@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta</title>
+
+    <link rel="stylesheet" href="src/leaflet/leaflet.css">
+    <script src="src/leaflet/leaflet.js"></script>
+
+    <script src="src/jquery-3.7.0/jquery.js"></script>
+    
+    <link rel="stylesheet" href="src/bootstrap-3.3.7/css/bootstrap.css">
+    <script src="src/bootstrap-3.3.7/js/bootstrap.js"></script>
+    
+    <link rel="stylesheet" href="src/geoman/leaflet-geoman.css">
+    <script src="src/geoman/leaflet-geoman.min.js"></script>
+    
+    <link rel="stylesheet" href="src/easybutton/easy-button.css">
+    <script src="src/easybutton/easy-button.js"></script>
+    
+    <link rel="stylesheet" href="src/sidebar/L.Control.Sidebar.css">
+    <script src="src/sidebar/L.Control.Sidebar.js"></script>
+
+    <script src="src/leaflet.providers/leaflet-providers.js"></script>
+
+    <script src="src/leaflet.geoserver/L.Geoserver.js"></script>
+    
+    <script src="src/leaflet.ajax/leaflet-ajax.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            /* display: flex; */
+        }
+        #mapdiv {
+            block-size: 100vh;
+        }
+      </style>
+
+</head>
+<body>
+    
+    <div id="side-bar" class="col-sm-2">
+        <button id="btnLocate" class="btn btn-primary">Ubicame</button>
+        <select name="" id="capa1">
+            <option selected>Seleccione capa 1</option>
+        </select>
+        <select name="" id="capa2">
+            <option selected>Seleccione capa 2</option>
+        </select>
+    </div>
+    <div id="mapdiv" class="col-sm-10"></div>
+
+    <script>
+        var map2;
+        var lyrOSM;
+        var lyrEsri;
+        var lyrContLumin;
+        var ctrLayers;
+        var objBasemaps;
+        var objOverlays;
+        var capaColonias;
+        var capaDelegaciones;
+        var capaLuminarias;
+        var mrkCurrentLocation;
+
+        $(document).ready(function () {
+        map2 = L.map("mapdiv", {
+          center: [32.50079, -116.932811],
+          zoom: 12,
+        });
+
+
+        map2.pm.addControls({
+          position: 'topleft',
+          drawMarker: false,
+          drawCircle: false,
+          drawCircleMarker: false,
+          drawText: false
+        });
+        map2.on("pm:create", function(e){
+          console.log(e);
+          fgpRio1.addLayer(e.layer);
+        });
+
+
+        lyrOSM = L.tileLayer.provider('OpenStreetMap.Mapnik');
+        lyrEsri = L.tileLayer.provider('Esri.WorldImagery');
+        map2.addLayer(lyrOSM);
+
+        objBasemaps = {
+          'Open Street Maps': lyrOSM,
+          'Esri Imagery': lyrEsri
+        };
+
+        capaDelegaciones = L.Geoserver.wms('https://geoserver.implantijuana.gob.mx/geoserver/wms', {
+            layers: 'gobierno:delegaciones_2013',
+            format: "image/png"
+        });
+        
+        capaColonias = L.Geoserver.wms('https://geoserver.implantijuana.gob.mx/geoserver/wms', {
+            layers: 'catastro:colonias_2020',
+            format: "image/png"
+        });
+
+        capaLuminarias = L.Geoserver.wfs('https://geoserver.implantijuana.gob.mx/geoserver/wfs', {
+            layers: 'servicios:luminarias_2021'
+            // format: "image/png"
+        });
+
+
+        lyrContLumin = L.geoJSON.ajax();
+
+        objOverlays = {
+            'Delegaciones': capaDelegaciones, 
+            'Colonias': capaColonias, 
+            'Luminarias': capaLuminarias 
+        };
+
+        ctrLayers = L.control.layers(objBasemaps, objOverlays).addTo(map2);
+
+
+        map2.on("locationfound", function (e) {
+          console.log(capaLuminarias.toJSON);
+          if (mrkCurrentLocation) {
+            mrkCurrentLocation.remove();
+          }
+          mrkCurrentLocation = L.circle(e.latlng, {
+            radius: 600,
+          }).bindTooltip('Hello im here').addTo(map2);
+          map2.setView(e.latlng, 14);
+        });
+
+        map2.on("locationerror", function (e) {
+          console.log(e);
+          alert("Lacalizacion no encontrada");
+        });
+
+
+        $("#btnLocate").click(function () {
+          map2.locate();
+        });
+
+    });
+
+    </script>
+
+</body>
+</html>
