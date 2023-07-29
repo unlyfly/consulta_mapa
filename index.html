@@ -95,35 +95,73 @@
           'Esri Imagery': lyrEsri
         };
 
-        capaDelegaciones = L.Geoserver.wms('https://geoserver.implantijuana.gob.mx/geoserver/wms', {
-            layers: 'gobierno:delegaciones_2013',
-            format: "image/png"
-        });
+
+        // function peticionAjax(url) {
+        //   return new Promise(
+        //     function (resolve, reject) {
+        //       var xhr = new XMLHttpRequest();
+        //       xhr.open("get", url);
+        //       xhr.onload = function () {
+        //         if (xhr.status === 200) {
+        //           resolve(xhr.response);
+        //         } else {
+        //           reject(Error(xhr.statusText));
+        //         }
+        //       };
+        //       xhr.onerror = function () {
+        //         reject(Error('Error de red'));
+        //       };;
+        //       xhr.send();
+        //     }
+        //   );
+        // };
         
-        capaColonias = L.Geoserver.wms('https://geoserver.implantijuana.gob.mx/geoserver/wms', {
+        // var urlTerremotos = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.geojson";
+
+        // peticionAjax(urlTerremotos)
+        //   .then(function (respuesta) {
+        //     var datos = JSON.parse(respuesta);
+        //     var capaVectorial = L.geoJSON(datos);
+        //     capaVectorial.addTo(mapa);
+        //   })
+        //   .catch(function (respuesta) {
+        //     alert(respuesta);
+        //   });
+
+
+        // capaDelegaciones = L.Geoserver.wfs('http://localhost:8080/geoserver/wfs', {
+        //     layers: 'gobierno:delegaciones_2013',
+        //     fitLayer: false
+        // });
+        
+        capaColonias = L.Geoserver.wfs('http://localhost:8080/geoserver/wfs', {
             layers: 'catastro:colonias_2020',
-            format: "image/png"
-        });
+            onEachFeature: function (feature, layer) {
+              layer.bindPopup('<p>Colonia:<p>'+feature.properties.colonia);
+            },
+            fitLayer: false,
+            style: {
+              color: "purple",
+              opacity: "0.5",
+            }
+          });
 
-        capaLuminarias = L.Geoserver.wfs('https://geoserver.implantijuana.gob.mx/geoserver/wfs', {
-            layers: 'servicios:luminarias_2021'
-            // format: "image/png"
-        });
 
+        // capaLuminarias = L.Geoserver.wfs('http://localhost:8080/geoserver/wfs', {
+        //     layers: 'servicios:luminarias_2021'
+        // });
 
-        lyrContLumin = L.geoJSON.ajax();
 
         objOverlays = {
-            'Delegaciones': capaDelegaciones, 
-            'Colonias': capaColonias, 
-            'Luminarias': capaLuminarias 
+            // 'Delegaciones': capaDelegaciones, 
+            'Colonias': capaColonias
+            // 'Luminarias': capaLuminarias 
         };
 
         ctrLayers = L.control.layers(objBasemaps, objOverlays).addTo(map2);
 
 
         map2.on("locationfound", function (e) {
-          console.log(capaLuminarias.toJSON);
           if (mrkCurrentLocation) {
             mrkCurrentLocation.remove();
           }
