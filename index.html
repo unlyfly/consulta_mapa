@@ -42,7 +42,7 @@
 </head>
 <body>
     
-    <div id="side-bar" class="col-sm-2">
+    <div id="side-bar" class="col-sm-1">
         <button id="btnLocate" class="btn btn-primary">Ubicame</button>
         <select name="" id="capa1">
             <option selected>Seleccione capa 1</option>
@@ -51,7 +51,7 @@
             <option selected>Seleccione capa 2</option>
         </select>
     </div>
-    <div id="mapdiv" class="col-sm-10"></div>
+    <div id="mapdiv" class="col-sm-12"></div>
 
     <script>
         var map2;
@@ -59,6 +59,8 @@
         var lyrEsri;
         var lyrContLumin;
         var ctrLayers;
+        var ctrSidebar;
+        var ctrEasybutton;
         var objBasemaps;
         var objOverlays;
         var capaColonias;
@@ -85,6 +87,12 @@
           fgpRio1.addLayer(e.layer);
         });
 
+        ctrSidebar = L.control.sidebar('side-bar', {
+          closeButton: false
+        }).addTo(map2);
+        ctrEasybutton = L.easyButton('glyphicon-log-out', function(){
+          ctrSidebar.toggle();
+        }).addTo(map2);
 
         lyrOSM = L.tileLayer.provider('OpenStreetMap.Mapnik');
         lyrEsri = L.tileLayer.provider('Esri.WorldImagery');
@@ -129,11 +137,6 @@
         //   });
 
 
-        // capaDelegaciones = L.Geoserver.wfs('http://localhost:8080/geoserver/wfs', {
-        //     layers: 'gobierno:delegaciones_2013',
-        //     fitLayer: false
-        // });
-        
         capaColonias = L.Geoserver.wfs('http://localhost:8080/geoserver/wfs', {
             layers: 'catastro:colonias_2020',
             onEachFeature: function (feature, layer) {
@@ -146,6 +149,10 @@
             }
           });
 
+          capaDelegaciones = L.Geoserver.wfs('http://localhost:8080/geoserver/wfs', {
+            layers: 'gobierno:delegaciones_2013',
+            fitLayer: false
+        });
 
         // capaLuminarias = L.Geoserver.wfs('http://localhost:8080/geoserver/wfs', {
         //     layers: 'servicios:luminarias_2021'
@@ -153,7 +160,7 @@
 
 
         objOverlays = {
-            // 'Delegaciones': capaDelegaciones, 
+            'Delegaciones': capaDelegaciones, 
             'Colonias': capaColonias
             // 'Luminarias': capaLuminarias 
         };
