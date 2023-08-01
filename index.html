@@ -37,17 +37,40 @@
         #mapdiv {
             block-size: 100vh;
         }
+
+        .errorMsg {
+          padding: 0;
+          text-align: center;
+        }
+
+        .col-xs-12, .col-xs-6, .col-xs-4 {
+          padding: 3px;
+        }
       </style>
 
 </head>
 <body>
     
-    <div id="side-bar" class="col-sm-1">
+    <div id="side-bar" class="col-sm-3">
         <button id="btnLocate" class="btn btn-primary">Ubicame</button>
-        <select name="" id="capa1">
+
+        <div id="divProyect" class="col-xs-12">
+          <div id="divProjLabel" class="text-center col-xs-12"></div>
+          <div id="divProjectError" class="errorMsg col-xs-12"></div>
+          <div id="divFindProject" class="form-group">
+            <div class="col-xs-6">
+              <input type="text" id="txtFindProject" class="form-control" placeholder="Project ID">
+            </div>
+            <div class="col-xs-6">
+              <button id="btnFindProject" class="btn btn-primary btn-block">Find Project</button>
+            </div>
+          </div>
+        </div>
+
+        <select name="" id="capa1" class="form-select col-xs-6">
             <option selected>Seleccione capa 1</option>
         </select>
-        <select name="" id="capa2">
+        <select name="" id="capa2" class="form-select col-xs-6">
             <option selected>Seleccione capa 2</option>
         </select>
     </div>
@@ -104,39 +127,6 @@
         };
 
 
-        // function peticionAjax(url) {
-        //   return new Promise(
-        //     function (resolve, reject) {
-        //       var xhr = new XMLHttpRequest();
-        //       xhr.open("get", url);
-        //       xhr.onload = function () {
-        //         if (xhr.status === 200) {
-        //           resolve(xhr.response);
-        //         } else {
-        //           reject(Error(xhr.statusText));
-        //         }
-        //       };
-        //       xhr.onerror = function () {
-        //         reject(Error('Error de red'));
-        //       };;
-        //       xhr.send();
-        //     }
-        //   );
-        // };
-        
-        // var urlTerremotos = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.geojson";
-
-        // peticionAjax(urlTerremotos)
-        //   .then(function (respuesta) {
-        //     var datos = JSON.parse(respuesta);
-        //     var capaVectorial = L.geoJSON(datos);
-        //     capaVectorial.addTo(mapa);
-        //   })
-        //   .catch(function (respuesta) {
-        //     alert(respuesta);
-        //   });
-
-
         capaColonias = L.Geoserver.wfs('http://localhost:8080/geoserver/wfs', {
             layers: 'catastro:colonias_2020',
             onEachFeature: function (feature, layer) {
@@ -187,6 +177,18 @@
         $("#btnLocate").click(function () {
           map2.locate();
         });
+
+        
+        function returnColoniaByName(Col){
+          var arLayer = capaColonias.getLayers();
+          for (i=0; i<arLayer.length; i++){
+            var featureCol = arLayer[i].feature.properties.colonia;
+            if (featureCol==Col){
+              return arLayer[i];
+            }
+          }
+          return false;
+        }
 
     });
 
