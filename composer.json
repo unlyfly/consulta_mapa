@@ -1,0 +1,19 @@
+{
+    "name": "sig1/mapa_consulta",
+    "description": "Mapa de consulta de datos en la web, con conexion a geoserver y base datos.",
+    "type": "project",
+    "require": {
+        "mjaschen/phpgeo": "^4.2",
+        "vlucas/phpdotenv": "^5.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Sig1\\MapaConsulta\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "fgarcia"
+        }
+    ]
+}

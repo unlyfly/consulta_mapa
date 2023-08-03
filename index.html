@@ -47,6 +47,14 @@
       .col-xs-4 {
         padding: 3px;
       }
+
+      .ui-autocomplete {
+        max-height: 80%;
+        overflow-y: auto;
+        /* prevent horizontal scrollbar */
+        overflow-x: hidden;
+      }
+
     </style>
   </head>
   <body>
@@ -92,6 +100,7 @@
             </button>
           </div>
         </div>
+        <div id="divDelegacionData"></div>
       </div>
 
       <select name="" id="capa1" class="form-select col-xs-6">
@@ -155,12 +164,22 @@
           "Esri Imagery": lyrEsri,
         };
 
+        capaLuminarias = L.Geoserver.wms('http://localhost:8080/geoserver/wms', {
+            layers: 'servicios:luminarias_2021',
+            fitLayer: false
+        });
+
+        
         capaColonias = L.Geoserver.wfs("http://localhost:8080/geoserver/wfs", {
           layers: "catastro:colonias_2020",
           onEachFeature: function (feature, layer) {
             attr = feature.properties;
-            layer.bindPopup("<p>Colonia:<p>" + attr.colonia);
-            arrayColonias.push(attr.colonia.toString())
+            geom = layer.getLatLngs();
+            layer.bindPopup("<p>Colonia:<p>" + attr);
+            if (!arrayColonias.includes(attr.colonia.toString())){
+              arrayColonias.push(attr.colonia.toString())
+            };
+            lumProcess(geom);
           },
           fitLayer: false,
           style: {
@@ -175,27 +194,30 @@
         })
 
 
-        capaDelegaciones = L.Geoserver.wfs(
-          "http://localhost:8080/geoserver/wfs",
-          {
+
+        capaDelegaciones = L.Geoserver.wfs("http://localhost:8080/geoserver/wfs",{
             layers: "gobierno:delegaciones_2013",
+            onEachFeature: function (feature, layer) {
+              attr = feature.properties;
+              layer.bindPopup("<p>Delegacion:<p>" + attr.delegacion);
+              if (!arrayDelegaciones.includes(attr.delegacion.toString())){
+                arrayDelegaciones.push(attr.delegacion.toString())
+              };
+            },
             fitLayer: false,
-          }
-        );
+          });
         $(function(){
           $('#txtFindDelegacion').autocomplete({
             source: arrayDelegaciones
           })
         })
 
-        // capaLuminarias = L.Geoserver.wfs('http://localhost:8080/geoserver/wfs', {
-        //     layers: 'servicios:luminarias_2021'
-        // });
+
 
         objOverlays = {
+          Luminarias: capaLuminarias,
           Delegaciones: capaDelegaciones,
           Colonias: capaColonias,
-          // 'Luminarias': capaLuminarias
         };
 
         ctrLayers = L.control.layers(objBasemaps, objOverlays).addTo(map2);
@@ -249,7 +271,32 @@
 
         $('#txtFindColonia').on('keyup paste', function(){
           var col = $('#txtFindColonia').val();
-          testLayerNameStatus(col);
+          testLayerNameStatus(arrayColonias, col, "#divFindColonia", "#btnFindColonia");
+        })
+
+        //PARA SEARCH DE DELEGACION
+
+        document.getElementById('btnFindDelegacion').onclick = function(){
+          var del = document.getElementById('txtFindDelegacion').value;
+          var lyr = returnLayerByName(capaDelegaciones, 'delegacion', del);
+          if (lyr){
+            if (lyrSearchDel){
+              lyrSearchDel.remove()
+            }
+            lyrSearchDel = L.geoJSON(lyr.toGeoJSON(), {style:{color:'yellow', weigth: 10, opacity: 0.5}}).addTo(map2);
+            map2.fitBounds(lyr.getBounds().pad(1));
+            $("#divFindDelegacion").removeClass("has-error");
+            $('#divDelegacionError').html("");
+            var attr = lyr.feature.properties;
+            $('#divDelegacionData').html("<h4 clas='text-center'>Atributos</h4><h5>Delegacion: "+attr.delegacion+"</h5><h5>Area: "+attr.area+" m </h5>");
+          } else {
+            $('#divDelegacionError').html("****** Delegacion no excontrada ******");
+          }
+        }
+
+        $('#txtFindDelegacion').on('keyup paste', function(){
+          var del = $('#txtFindDelegacion').val();
+          testLayerNameStatus(arrayDelegaciones, del, "#divFindDelegacion", "#btnFindDelegacion");
         })
 
         // FORMULAS GENERALES
@@ -265,16 +312,33 @@
           return false;
         }
 
-        function testLayerNameStatus(lyr, att){
-          if (lyr.indexOf(att)<0){
-            $("#divFindColonia").addClass("has-error");
-            $("#btnFindColonia").attr("disabled", false);
+        function testLayerNameStatus(arr, val, divFind, btnFind){
+          if (arr.indexOf(val)<0){
+            $(divFind).addClass("has-error");
+            $(btnFind).attr("disabled", false);
           } else {
-            $("#divFindColonia").removeClass("has-error");
-            $("#divColoniaError").html("");
-            $("#btnFindColonia").attr("disabled", true);
+            $(divFind).removeClass("has-error");
+            $(btnFind).attr("disabled", true);
           }
         }
+
+        function lumProcess(geom){
+          $.ajax({
+              type: 'POST',
+              url: 'php/DataExtractor.php',
+              data: JSON.stringify({ geom: geom }),
+              contentType: 'application/json',
+              success: function (data) {
+                // Process the returned data (GeoJSON) and display on the map
+                const intersectedGeoJSON = JSON.parse(data);
+                L.geoJSON(intersectedGeoJSON).addTo(map2);
+              },
+              error: function (error) {
+                console.error('Error:', error);
+              }
+          })
+        };
+
       });
     </script>
   </body>
