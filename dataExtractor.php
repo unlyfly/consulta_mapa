@@ -2,17 +2,17 @@
 require __DIR__ . '/vendor/autoload.php';
 include ('database.php');
 
-// Include PHPGeo library
-use Brick\Geo\LineString;
-use Brick\Geo\Point;
-use Brick\Geo\Polygon;
+// Include Brick\Geo library
+use GeoPHP\IO\WKB\Parser;
+use GeoPHP\IO\GeoJSON\Encoder;
+use GeoPHP\Feature\Geometry;
 use Brick\Geo\IO\GeoJSONReader;
 use Brick\Geo\IO\GeoJSONWriter;
 
 
+
 //Connect to data base
 $db = connectToDB(); 
-print('Connection Succesful!');
 
 // Get the selected coordinates from the AJAX request
 $data = file_get_contents('php://input');
@@ -21,34 +21,39 @@ $data = file_get_contents('php://input');
 $reader = new GeoJSONReader();
 $polygon = $reader->read($data);
 
-$polygon->SRID(32611); /////  IMPORTANTE: INVESTIGAR PARA CAMBIAR SRID
+// echo $polygon->SRID();
 
-echo $polygon->SRID();
-// Convert Geometry to Text
 $selectedGeom = $polygon->asText();
 
+$query = "SELECT b.* FROM servicios.luminarias as b, ST_GeomFromText('$selectedGeom') as a WHERE ST_Contains(ST_GeomFromText('$selectedGeom', 4326), b.geom)";
 
-$query = "SELECT b.* FROM servicios.luminarias_2021 as b, ST_GeomFromText('$selectedGeom') as a WHERE ST_Contains(ST_GeomFromText('$selectedGeom'), b.geom)";
 
 $result = pg_query($db, $query);
 
-$selectedPoints = array();
+$GeoJSON = array('type' => 'FeatureCollection', 'features' => array());
 
 while ($row = pg_fetch_assoc($result)) {
-    // Convert the point data to an array and add to the selectedPoints array
-    $point = array(
-        'type' => 'Feature',
-        'geometry' => json_decode($row['geom']),
-        'properties' => array(
-        // Add other properties as needed
-        )
-    );
-    $selectedPoints[] = $point;
-}
+    $properties = $row;
+    # Remove geojson and geometry fields from properties
+    unset($properties['geom']);
 
-print json_encode($selectedPoints);
+    $wkb = hex2bin($row['geom']);
+
+    $point = geoPHP::load($wkb, 'wkb');
+
+    // Convert the Point to GeoJSON
+    $pointGeoJson = $point->out('json');
+
+    // Convert the point data to an array and add to the selectedPoints array
+    $feature = array(
+        'type' => 'Feature',
+        'geometry' => json_decode($pointGeoJson, true),
+        'properties' => $properties
+    );
+    array_push($GeoJSON['features'], $feature);
+}
+// echo json_encode($selectedPoints);
 
 // Return the GeoJSON as a JSON response
-// header('Content-Type: application/json');
-echo json_encode(array('type' => 'FeatureCollection', 'features' => $selectedPoints));
+echo json_encode($GeoJSON);
 ?>

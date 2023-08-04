@@ -193,7 +193,7 @@
             color: "purple",
             opacity: "0.5",
           },
-        });
+        }).addTo(map2);
         $(function () {
           $("#txtFindColonia").autocomplete({
             source: arrayColonias,
@@ -369,11 +369,15 @@
             type: "POST",
             url: "dataExtractor.php",
             data: JSON.stringify(geom),
-            contentType: 'application/json',
+            contentType: 'json',
             success: function (data) {
               // Process the returned data (GeoJSON) and display on the map
-              // const intersectedGeoJSON = JSON.parse(data);
-              // L.geoJSON(intersectedGeoJSON).addTo(map2);
+              const intersectedGeoJSON = JSON.parse(data);
+              L.geoJSON(intersectedGeoJSON, {
+                pointToLayer: function (feature, latlng) {
+                    return L.marker(latlng);
+                }
+              }).addTo(map2);
               console.log(data);
             },
             error: function (error) {

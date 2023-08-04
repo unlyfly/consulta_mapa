@@ -5,7 +5,8 @@
     "require": {
         "mjaschen/phpgeo": "4.0",
         "vlucas/phpdotenv": "^5.5",
-        "brick/geo": "^0.9.0"
+        "brick/geo": "^0.9.0",
+        "phayes/geophp": "^1.2"
     },
     "autoload": {
         "psr-4": {
