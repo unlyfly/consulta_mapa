@@ -4,8 +4,64 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dcdad838d730a3796e1667c6de28847e",
+    "content-hash": "04907dc740921dda9eb92266d50c8a60",
     "packages": [
+        {
+            "name": "brick/geo",
+            "version": "0.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/brick/geo.git",
+                "reference": "ce4503f8d77473dbd7215de6aec51f14effe8b0f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/brick/geo/zipball/ce4503f8d77473dbd7215de6aec51f14effe8b0f",
+                "reference": "ce4503f8d77473dbd7215de6aec51f14effe8b0f",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "brick/reflection": "~0.2.0 || ~0.3.0 || ~0.4.0",
+                "ext-json": "*",
+                "ext-pdo": "*",
+                "ext-sqlite3": "*",
+                "php-coveralls/php-coveralls": "^2.0",
+                "phpunit/phpunit": "^9.0",
+                "vimeo/psalm": "4.28.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Brick\\Geo\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "GIS geometry library",
+            "keywords": [
+                "brick",
+                "geo",
+                "geography",
+                "geometry",
+                "gis"
+            ],
+            "support": {
+                "issues": "https://github.com/brick/geo/issues",
+                "source": "https://github.com/brick/geo/tree/0.9.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/BenMorel",
+                    "type": "github"
+                }
+            ],
+            "time": "2022-11-21T23:44:16+00:00"
+        },
         {
             "name": "graham-campbell/result-type",
             "version": "v1.1.1",
@@ -70,16 +126,16 @@
         },
         {
             "name": "mjaschen/phpgeo",
-            "version": "4.2.0",
+            "version": "4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mjaschen/phpgeo.git",
-                "reference": "b2e593cf1e9aceea36510158ddb80c7395a80d5a"
+                "reference": "63bead2c9ff70618769b55fa9e601c5a59be5510"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mjaschen/phpgeo/zipball/b2e593cf1e9aceea36510158ddb80c7395a80d5a",
-                "reference": "b2e593cf1e9aceea36510158ddb80c7395a80d5a",
+                "url": "https://api.github.com/repos/mjaschen/phpgeo/zipball/63bead2c9ff70618769b55fa9e601c5a59be5510",
+                "reference": "63bead2c9ff70618769b55fa9e601c5a59be5510",
                 "shasum": ""
             },
             "require": {
@@ -137,9 +193,9 @@
                 "docs": "https://phpgeo.marcusjaschen.de/Installation.html",
                 "email": "mjaschen@gmail.com",
                 "issues": "https://github.com/mjaschen/phpgeo/issues",
-                "source": "https://github.com/mjaschen/phpgeo/tree/4.2.0"
+                "source": "https://github.com/mjaschen/phpgeo/tree/4.0.0"
             },
-            "time": "2022-07-25T08:36:36+00:00"
+            "time": "2021-11-29T12:23:32+00:00"
         },
         {
             "name": "phpoption/phpoption",

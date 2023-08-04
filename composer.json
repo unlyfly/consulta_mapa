@@ -3,8 +3,9 @@
     "description": "Mapa de consulta de datos en la web, con conexion a geoserver y base datos.",
     "type": "project",
     "require": {
-        "mjaschen/phpgeo": "^4.2",
-        "vlucas/phpdotenv": "^5.5"
+        "mjaschen/phpgeo": "4.0",
+        "vlucas/phpdotenv": "^5.5",
+        "brick/geo": "^0.9.0"
     },
     "autoload": {
         "psr-4": {
