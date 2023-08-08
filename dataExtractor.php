@@ -27,7 +27,6 @@ $selectedGeom = $polygon->asText();
 
 $query = "SELECT b.* FROM servicios.luminarias as b, ST_GeomFromText('$selectedGeom') as a WHERE ST_Contains(ST_GeomFromText('$selectedGeom', 4326), b.geom)";
 
-
 $result = pg_query($db, $query);
 
 $GeoJSON = array('type' => 'FeatureCollection', 'features' => array());

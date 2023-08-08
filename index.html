@@ -137,6 +137,8 @@
       var mrkCurrentLocation;
       var arrayColonias = [];
       var arrayDelegaciones = [];
+      var pointsLayer;
+      var drawnPolygon;
 
       $(document).ready(function () {
         map2 = L.map("mapdiv", {
@@ -147,7 +149,7 @@
         map2.pm.addControls({
           position: "topleft",
           drawMarker: false,
-          drawCircle: false,
+          drawCircle: true,
           drawCircleMarker: false,
           drawText: false,
         });
@@ -169,6 +171,9 @@
           "Open Street Maps": lyrOSM,
           "Esri Imagery": lyrEsri,
         };
+
+        pointsLayer = L.layerGroup().addTo(map2);
+        drawnPolygon = L.layerGroup().addTo(map2);
 
         capaLuminarias = L.Geoserver.wms(
           "http://localhost:8080/geoserver/wms",
@@ -193,7 +198,7 @@
             color: "purple",
             opacity: "0.5",
           },
-        }).addTo(map2);
+        });
         $(function () {
           $("#txtFindColonia").autocomplete({
             source: arrayColonias,
@@ -201,11 +206,10 @@
         });
 
         capaColonias.on("click", function (event) {
+          drawnPolygon.clearLayers();
           var selectedFeature = event.layer.toGeoJSON();
-          var coorOnly = selectedFeature.geometry.coordinates[0][0];
-          // Your code to handle the selected feature goes here
-          console.log("Feature properties:", selectedFeature.geometry);
           lumProcess(selectedFeature.geometry);
+          console.log(selectedFeature.geometry);
         });
 
         capaDelegaciones = L.Geoserver.wfs(
@@ -237,19 +241,24 @@
         ctrLayers = L.control.layers(objBasemaps, objOverlays).addTo(map2);
 
         map2.on("pm:create", function (e) {
-          console.log(e.layer.getLatLngs());
+          drawnPolygon.clearLayers();
+          const selectedRec = e.layer.toGeoJSON();
+          drawnPolygon.addLayer(e.layer);
+          lumProcess(selectedRec.geometry);
+          console.log(selectedRec.geometry);
         });
 
         map2.on("locationfound", function (e) {
           if (mrkCurrentLocation) {
             mrkCurrentLocation.remove();
           }
-          mrkCurrentLocation = L.circle(e.latlng, {
-            radius: 600,
-          })
-            .bindTooltip("Hello im here")
-            .addTo(map2);
-          map2.setView(e.latlng, 14);
+          mrkCurrentLocation = L.circleMarker(e.latlng, {
+            radius: 12,
+            opacity: 1,
+            transparency: 0,
+          }).addTo(map2);
+          console.log(mrkCurrentLocation.toGeoJSON());
+          map2.setView(e.latlng, 16);
         });
 
         map2.on("locationerror", function (e) {
@@ -365,20 +374,28 @@
         }
 
         function lumProcess(geom) {
+          pointsLayer.clearLayers();
           $.ajax({
             type: "POST",
             url: "dataExtractor.php",
             data: JSON.stringify(geom),
             contentType: 'json',
             success: function (data) {
-              // Process the returned data (GeoJSON) and display on the map
               const intersectedGeoJSON = JSON.parse(data);
               L.geoJSON(intersectedGeoJSON, {
-                pointToLayer: function (feature, latlng) {
-                    return L.marker(latlng);
+                pointToLayer: function(feature, latlng) {
+                  return L.circleMarker(latlng, {
+                      radius: 3,
+                      fillColor: 'yellow',
+                      color: 'black',
+                      weight: 1,
+                      opacity: 1,
+                      fillOpacity: 0.8
+                  })},
+                onEachFeature: function (feature, layer) {
+                  pointsLayer.addLayer(layer);
                 }
               }).addTo(map2);
-              console.log(data);
             },
             error: function (error) {
               console.error("Error:", error);
