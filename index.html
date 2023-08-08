@@ -10,8 +10,9 @@
 
     <script src="src/jquery-3.7.0/jquery.js"></script>
 
-    <link rel="stylesheet" href="src/bootstrap-3.3.7/css/bootstrap.css" />
-    <script src="src/bootstrap-3.3.7/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="src/bootstrap-3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="src/bootstrap-3.3.7/css/bootstrap-theme.min.css" />
+    <script src="src/bootstrap-3.3.7/js/bootstrap.min.js"></script>
 
     <link rel="stylesheet" href="src/geoman/leaflet-geoman.css" />
     <script src="src/geoman/leaflet-geoman.min.js"></script>
@@ -134,6 +135,7 @@
       var capaColonias;
       var capaDelegaciones;
       var capaLuminarias;
+      var capaSubsectores;
       var mrkCurrentLocation;
       var arrayColonias = [];
       var arrayDelegaciones = [];
@@ -147,11 +149,17 @@
         });
 
         map2.pm.addControls({
-          position: "topleft",
+          position: "bottomright",
           drawMarker: false,
           drawCircle: true,
           drawCircleMarker: false,
+          drawPolyline: false,
           drawText: false,
+          editMode: false,
+          dragMode: false,
+          cutPolygon: false,
+          removalMode: false,
+          rotateMode: false,
         });
 
         ctrSidebar = L.control
@@ -182,6 +190,14 @@
             fitLayer: false,
           }
         );
+
+        // capaSubsectores = L.Geoserver.wfs(
+        //   "http://10.10.250.97:8080/geoserver/wfs",
+        //   {
+        //     layers: "catastro:pducpt2010_SUBSECTORES",
+        //     fitLayer: false,
+        //   }
+        // );
 
         capaColonias = L.Geoserver.wfs("http://localhost:8080/geoserver/wfs", {
           layers: "catastro:colonias_2020",
@@ -236,6 +252,7 @@
           Luminarias: capaLuminarias,
           Delegaciones: capaDelegaciones,
           Colonias: capaColonias,
+          // Subsectores: capaSubsectores
         };
 
         ctrLayers = L.control.layers(objBasemaps, objOverlays).addTo(map2);
