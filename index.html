@@ -10,9 +10,12 @@
 
     <script src="src/jquery-3.7.0/jquery.js"></script>
 
-    <link rel="stylesheet" href="src/bootstrap-3.3.7/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="src/bootstrap-3.3.7/css/bootstrap-theme.min.css" />
-    <script src="src/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="src/bootstrap-5.3.1-dist/css/bootstrap.min.css"
+    />
+    <script src="src/bootstrap-5.3.1-dist/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="src/fontawesome-6.4.2/css/all.min.css" />
+    <script src="src/fontawesome-6.4.2/js/all.min.js"></script>
 
     <link rel="stylesheet" href="src/geoman/leaflet-geoman.css" />
     <script src="src/geoman/leaflet-geoman.min.js"></script>
@@ -25,6 +28,12 @@
 
     <link rel="stylesheet" href="src/sidebar/L.Control.Sidebar.css" />
     <script src="src/sidebar/L.Control.Sidebar.js"></script>
+    
+    <link rel="stylesheet" href="src/L.switchBasemap/L.switchBasemap.css" />
+    <script src="src/L.switchBasemap/L.switchBasemap.js"></script>
+
+    <!-- <link rel="stylesheet" href="src/leaflet.sidebarV2/leaflet-sidebar.min.css" />
+    <script src="src/leaflet.sidebarV2/leaflet-sidebar.min.js"></script> -->
 
     <script src="src/leaflet.providers/leaflet-providers.js"></script>
 
@@ -33,8 +42,11 @@
     <script src="src/leaflet.ajax/leaflet-ajax.min.js"></script>
 
     <style>
+      html,
+      body,
       #mapdiv {
-        block-size: 100vh;
+        height: 100%;
+        font: 10pt "Helvetica Neue", Arial, Helvetica, sans-serif;
       }
 
       .errorMsg {
@@ -58,14 +70,14 @@
     </style>
   </head>
   <body>
-    <div id="side-bar" class="col-sm-3">
+    <div id="side-bar" class="sidebar collapsed">
       <button id="btnLocate" class="btn btn-primary">Ubicame</button>
 
       <div id="divCol" class="col-xs-12">
         <div id="divColLabel" class="text-center col-xs-12"></div>
         <div id="divColoniaError" class="errorMsg col-xs-12"></div>
-        <div id="divFindColonia" class="form-group">
-          <div class="col-xs-6">
+        <div id="divFindColonia" class="form-group col-xs-12">
+          <div class="col-xs-8">
             <input
               type="text"
               id="txtFindColonia"
@@ -73,12 +85,8 @@
               placeholder="Nombre de colonia"
             />
           </div>
-          <div class="col-xs-6">
-            <button
-              id="btnFindColonia"
-              class="btn btn-primary btn-block"
-              disabled
-            >
+          <div class="col-xs-4">
+            <button id="btnFindColonia" class="btn btn-primary btn-block" disabled>
               Buscar Colonia
             </button>
           </div>
@@ -99,11 +107,7 @@
             />
           </div>
           <div class="col-xs-6">
-            <button
-              id="btnFindDelegacion"
-              class="btn btn-primary btn-block"
-              disabled
-            >
+            <button id="btnFindDelegacion" class="btn btn-primary btn-block" disabled>
               Buscar Delegación
             </button>
           </div>
@@ -118,7 +122,7 @@
         <option selected>Seleccione capa 2</option>
       </select>
     </div>
-    <div id="mapdiv" class="col-sm-12"></div>
+    <div id="mapdiv"></div>
 
     <script>
       var map2;
@@ -149,7 +153,7 @@
         });
 
         map2.pm.addControls({
-          position: "bottomright",
+          position: "topleft",
           drawMarker: false,
           drawCircle: true,
           drawCircleMarker: false,
@@ -162,18 +166,25 @@
           rotateMode: false,
         });
 
-        ctrSidebar = L.control
-          .sidebar("side-bar", {
-            closeButton: false,
-          })
-          .addTo(map2);
-        ctrEasybutton = L.easyButton("glyphicon-log-out", function () {
+        ctrSidebar = L.control.sidebar("side-bar").addTo(map2);
+
+        ctrEasybutton = L.easyButton("fas fa-arrow-right", function () {
           ctrSidebar.toggle();
         }).addTo(map2);
 
-        lyrOSM = L.tileLayer.provider("OpenStreetMap.Mapnik");
-        lyrEsri = L.tileLayer.provider("Esri.WorldImagery");
-        map2.addLayer(lyrOSM);
+        new L.basemapsSwitcher([
+          {
+            layer: L.tileLayer.provider("OpenStreetMap.Mapnik").addTo(map2),
+            icon: './assets/img/osm_switch.PNG',
+            name: 'OSM',
+          },
+          {
+            layer: L.tileLayer.provider("Esri.WorldImagery"),
+            icon: './assets/img/esri_switch.PNG',
+            name: 'Esri Map',
+          },
+        ], { position: 'bottomleft' }).addTo(map2);
+
 
         objBasemaps = {
           "Open Street Maps": lyrOSM,
@@ -183,6 +194,14 @@
         pointsLayer = L.layerGroup().addTo(map2);
         drawnPolygon = L.layerGroup().addTo(map2);
 
+        capaSubsectores = L.Geoserver.wfs(
+          "http://10.10.250.97:8080/geoserver/wfs",
+          {
+            layers: "catastro:pducpt2010_SUBSECTORES",
+            fitLayer: false,
+          }
+        );
+
         capaLuminarias = L.Geoserver.wms(
           "http://localhost:8080/geoserver/wms",
           {
@@ -190,14 +209,6 @@
             fitLayer: false,
           }
         );
-
-        // capaSubsectores = L.Geoserver.wfs(
-        //   "http://10.10.250.97:8080/geoserver/wfs",
-        //   {
-        //     layers: "catastro:pducpt2010_SUBSECTORES",
-        //     fitLayer: false,
-        //   }
-        // );
 
         capaColonias = L.Geoserver.wfs("http://localhost:8080/geoserver/wfs", {
           layers: "catastro:colonias_2020",
@@ -249,10 +260,10 @@
         });
 
         objOverlays = {
+          Subsectores: capaSubsectores,
           Luminarias: capaLuminarias,
           Delegaciones: capaDelegaciones,
           Colonias: capaColonias,
-          // Subsectores: capaSubsectores
         };
 
         ctrLayers = L.control.layers(objBasemaps, objOverlays).addTo(map2);
@@ -396,22 +407,23 @@
             type: "POST",
             url: "dataExtractor.php",
             data: JSON.stringify(geom),
-            contentType: 'json',
+            contentType: "json",
             success: function (data) {
               const intersectedGeoJSON = JSON.parse(data);
               L.geoJSON(intersectedGeoJSON, {
-                pointToLayer: function(feature, latlng) {
+                pointToLayer: function (feature, latlng) {
                   return L.circleMarker(latlng, {
-                      radius: 3,
-                      fillColor: 'yellow',
-                      color: 'black',
-                      weight: 1,
-                      opacity: 1,
-                      fillOpacity: 0.8
-                  })},
+                    radius: 3,
+                    fillColor: "yellow",
+                    color: "black",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8,
+                  });
+                },
                 onEachFeature: function (feature, layer) {
                   pointsLayer.addLayer(layer);
-                }
+                },
               }).addTo(map2);
             },
             error: function (error) {
