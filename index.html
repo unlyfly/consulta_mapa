@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="src/fontawesome-6.4.2/css/all.min.css" />
     <script src="src/fontawesome-6.4.2/js/all.min.js"></script>
 
+    <script src="src/turf/turf.min.js"></script>
+
     <link rel="stylesheet" href="src/geoman/leaflet-geoman.css" />
     <script src="src/geoman/leaflet-geoman.min.js"></script>
 
@@ -131,6 +133,8 @@
       var lyrContLumin;
       var lyrSearchCol;
       var lyrSearchDel;
+      var lyrCurrentLoc;
+      var jsonCurrentLocation;
       var ctrLayers;
       var ctrSidebar;
       var ctrEasybutton;
@@ -233,6 +237,10 @@
         });
 
         capaColonias.on("click", function (event) {
+          if (mrkCurrentLocation) {
+            mrkCurrentLocation.remove();
+            lyrCurrentLoc.remove();
+          }
           drawnPolygon.clearLayers();
           var selectedFeature = event.layer.toGeoJSON();
           lumProcess(selectedFeature.geometry);
@@ -266,7 +274,7 @@
           Colonias: capaColonias,
         };
 
-        ctrLayers = L.control.layers(objBasemaps, objOverlays).addTo(map2);
+        ctrLayers = L.control.layers('' ,objOverlays).addTo(map2);
 
         map2.on("pm:create", function (e) {
           drawnPolygon.clearLayers();
@@ -279,14 +287,16 @@
         map2.on("locationfound", function (e) {
           if (mrkCurrentLocation) {
             mrkCurrentLocation.remove();
+            lyrCurrentLoc.remove();
           }
-          mrkCurrentLocation = L.circleMarker(e.latlng, {
-            radius: 12,
-            opacity: 1,
-            transparency: 0,
-          }).addTo(map2);
-          console.log(mrkCurrentLocation.toGeoJSON());
+          mrkCurrentLocation = L.marker(e.latlng).addTo(map2);
           map2.setView(e.latlng, 16);
+          jsonCurrentLocation = turf.buffer(mrkCurrentLocation.toGeoJSON(), 0.4, {units: 'kilometers'});
+          console.log(jsonCurrentLocation);
+          lyrCurrentLoc = L.geoJSON(jsonCurrentLocation, {style:{color: 'blue', fillColor: 'blue', fillOpacity: 0.5}}).addTo(map2);
+
+          drawnPolygon.clearLayers();
+          lumProcess(jsonCurrentLocation.geometry);
         });
 
         map2.on("locationerror", function (e) {
