@@ -1,5 +1,4 @@
 <?php
-// Read and process geospatial data into a GeoPandas DataFrame (assuming you already have this step)
 function connectToDB() {
 
     $dotenv = Dotenv\Dotenv::createImmutable(__DIR__. '/config');

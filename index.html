@@ -3,15 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Consulta</title>
+    <title>Mapa de Acceso a la Información</title>
 
     <link rel="stylesheet" href="src/leaflet/leaflet.css" />
     <script src="src/leaflet/leaflet.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+    
+    <script src="src/L.crs/proj4leaflet.js"></script>
 
     <script src="src/jquery-3.7.0/jquery.js"></script>
 
-    <link rel="stylesheet" href="src/bootstrap-5.3.1-dist/css/bootstrap.min.css"
-    />
+    <link rel="stylesheet" href="src/jquery-3.7.0/jquery-ui.min.css" />
+    <script src="src/jquery-3.7.0/jquery-ui.min.js"></script>
+
+    <script src="src/leaflet.ajax/leaflet-ajax.min.js"></script>
+
+    <script src="src/wfst/leaflet-wfst.src.js"></script>
+
+    <!-- <script src="src/leaflet.geoserver/L.Geoserver.js"></script> -->
+
+    <link rel="stylesheet" href="src/bootstrap-5.3.1-dist/css/bootstrap.min.css" />
     <script src="src/bootstrap-5.3.1-dist/js/bootstrap.min.js"></script>
 
     <link rel="stylesheet" href="src/fontawesome-6.4.2/css/all.min.css" />
@@ -21,9 +33,6 @@
 
     <link rel="stylesheet" href="src/geoman/leaflet-geoman.css" />
     <script src="src/geoman/leaflet-geoman.min.js"></script>
-
-    <link rel="stylesheet" href="src/jquery-3.7.0/jquery-ui.min.css" />
-    <script src="src/jquery-3.7.0/jquery-ui.min.js"></script>
 
     <link rel="stylesheet" href="src/easybutton/easy-button.css" />
     <script src="src/easybutton/easy-button.js"></script>
@@ -38,10 +47,6 @@
     <script src="src/leaflet.sidebarV2/leaflet-sidebar.min.js"></script> -->
 
     <script src="src/leaflet.providers/leaflet-providers.js"></script>
-
-    <script src="src/leaflet.geoserver/L.Geoserver.js"></script>
-
-    <script src="src/leaflet.ajax/leaflet-ajax.min.js"></script>
 
     <style>
       html,
@@ -198,42 +203,65 @@
         pointsLayer = L.layerGroup().addTo(map2);
         drawnPolygon = L.layerGroup().addTo(map2);
 
-        capaSubsectores = L.Geoserver.wfs(
-          "http://10.10.250.97:8080/geoserver/wfs",
-          {
-            layers: "catastro:pducpt2010_SUBSECTORES",
-            fitLayer: false,
-          }
-        );
+        // capaLuminarias = L.Geoserver.wms("http://localhost:8080/geoserver/wms",
+        //   {
+        //     layers: "servicios:luminarias_2021",
+        //     fitLayer: false,
+        //   }
+        // );
 
-        capaLuminarias = L.Geoserver.wms(
-          "http://localhost:8080/geoserver/wms",
-          {
-            layers: "servicios:luminarias_2021",
-            fitLayer: false,
-          }
-        );
+        // capaColonias = L.Geoserver.wfs("http://10.10.250.97:8080/geoserver/wfs", 
+        //   {
+        //     layers: "catastro:colonias_2020",
+        //     onEachFeature: function (feature, layer) {
+        //       attr = feature.properties;
+        //       geom = layer.getLatLngs();
+        //       layer.bindPopup("<p>Colonia:<p>" + attr.colonia);
+        //       if (!arrayColonias.includes(attr.colonia)) {
+        //         arrayColonias.push(attr.colonia.toString());
+        //       }
+        //     },
+        //     fitLayer: false,
+        //     style: {
+        //       color: "purple",
+        //       opacity: "0.5",
+        //     },
+        //   });
+        //   $(function () {
+        //     $("#txtFindColonia").autocomplete({
+        //       source: arrayColonias,
+        //     });
+        //   });
 
-        capaColonias = L.Geoserver.wfs("http://localhost:8080/geoserver/wfs", {
-          layers: "catastro:colonias_2020",
-          onEachFeature: function (feature, layer) {
-            attr = feature.properties;
-            geom = layer.getLatLngs();
-            layer.bindPopup("<p>Colonia:<p>" + attr.colonia);
-            if (!arrayColonias.includes(attr.colonia)) {
-              arrayColonias.push(attr.colonia.toString());
-            }
-          },
-          fitLayer: false,
+
+        capaDelegaciones = new L.WFS({
+          url: 'http://10.10.250.97:8080/geoserver/wfs',
+          typeNS: 'gobierno',
+          typeName: 'delegaciones_2013',
+          geometryField: 'geom',
+          crs: new L.Proj.CRS("EPSG:32611","+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
+          ),
           style: {
-            color: "purple",
-            opacity: "0.5",
-          },
+              color: 'red',
+              fillColor: 'blue',
+              fillOpacity: 1,
+              weight: 1
+          }
         });
-        $(function () {
-          $("#txtFindColonia").autocomplete({
-            source: arrayColonias,
-          });
+
+        capaColonias = new L.WFS({
+          url: 'http://10.10.250.97:8080/geoserver/wfs',
+          typeNS: 'catastro',
+          typeName: 'colonias_2020',
+          geometryField: 'geom',
+          crs: new L.Proj.CRS("EPSG:32611","+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
+          ),
+          style: {
+              fillColor: 'grey',
+              color: 'red',
+              weight: 2,
+              fillOpacity: .1,
+          }
         });
 
         capaColonias.on("click", function (event) {
@@ -247,31 +275,53 @@
           console.log(selectedFeature.geometry);
         });
 
-        capaDelegaciones = L.Geoserver.wfs(
-          "http://localhost:8080/geoserver/wfs",
-          {
-            layers: "gobierno:delegaciones_2013",
-            onEachFeature: function (feature, layer) {
-              attr = feature.properties;
-              layer.bindPopup("<p>Delegacion:<p>" + attr.delegacion);
-              if (!arrayDelegaciones.includes(attr.delegacion.toString())) {
-                arrayDelegaciones.push(attr.delegacion.toString());
-              }
-            },
-            fitLayer: false,
+
+        capaSubsectores = new L.WFS({
+          url: 'http://10.10.250.97:8080/geoserver/wfs',
+          typeNS: 'implan',
+          typeName: 'pducpt2010_SUBSECTORES',
+          geometryField: 'geom',
+          crs: new L.Proj.CRS("EPSG:32611","+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
+          ),
+          style: {
+              fillColor: 'grey',
+              color: 'red',
+              weight: 2,
+              fillOpacity: .1,
           }
-        );
-        $(function () {
-          $("#txtFindDelegacion").autocomplete({
-            source: arrayDelegaciones,
-          });
         });
 
+        // capaSubsectores = L.Geoserver.wfs("http://10.10.250.97:8080/geoserver/wfs",
+        //   {
+        //     layers: "implan:pducpt2010_SUBSECTORES",
+        //     fitLayer: false,
+        //   }
+        // );
+
+        // capaDelegaciones = L.Geoserver.wfs("http://10.10.250.97:8080/geoserver/wfs",
+        //   {
+        //     layers: "gobierno:delegaciones_2013",
+        //     onEachFeature: function (feature, layer) {
+        //       attr = feature.properties;
+        //       layer.bindPopup("<p>Delegacion:<p>" + attr.delegacion);
+        //       if (!arrayDelegaciones.includes(attr.delegacion.toString())) {
+        //         arrayDelegaciones.push(attr.delegacion.toString());
+        //       }
+        //     },
+        //     fitLayer: false,
+        //   }
+        // );
+        // $(function () {
+        //   $("#txtFindDelegacion").autocomplete({
+        //     source: arrayDelegaciones,
+        //   });
+        // });
+
         objOverlays = {
+          // Luminarias: capaLuminarias,
           Subsectores: capaSubsectores,
-          Luminarias: capaLuminarias,
-          Delegaciones: capaDelegaciones,
           Colonias: capaColonias,
+          Delegaciones: capaDelegaciones,
         };
 
         ctrLayers = L.control.layers('' ,objOverlays).addTo(map2);
@@ -291,9 +341,9 @@
           }
           mrkCurrentLocation = L.marker(e.latlng).addTo(map2);
           map2.setView(e.latlng, 16);
-          jsonCurrentLocation = turf.buffer(mrkCurrentLocation.toGeoJSON(), 0.4, {units: 'kilometers'});
+          jsonCurrentLocation = turf.buffer(mrkCurrentLocation.toGeoJSON(), 0.6, {units: 'kilometers'});
           console.log(jsonCurrentLocation);
-          lyrCurrentLoc = L.geoJSON(jsonCurrentLocation, {style:{color: 'blue', fillColor: 'blue', fillOpacity: 0.5}}).addTo(map2);
+          lyrCurrentLoc = L.geoJSON(jsonCurrentLocation, {style:{color: 'blue', fillColor: 'blue', fillOpacity: 0.2}}).addTo(map2);
 
           drawnPolygon.clearLayers();
           lumProcess(jsonCurrentLocation.geometry);
