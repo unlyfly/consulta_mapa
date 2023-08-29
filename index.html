@@ -10,18 +10,18 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
     
-    <script src="src/L.crs/proj4leaflet.js"></script>
-
     <script src="src/jquery-3.7.0/jquery.js"></script>
-
+    
     <link rel="stylesheet" href="src/jquery-3.7.0/jquery-ui.min.css" />
     <script src="src/jquery-3.7.0/jquery-ui.min.js"></script>
+
+    <script src="src/L.crs/proj4leaflet.js"></script>
 
     <script src="src/leaflet.ajax/leaflet-ajax.min.js"></script>
 
     <script src="src/wfst/leaflet-wfst.src.js"></script>
 
-    <!-- <script src="src/leaflet.geoserver/L.Geoserver.js"></script> -->
+    <script src="src/leaflet.geoserver/L.Geoserver.js"></script>
 
     <link rel="stylesheet" href="src/bootstrap-5.3.1-dist/css/bootstrap.min.css" />
     <script src="src/bootstrap-5.3.1-dist/js/bootstrap.min.js"></script>
@@ -47,13 +47,16 @@
     <script src="src/leaflet.sidebarV2/leaflet-sidebar.min.js"></script> -->
 
     <script src="src/leaflet.providers/leaflet-providers.js"></script>
+    
+    <link rel="stylesheet" href="src/leaflet.searchbox/Leaflet.AnimatedSearchBox.css" />
+    <script src="src/leaflet.searchbox/Leaflet.AnimatedSearchBox.js"></script>
 
     <style>
       html,
       body,
       #mapdiv {
         height: 100%;
-        font: 10pt "Helvetica Neue", Arial, Helvetica, sans-serif;
+        font: 11pt "Helvetica Neue", Arial, Helvetica, sans-serif;
       }
 
       .errorMsg {
@@ -78,13 +81,11 @@
   </head>
   <body>
     <div id="side-bar" class="sidebar collapsed">
-      <button id="btnLocate" class="btn btn-primary">Ubicame</button>
-
-      <div id="divCol" class="col-xs-12">
-        <div id="divColLabel" class="text-center col-xs-12"></div>
+      <div id="divCol" class="col-sm-12 mt-4">
+        <div id="divColLabel" class="text-center col-sm-12"></div>
         <div id="divColoniaError" class="errorMsg col-xs-12"></div>
-        <div id="divFindColonia" class="form-group col-xs-12">
-          <div class="col-xs-8">
+        <div id="divFindColonia" class="form-group d-flex justify-content-between col-sm-12">
+          <div class="col-sm-6">
             <input
               type="text"
               id="txtFindColonia"
@@ -92,8 +93,8 @@
               placeholder="Nombre de colonia"
             />
           </div>
-          <div class="col-xs-4">
-            <button id="btnFindColonia" class="btn btn-primary btn-block" disabled>
+          <div class="col-sm-6">
+            <button id="btnFindColonia" class="btn btn-warning btn-block" style="text-overflow: ellipsis;" disabled>
               Buscar Colonia
             </button>
           </div>
@@ -101,20 +102,20 @@
         <div id="divColoniaData"></div>
       </div>
 
-      <div id="divDel" class="col-xs-12">
-        <div id="divDelLabel" class="text-center col-xs-12"></div>
+      <div id="divDel" class="col-sm-12 mt-4">
+        <div id="divDelLabel" class="text-center col-sm-12"></div>
         <div id="divDelegacionError" class="errorMsg col-xs-12"></div>
-        <div id="divFindDelegacion" class="form-group">
-          <div class="col-xs-6">
+        <div id="divFindDelegacion" class="form-group d-flex justify-content-between col-sm-12">
+          <div class="col-sm-6">
             <input
               type="text"
               id="txtFindDelegacion"
               class="form-control"
-              placeholder="Nombre de delegacion"
+              placeholder="Nombre de delegación"
             />
           </div>
-          <div class="col-xs-6">
-            <button id="btnFindDelegacion" class="btn btn-primary btn-block" disabled>
+          <div class="col-sm-6">
+            <button id="btnFindDelegacion" class="btn btn-warning btn-block" style="text-overflow: ellipsis;" disabled>
               Buscar Delegación
             </button>
           </div>
@@ -122,12 +123,39 @@
         <div id="divDelegacionData"></div>
       </div>
 
-      <select name="" id="capa1" class="form-select col-xs-6">
-        <option selected>Seleccione capa 1</option>
-      </select>
-      <select name="" id="capa2" class="form-select col-xs-6">
-        <option selected>Seleccione capa 2</option>
-      </select>
+      <ul class="list-group mt-4" style="list-style-type: none;">
+        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
+          <div class="form-switch">
+            <input class="form-check-input me-3" type="checkbox" id="switchDelegaciones">Delegaciones
+          </div>
+        </li>
+        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
+          <div class="form-switch">
+            <input class="form-check-input me-3" type="checkbox" id="switchColonias">Colonias
+          </div>
+        </li>
+        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
+          <div class="form-switch">
+              <input class="form-check-input me-3" type="checkbox" id="switchRutasReco">Rutas de Recolección
+          </div>
+        </li>
+        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
+          <div class="form-switch">
+              <input class="form-check-input me-3" type="checkbox" id="switchFortamun">Bacheo Fortamun
+          </div>
+        </li>
+        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
+          <div class="form-switch">
+              <input class="form-check-input me-3" type="checkbox" id="switchDesarenadores">Desarenadores
+          </div>
+        </li>
+      </ul>
+
+      <div id="tablaEst" class="text-center col-sm-12 mt-4"></div>
+
+      <div class="d-grid gap-2">
+        <button id="btnLocate" class="btn btn-danger mt-4">Ubicame</button>
+      </div>
     </div>
     <div id="mapdiv"></div>
 
@@ -154,6 +182,8 @@
       var arrayDelegaciones = [];
       var pointsLayer;
       var drawnPolygon;
+      var crs32611;
+      var searchbox;
 
       $(document).ready(function () {
         map2 = L.map("mapdiv", {
@@ -175,21 +205,30 @@
           rotateMode: false,
         });
 
-        ctrSidebar = L.control.sidebar("side-bar").addTo(map2);
+        ctrSidebar = L.control.sidebar("side-bar", {closeButton: false}).addTo(map2);
 
         ctrEasybutton = L.easyButton("fas fa-arrow-right", function () {
           ctrSidebar.toggle();
         }).addTo(map2);
 
+        searchbox = L.control.searchbox({
+            position: 'topright',
+            expand: 'left',
+            collapsed: true,
+            id: 'searchItem',
+            autocompleteFeatures: 'setValueOnClick',
+            iconPath: './assets/img/search_icon.png',
+        }).addTo(map2);
+
         new L.basemapsSwitcher([
           {
             layer: L.tileLayer.provider("OpenStreetMap.Mapnik").addTo(map2),
-            icon: './assets/img/osm_switch.PNG',
+            icon: './assets/img/osm_switch.png',
             name: 'OSM',
           },
           {
             layer: L.tileLayer.provider("Esri.WorldImagery"),
-            icon: './assets/img/esri_switch.PNG',
+            icon: './assets/img/esri_switch.png',
             name: 'Esri Map',
           },
         ], { position: 'bottomleft' }).addTo(map2);
@@ -210,7 +249,7 @@
         //   }
         // );
 
-        // capaColonias = L.Geoserver.wfs("http://10.10.250.97:8080/geoserver/wfs", 
+        // capaColonia = L.Geoserver.wfs("http://localhost:8080/geoserver/wfs", 
         //   {
         //     layers: "catastro:colonias_2020",
         //     onEachFeature: function (feature, layer) {
@@ -233,20 +272,70 @@
         //     });
         //   });
 
+        crs32611 = new L.Proj.CRS("EPSG:32611","+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs");
+
 
         capaDelegaciones = new L.WFS({
           url: 'http://10.10.250.97:8080/geoserver/wfs',
           typeNS: 'gobierno',
-          typeName: 'delegaciones_2013',
+          typeName: 'delegaciones',
           geometryField: 'geom',
-          crs: new L.Proj.CRS("EPSG:32611","+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
-          ),
+          crs: crs32611,
           style: {
               color: 'red',
               fillColor: 'blue',
-              fillOpacity: 1,
               weight: 1
           }
+        }).on('load', function (e) {
+          var capad = e.target.toGeoJSON();
+          capad.features.forEach(function (feature) {
+            var layer = L.geoJSON(feature, {
+              onEachFeature: function (feature, layer) {
+                attr = feature.properties;
+                geom = layer.getLatLngs();
+                layer.bindPopup("<p>Delegacion:<p>" + attr.delegacion);
+                if (!arrayDelegaciones.includes(attr.delegacion)) {
+                  arrayDelegaciones.push(attr.delegacion.toString());
+                }
+              }
+            })
+          });
+        });;
+        $(function () {
+          $("#txtFindDelegacion").autocomplete({
+            source: arrayDelegaciones,
+          });
+        });
+
+        capaRutasReco = new L.WFS({
+          url: 'http://10.10.250.97:8080/geoserver/wfs',
+          typeNS: 'servicios',
+          typeName: 'rutas_recoleccion',
+          geometryField: 'geom',
+          crs: crs32611,
+          style: {
+              color: 'orange',
+              weight: 3
+          }
+        });
+        capaFortamun = new L.WFS({
+          url: 'http://10.10.250.97:8080/geoserver/wfs',
+          typeNS: 'doium',
+          typeName: 'poligonos_fortamun_2023',
+          geometryField: 'geom',
+          crs: crs32611,
+          style: {
+              color: 'black',
+              fillColor: 'black',
+          }
+        });
+
+        capaDesarenadores = new L.WFS({
+          url: 'http://10.10.250.97:8080/geoserver/wfs',
+          typeNS: 'doium',
+          typeName: 'pl_desarenadores',
+          geometryField: 'geom',
+          crs: crs32611,
         });
 
         capaColonias = new L.WFS({
@@ -254,14 +343,34 @@
           typeNS: 'catastro',
           typeName: 'colonias_2020',
           geometryField: 'geom',
-          crs: new L.Proj.CRS("EPSG:32611","+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
-          ),
+          crs: crs32611,
           style: {
-              fillColor: 'grey',
-              color: 'red',
+              fillColor: '#C8A2C8',
+              color: 'pink',
               weight: 2,
-              fillOpacity: .1,
+              fillOpacity: 0,
           }
+        }).on('load', function (e) {
+          var capa = e.target.toGeoJSON();
+          capa.features.forEach(function (feature) {
+            var layer = L.geoJSON(feature, {
+              onEachFeature: function (feature, layer) {
+                attr = feature.properties;
+                geom = layer.getLatLngs();
+                layer.bindPopup("<p>Colonia:<p>" + attr.nomb_fracc);
+                if (attr && attr.nomb_fracc !== undefined) {
+                  if (!arrayColonias.includes(attr.nomb_fracc)) {
+                    arrayColonias.push(attr.nomb_fracc.toString());
+                  }
+                }
+              }
+            })
+          });
+        });
+        $(function(){
+          $("#searchItem").autocomplete({
+            source: arrayColonias,
+          });
         });
 
         capaColonias.on("click", function (event) {
@@ -272,59 +381,18 @@
           drawnPolygon.clearLayers();
           var selectedFeature = event.layer.toGeoJSON();
           lumProcess(selectedFeature.geometry);
-          console.log(selectedFeature.geometry);
         });
 
-
-        capaSubsectores = new L.WFS({
-          url: 'http://10.10.250.97:8080/geoserver/wfs',
-          typeNS: 'implan',
-          typeName: 'pducpt2010_SUBSECTORES',
-          geometryField: 'geom',
-          crs: new L.Proj.CRS("EPSG:32611","+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
-          ),
-          style: {
-              fillColor: 'grey',
-              color: 'red',
-              weight: 2,
-              fillOpacity: .1,
-          }
-        });
-
-        // capaSubsectores = L.Geoserver.wfs("http://10.10.250.97:8080/geoserver/wfs",
-        //   {
-        //     layers: "implan:pducpt2010_SUBSECTORES",
-        //     fitLayer: false,
-        //   }
-        // );
-
-        // capaDelegaciones = L.Geoserver.wfs("http://10.10.250.97:8080/geoserver/wfs",
-        //   {
-        //     layers: "gobierno:delegaciones_2013",
-        //     onEachFeature: function (feature, layer) {
-        //       attr = feature.properties;
-        //       layer.bindPopup("<p>Delegacion:<p>" + attr.delegacion);
-        //       if (!arrayDelegaciones.includes(attr.delegacion.toString())) {
-        //         arrayDelegaciones.push(attr.delegacion.toString());
-        //       }
-        //     },
-        //     fitLayer: false,
-        //   }
-        // );
-        // $(function () {
-        //   $("#txtFindDelegacion").autocomplete({
-        //     source: arrayDelegaciones,
-        //   });
-        // });
-
-        objOverlays = {
-          // Luminarias: capaLuminarias,
-          Subsectores: capaSubsectores,
-          Colonias: capaColonias,
-          Delegaciones: capaDelegaciones,
-        };
-
-        ctrLayers = L.control.layers('' ,objOverlays).addTo(map2);
+        // objOverlays = {
+        //   Luminarias: capaLuminarias,
+        //   Subsectores: capaSubsectores,
+        //   Colonias: capaColonias,
+        //   Delegaciones: capaDelegaciones,
+        //   'Rutas Recolección': capaRutasReco,
+        //   'Bacheo Fortamun': capaFortamun,
+        //   Desarenadores: capaDesarenadores
+        // };
+        // ctrLayers = L.control.layers('' ,objOverlays).addTo(map2);
 
         map2.on("pm:create", function (e) {
           drawnPolygon.clearLayers();
@@ -342,7 +410,6 @@
           mrkCurrentLocation = L.marker(e.latlng).addTo(map2);
           map2.setView(e.latlng, 16);
           jsonCurrentLocation = turf.buffer(mrkCurrentLocation.toGeoJSON(), 0.6, {units: 'kilometers'});
-          console.log(jsonCurrentLocation);
           lyrCurrentLoc = L.geoJSON(jsonCurrentLocation, {style:{color: 'blue', fillColor: 'blue', fillOpacity: 0.2}}).addTo(map2);
 
           drawnPolygon.clearLayers();
@@ -358,13 +425,47 @@
           map2.locate();
         });
 
+        document.getElementById('switchColonias').addEventListener('change', function() {
+          if (this.checked) {
+            capaColonias.addTo(map2);
+          } else {
+            map2.removeLayer(capaColonias);
+          }
+        });
+        document.getElementById('switchDelegaciones').addEventListener('change', function() {
+          if (this.checked) {
+            capaDelegaciones.addTo(map2);
+          } else {
+            map2.removeLayer(capaDelegaciones);
+          }
+        });
+        document.getElementById('switchRutasReco').addEventListener('change', function() {
+          if (this.checked) {
+            capaRutasReco.addTo(map2);
+          } else {
+            map2.removeLayer(capaRutasReco);
+          }
+        });
+        document.getElementById('switchFortamun').addEventListener('change', function() {
+          if (this.checked) {
+            capaFortamun.addTo(map2);
+          } else {
+            map2.removeLayer(capaFortamun);
+          }
+        });
+        document.getElementById('switchDesarenadores').addEventListener('change', function() {
+          if (this.checked) {
+            capaDesarenadores.addTo(map2);
+          } else {
+            map2.removeLayer(capaDesarenadores);
+          }
+        });
+
         //PARA SEARCH DE COLONIA
 
         document.getElementById("btnFindColonia").onclick = function () {
-          var col = document
-            .getElementById("txtFindColonia")
-            .value.toUpperCase();
-          var lyr = returnLayerByName(capaColonias, "colonia", col);
+          var col = document.getElementById("txtFindColonia").value.toUpperCase();
+          var lyr = returnLayerByName(capaColonias, "nomb_fracc", col);
           if (lyr) {
             if (lyrSearchCol) {
               lyrSearchCol.remove();
@@ -377,14 +478,14 @@
             $("#divColoniaError").html("");
             var attr = lyr.feature.properties;
             $("#divColoniaData").html(
-              "<h4 clas='text-center'>Atributos</h4><h5>Colonia: " +
-                attr.colonia +
+              "<h4 class='text-center'>Atributos</h4><h5>Colonia: " +
+                attr.nomb_fracc +
                 "</h5><h5>Area: " +
                 attr.area +
                 " m </h5>"
             );
           } else {
-            $("#divColoniaError").html("****** Colonia no excontrada ******");
+            $("#divColoniaError").html("****** Colonia no encontrada ******");
           }
         };
 
@@ -415,7 +516,7 @@
             $("#divDelegacionError").html("");
             var attr = lyr.feature.properties;
             $("#divDelegacionData").html(
-              "<h4 clas='text-center'>Atributos</h4><h5>Delegacion: " +
+              "<h4 class='text-center'>Atributos</h4><h5>Delegacion: " +
                 attr.delegacion +
                 "</h5><h5>Area: " +
                 attr.area +
@@ -423,7 +524,7 @@
             );
           } else {
             $("#divDelegacionError").html(
-              "****** Delegacion no excontrada ******"
+              "****** Delegacion no encontrada ******"
             );
           }
         };
@@ -470,6 +571,12 @@
             contentType: "json",
             success: function (data) {
               const intersectedGeoJSON = JSON.parse(data);
+              $("#tablaEst").html(
+              "<h4 class='text-center'>Atributos de Selección</h4><h5>Cantidad de Lums: " +
+                intersectedGeoJSON.features.length +
+                "</h5>"
+            );
+              console.log(intersectedGeoJSON);
               L.geoJSON(intersectedGeoJSON, {
                 pointToLayer: function (feature, latlng) {
                   return L.circleMarker(latlng, {
