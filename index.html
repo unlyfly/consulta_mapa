@@ -7,11 +7,11 @@
 
     <link rel="stylesheet" href="src/leaflet/leaflet.css" />
     <script src="src/leaflet/leaflet.js"></script>
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
-    
+
     <script src="src/jquery-3.7.0/jquery.js"></script>
-    
+
     <link rel="stylesheet" href="src/jquery-3.7.0/jquery-ui.min.css" />
     <script src="src/jquery-3.7.0/jquery-ui.min.js"></script>
 
@@ -39,17 +39,25 @@
 
     <link rel="stylesheet" href="src/sidebar/L.Control.Sidebar.css" />
     <script src="src/sidebar/L.Control.Sidebar.js"></script>
-    
+
     <link rel="stylesheet" href="src/L.switchBasemap/L.switchBasemap.css" />
     <script src="src/L.switchBasemap/L.switchBasemap.js"></script>
 
-    <!-- <link rel="stylesheet" href="src/leaflet.sidebarV2/leaflet-sidebar.min.css" />
-    <script src="src/leaflet.sidebarV2/leaflet-sidebar.min.js"></script> -->
-
     <script src="src/leaflet.providers/leaflet-providers.js"></script>
-    
+
     <link rel="stylesheet" href="src/leaflet.searchbox/Leaflet.AnimatedSearchBox.css" />
     <script src="src/leaflet.searchbox/Leaflet.AnimatedSearchBox.js"></script>
+
+    <script>
+      function switchLayers(lyrId, lyrName) {
+        var lyr = document.getElementById(lyrId);
+        if (lyr.checked) {
+          lyrName.addTo(map2);
+        } else {
+          map2.removeLayer(lyrName);
+        }
+      }
+    </script>
 
     <style>
       html,
@@ -79,12 +87,16 @@
       }
     </style>
   </head>
+
   <body>
     <div id="side-bar" class="sidebar collapsed">
       <div id="divCol" class="col-sm-12 mt-4">
         <div id="divColLabel" class="text-center col-sm-12"></div>
         <div id="divColoniaError" class="errorMsg col-xs-12"></div>
-        <div id="divFindColonia" class="form-group d-flex justify-content-between col-sm-12">
+        <div
+          id="divFindColonia"
+          class="form-group d-flex justify-content-between col-sm-12"
+        >
           <div class="col-sm-6">
             <input
               type="text"
@@ -94,7 +106,12 @@
             />
           </div>
           <div class="col-sm-6">
-            <button id="btnFindColonia" class="btn btn-warning btn-block" style="text-overflow: ellipsis;" disabled>
+            <button
+              id="btnFindColonia"
+              class="btn btn-warning btn-block"
+              style="text-overflow: ellipsis"
+              disabled
+            >
               Buscar Colonia
             </button>
           </div>
@@ -105,7 +122,10 @@
       <div id="divDel" class="col-sm-12 mt-4">
         <div id="divDelLabel" class="text-center col-sm-12"></div>
         <div id="divDelegacionError" class="errorMsg col-xs-12"></div>
-        <div id="divFindDelegacion" class="form-group d-flex justify-content-between col-sm-12">
+        <div
+          id="divFindDelegacion"
+          class="form-group d-flex justify-content-between col-sm-12"
+        >
           <div class="col-sm-6">
             <input
               type="text"
@@ -115,7 +135,12 @@
             />
           </div>
           <div class="col-sm-6">
-            <button id="btnFindDelegacion" class="btn btn-warning btn-block" style="text-overflow: ellipsis;" disabled>
+            <button
+              id="btnFindDelegacion"
+              class="btn btn-warning btn-block"
+              style="text-overflow: ellipsis"
+              disabled
+            >
               Buscar Delegación
             </button>
           </div>
@@ -123,30 +148,65 @@
         <div id="divDelegacionData"></div>
       </div>
 
-      <ul class="list-group mt-4" style="list-style-type: none;">
-        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
+      <ul class="list-group mt-4" style="list-style-type: none">
+        <li
+          class="form-control list-group-item list-group-item-action list-group-item-warning"
+        >
           <div class="form-switch">
-            <input class="form-check-input me-3" type="checkbox" id="switchDelegaciones">Delegaciones
+            <input
+              class="form-check-input me-3"
+              type="checkbox"
+              id="switchDelegaciones"
+              onchange="switchLayers('switchDelegaciones', capaDelegaciones)"
+            />Delegaciones
           </div>
         </li>
-        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
+        <li
+          class="form-control list-group-item list-group-item-action list-group-item-warning"
+        >
           <div class="form-switch">
-            <input class="form-check-input me-3" type="checkbox" id="switchColonias">Colonias
+            <input
+              class="form-check-input me-3"
+              type="checkbox"
+              id="switchColonias"
+              onchange="switchLayers('switchColonias', capaColonias)"
+            />Colonias
           </div>
         </li>
-        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
+        <li
+          class="form-control list-group-item list-group-item-action list-group-item-warning"
+        >
           <div class="form-switch">
-              <input class="form-check-input me-3" type="checkbox" id="switchRutasReco">Rutas de Recolección
+            <input
+              class="form-check-input me-3"
+              type="checkbox"
+              id="switchRutasReco"
+              onchange="switchLayers('switchRutasReco', capaRutasReco)"
+            />Rutas de Recolección
           </div>
         </li>
-        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
+        <li
+          class="form-control list-group-item list-group-item-action list-group-item-warning"
+        >
           <div class="form-switch">
-              <input class="form-check-input me-3" type="checkbox" id="switchFortamun">Bacheo Fortamun
+            <input
+              class="form-check-input me-3"
+              type="checkbox"
+              id="switchFortamun"
+              onchange="switchLayers('switchFortamun', capaFortamun)"
+            />Bacheo Fortamun
           </div>
         </li>
-        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
+        <li
+          class="form-control list-group-item list-group-item-action list-group-item-warning"
+        >
           <div class="form-switch">
-              <input class="form-check-input me-3" type="checkbox" id="switchDesarenadores">Desarenadores
+            <input
+              class="form-check-input me-3"
+              type="checkbox"
+              id="switchDesarenadores"
+              onchange="switchLayers('switchDesarenadores', capaDesarenadores)"
+            />Desarenadores
           </div>
         </li>
       </ul>
@@ -205,34 +265,40 @@
           rotateMode: false,
         });
 
-        ctrSidebar = L.control.sidebar("side-bar", {closeButton: false}).addTo(map2);
+        ctrSidebar = L.control
+          .sidebar("side-bar", { closeButton: false })
+          .addTo(map2);
 
         ctrEasybutton = L.easyButton("fas fa-arrow-right", function () {
           ctrSidebar.toggle();
         }).addTo(map2);
 
-        searchbox = L.control.searchbox({
-            position: 'topright',
-            expand: 'left',
+        searchbox = L.control
+          .searchbox({
+            position: "topright",
+            expand: "left",
             collapsed: true,
-            id: 'searchItem',
-            autocompleteFeatures: 'setValueOnClick',
-            iconPath: './assets/img/search_icon.png',
-        }).addTo(map2);
+            id: "searchItem",
+            autocompleteFeatures: "setValueOnClick",
+            iconPath: "./assets/img/search_icon.png",
+          })
+          .addTo(map2);
 
-        new L.basemapsSwitcher([
-          {
-            layer: L.tileLayer.provider("OpenStreetMap.Mapnik").addTo(map2),
-            icon: './assets/img/osm_switch.png',
-            name: 'OSM',
-          },
-          {
-            layer: L.tileLayer.provider("Esri.WorldImagery"),
-            icon: './assets/img/esri_switch.png',
-            name: 'Esri Map',
-          },
-        ], { position: 'bottomleft' }).addTo(map2);
-
+        new L.basemapsSwitcher(
+          [
+            {
+              layer: L.tileLayer.provider("OpenStreetMap.Mapnik").addTo(map2),
+              icon: "./assets/img/osm_switch.png",
+              name: "OSM",
+            },
+            {
+              layer: L.tileLayer.provider("Esri.WorldImagery"),
+              icon: "./assets/img/esri_switch.png",
+              name: "Esri Map",
+            },
+          ],
+          { position: "bottomleft" }
+        ).addTo(map2);
 
         objBasemaps = {
           "Open Street Maps": lyrOSM,
@@ -242,65 +308,37 @@
         pointsLayer = L.layerGroup().addTo(map2);
         drawnPolygon = L.layerGroup().addTo(map2);
 
-        // capaLuminarias = L.Geoserver.wms("http://localhost:8080/geoserver/wms",
-        //   {
-        //     layers: "servicios:luminarias_2021",
-        //     fitLayer: false,
-        //   }
-        // );
-
-        // capaColonia = L.Geoserver.wfs("http://localhost:8080/geoserver/wfs", 
-        //   {
-        //     layers: "catastro:colonias_2020",
-        //     onEachFeature: function (feature, layer) {
-        //       attr = feature.properties;
-        //       geom = layer.getLatLngs();
-        //       layer.bindPopup("<p>Colonia:<p>" + attr.colonia);
-        //       if (!arrayColonias.includes(attr.colonia)) {
-        //         arrayColonias.push(attr.colonia.toString());
-        //       }
-        //     },
-        //     fitLayer: false,
-        //     style: {
-        //       color: "purple",
-        //       opacity: "0.5",
-        //     },
-        //   });
-        //   $(function () {
-        //     $("#txtFindColonia").autocomplete({
-        //       source: arrayColonias,
-        //     });
-        //   });
-
-        crs32611 = new L.Proj.CRS("EPSG:32611","+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs");
-
+        crs32611 = new L.Proj.CRS(
+          "EPSG:32611",
+          "+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
+        );
 
         capaDelegaciones = new L.WFS({
-          url: 'http://10.10.250.97:8080/geoserver/wfs',
-          typeNS: 'gobierno',
-          typeName: 'delegaciones',
-          geometryField: 'geom',
+          url: "http://10.10.250.97:8080/geoserver/wfs",
+          typeNS: "gobierno",
+          typeName: "delegaciones",
+          geometryField: "geom",
           crs: crs32611,
+          fillOpacity: 0.3,
+          opacity: 0.5,
           style: {
-              color: 'red',
-              fillColor: 'blue',
-              weight: 1
-          }
-        }).on('load', function (e) {
+            color: "blue",
+            weight: 1,
+            fillColor: "blue",
+          },
+        });
+        capaDelegaciones.on("load", function (e) {
           var capad = e.target.toGeoJSON();
-          capad.features.forEach(function (feature) {
-            var layer = L.geoJSON(feature, {
-              onEachFeature: function (feature, layer) {
-                attr = feature.properties;
-                geom = layer.getLatLngs();
-                layer.bindPopup("<p>Delegacion:<p>" + attr.delegacion);
-                if (!arrayDelegaciones.includes(attr.delegacion)) {
-                  arrayDelegaciones.push(attr.delegacion.toString());
-                }
+          L.geoJSON(capad, {
+            onEachFeature: function (feature, layer) {
+              attr = feature.properties;
+              layer.bindPopup("<p>Delegacion:<p>" + attr.delegacion);
+              if (!arrayDelegaciones.includes(attr.delegacion)) {
+                arrayDelegaciones.push(attr.delegacion.toString());
               }
-            })
+            },
           });
-        });;
+        });
         $(function () {
           $("#txtFindDelegacion").autocomplete({
             source: arrayDelegaciones,
@@ -308,67 +346,67 @@
         });
 
         capaRutasReco = new L.WFS({
-          url: 'http://10.10.250.97:8080/geoserver/wfs',
-          typeNS: 'servicios',
-          typeName: 'rutas_recoleccion',
-          geometryField: 'geom',
+          url: "http://10.10.250.97:8080/geoserver/wfs",
+          typeNS: "servicios",
+          typeName: "rutas_recoleccion",
+          geometryField: "geom",
           crs: crs32611,
+          opacity: 0.8,
           style: {
-              color: 'orange',
-              weight: 3
-          }
+            color: "orange",
+            weight: 2,
+          },
         });
         capaFortamun = new L.WFS({
-          url: 'http://10.10.250.97:8080/geoserver/wfs',
-          typeNS: 'doium',
-          typeName: 'poligonos_fortamun_2023',
-          geometryField: 'geom',
-          crs: crs32611,
-          style: {
-              color: 'black',
-              fillColor: 'black',
-          }
-        });
+            url: "http://10.10.250.97:8080/geoserver/wfs",
+            typeNS: "doium",
+            typeName: "poligonos_fortamun_2023",
+            geometryField: "geom",
+            crs: crs32611,
+            opacity: 0.8,
+            fillOpacity: 0.4,
+            style: {
+              color: "black",
+              fillColor: "black",
+            },
+          });
 
         capaDesarenadores = new L.WFS({
-          url: 'http://10.10.250.97:8080/geoserver/wfs',
-          typeNS: 'doium',
-          typeName: 'pl_desarenadores',
-          geometryField: 'geom',
+          url: "http://10.10.250.97:8080/geoserver/wfs",
+          typeNS: "doium",
+          typeName: "pl_desarenadores",
+          geometryField: "geom",
           crs: crs32611,
         });
 
         capaColonias = new L.WFS({
-          url: 'http://10.10.250.97:8080/geoserver/wfs',
-          typeNS: 'catastro',
-          typeName: 'colonias_2020',
-          geometryField: 'geom',
+          url: "http://10.10.250.97:8080/geoserver/wfs",
+          typeNS: "catastro",
+          typeName: "colonias_2020",
+          geometryField: "geom",
           crs: crs32611,
+          fillOpacity: 0.5,
           style: {
-              fillColor: '#C8A2C8',
-              color: 'pink',
-              weight: 2,
-              fillOpacity: 0,
-          }
-        }).on('load', function (e) {
+            fillColor: "#C8A2C8",
+            color: "pink",
+            weight: 2,
+          },
+        }).on("load", function (e) {
           var capa = e.target.toGeoJSON();
-          capa.features.forEach(function (feature) {
-            var layer = L.geoJSON(feature, {
-              onEachFeature: function (feature, layer) {
-                attr = feature.properties;
-                geom = layer.getLatLngs();
-                layer.bindPopup("<p>Colonia:<p>" + attr.nomb_fracc);
-                if (attr && attr.nomb_fracc !== undefined) {
-                  if (!arrayColonias.includes(attr.nomb_fracc)) {
-                    arrayColonias.push(attr.nomb_fracc.toString());
-                  }
+          L.geoJSON(capa, {
+            onEachFeature: function (feature, layer) {
+              attr = feature.properties;
+              layer.bindPopup("<p>Colonia:<p>" + attr.nomb_fracc);
+              if (attr && attr.nomb_fracc !== undefined) {
+                if (!arrayColonias.includes(attr.nomb_fracc)) {
+                  arrayColonias.push(attr.nomb_fracc.toString());
                 }
               }
-            })
+            },
           });
         });
-        $(function(){
-          $("#searchItem").autocomplete({
+        $(function () {
+          $("#txtFindColonia").autocomplete({
             source: arrayColonias,
           });
         });
@@ -380,6 +418,7 @@
           }
           drawnPolygon.clearLayers();
           var selectedFeature = event.layer.toGeoJSON();
+          event.layer.bindPopup('hola mundo');
           lumProcess(selectedFeature.geometry);
         });
 
@@ -409,8 +448,14 @@
           }
           mrkCurrentLocation = L.marker(e.latlng).addTo(map2);
           map2.setView(e.latlng, 16);
-          jsonCurrentLocation = turf.buffer(mrkCurrentLocation.toGeoJSON(), 0.6, {units: 'kilometers'});
-          lyrCurrentLoc = L.geoJSON(jsonCurrentLocation, {style:{color: 'blue', fillColor: 'blue', fillOpacity: 0.2}}).addTo(map2);
+          jsonCurrentLocation = turf.buffer(
+            mrkCurrentLocation.toGeoJSON(),
+            0.6,
+            { units: "kilometers" }
+          );
+          lyrCurrentLoc = L.geoJSON(jsonCurrentLocation, {
+            style: { color: "blue", fillColor: "blue", fillOpacity: 0.2 },
+          }).addTo(map2);
 
           drawnPolygon.clearLayers();
           lumProcess(jsonCurrentLocation.geometry);
@@ -425,47 +470,14 @@
           map2.locate();
         });
 
-        document.getElementById('switchColonias').addEventListener('change', function() {
-          if (this.checked) {
-            capaColonias.addTo(map2);
-          } else {
-            map2.removeLayer(capaColonias);
-          }
-        });
-        document.getElementById('switchDelegaciones').addEventListener('change', function() {
-          if (this.checked) {
-            capaDelegaciones.addTo(map2);
-          } else {
-            map2.removeLayer(capaDelegaciones);
-          }
-        });
-        document.getElementById('switchRutasReco').addEventListener('change', function() {
-          if (this.checked) {
-            capaRutasReco.addTo(map2);
-          } else {
-            map2.removeLayer(capaRutasReco);
-          }
-        });
-        document.getElementById('switchFortamun').addEventListener('change', function() {
-          if (this.checked) {
-            capaFortamun.addTo(map2);
-          } else {
-            map2.removeLayer(capaFortamun);
-          }
-        });
-        document.getElementById('switchDesarenadores').addEventListener('change', function() {
-          if (this.checked) {
-            capaDesarenadores.addTo(map2);
-          } else {
-            map2.removeLayer(capaDesarenadores);
-          }
-        });
-
         //PARA SEARCH DE COLONIA
 
         document.getElementById("btnFindColonia").onclick = function () {
-          var col = document.getElementById("txtFindColonia").value.toUpperCase();
+          var col = document
+            .getElementById("txtFindColonia")
+            .value.toUpperCase();
           var lyr = returnLayerByName(capaColonias, "nomb_fracc", col);
+          var area = turf.area(lyr.toGeoJSON());
           if (lyr) {
             if (lyrSearchCol) {
               lyrSearchCol.remove();
@@ -481,7 +493,7 @@
               "<h4 class='text-center'>Atributos</h4><h5>Colonia: " +
                 attr.nomb_fracc +
                 "</h5><h5>Area: " +
-                attr.area +
+                area +
                 " m </h5>"
             );
           } else {
@@ -504,6 +516,7 @@
         document.getElementById("btnFindDelegacion").onclick = function () {
           var del = document.getElementById("txtFindDelegacion").value;
           var lyr = returnLayerByName(capaDelegaciones, "delegacion", del);
+          var area = turf.area(lyr.toGeoJSON());
           if (lyr) {
             if (lyrSearchDel) {
               lyrSearchDel.remove();
@@ -519,7 +532,7 @@
               "<h4 class='text-center'>Atributos</h4><h5>Delegacion: " +
                 attr.delegacion +
                 "</h5><h5>Area: " +
-                attr.area +
+                area +
                 " m </h5>"
             );
           } else {
@@ -562,6 +575,12 @@
           }
         }
 
+        // function toggleCapas(){
+        //   var RutasRec= document.getElementById('switchRutasReco');
+        //   var BachFort= document.getElementById('switchFortamun');
+        //   var Desarena= document.getElementById('switchDesarenadores');
+        // };
+
         function lumProcess(geom) {
           pointsLayer.clearLayers();
           $.ajax({
@@ -572,11 +591,10 @@
             success: function (data) {
               const intersectedGeoJSON = JSON.parse(data);
               $("#tablaEst").html(
-              "<h4 class='text-center'>Atributos de Selección</h4><h5>Cantidad de Lums: " +
-                intersectedGeoJSON.features.length +
-                "</h5>"
-            );
-              console.log(intersectedGeoJSON);
+                "<h4 class='text-center'>Atributos de Selección</h4><h5>Cantidad de Luminarias: " +
+                  intersectedGeoJSON.features.length +
+                  "</h5>"
+              );
               L.geoJSON(intersectedGeoJSON, {
                 pointToLayer: function (feature, latlng) {
                   return L.circleMarker(latlng, {
@@ -585,7 +603,7 @@
                     color: "black",
                     weight: 1,
                     opacity: 1,
-                    fillOpacity: 0.8,
+                    fillOpacity: 1,
                   });
                 },
                 onEachFeature: function (feature, layer) {
