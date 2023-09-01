@@ -314,11 +314,10 @@
         );
 
         capaDelegaciones = new L.WFS({
-          url: "http://10.10.250.97:8080/geoserver/wfs",
+          url: "https://www.clustersig.com/geoserver/wfs",
           typeNS: "gobierno",
           typeName: "delegaciones",
           geometryField: "geom",
-          crs: crs32611,
           fillOpacity: 0.3,
           opacity: 0.5,
           style: {
@@ -380,11 +379,10 @@
         });
 
         capaColonias = new L.WFS({
-          url: "http://10.10.250.97:8080/geoserver/wfs",
+          url: "https://www.clustersig.com/geoserver/wfs",
           typeNS: "catastro",
-          typeName: "colonias_2020",
+          typeName: "colonias",
           geometryField: "geom",
-          crs: crs32611,
           fillOpacity: 0.5,
           style: {
             fillColor: "#C8A2C8",
@@ -396,7 +394,6 @@
           L.geoJSON(capa, {
             onEachFeature: function (feature, layer) {
               attr = feature.properties;
-              layer.bindPopup("<p>Colonia:<p>" + attr.nomb_fracc);
               if (attr && attr.nomb_fracc !== undefined) {
                 if (!arrayColonias.includes(attr.nomb_fracc)) {
                   arrayColonias.push(attr.nomb_fracc.toString());
@@ -410,7 +407,7 @@
             source: arrayColonias,
           });
         });
-
+        
         capaColonias.on("click", function (event) {
           if (mrkCurrentLocation) {
             mrkCurrentLocation.remove();
@@ -418,7 +415,7 @@
           }
           drawnPolygon.clearLayers();
           var selectedFeature = event.layer.toGeoJSON();
-          event.layer.bindPopup('hola mundo');
+          event.layer.bindPopup('hola mundo').openPopup();;
           lumProcess(selectedFeature.geometry);
         });
 
