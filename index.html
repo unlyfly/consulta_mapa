@@ -48,23 +48,34 @@
     <link rel="stylesheet" href="src/leaflet.searchbox/Leaflet.AnimatedSearchBox.css" />
     <script src="src/leaflet.searchbox/Leaflet.AnimatedSearchBox.js"></script>
 
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+
     <script>
       function switchLayers(lyrId, lyrName) {
         var lyr = document.getElementById(lyrId);
         if (lyr.checked) {
+          console.log('is now active');
           lyrName.addTo(map2);
         } else {
+          console.log({lyrName} +'is not  active');
           map2.removeLayer(lyrName);
         }
       }
     </script>
 
     <style>
+
+      :root { font-family: 'Inter', sans-serif; }
+      @supports (font-variation-settings: normal) {
+        :root { font-family: 'Inter var', sans-serif; }
+      }
+
       html,
       body,
       #mapdiv {
         height: 100%;
-        font: 11pt "Helvetica Neue", Arial, Helvetica, sans-serif;
+        font-family: inter;
       }
 
       .errorMsg {
@@ -89,30 +100,30 @@
   </head>
 
   <body>
-    <div id="side-bar" class="sidebar collapsed">
+    <div id="side-bar" class="sidebar collapsed" style="border-radius: 1rem;">
       <div id="divCol" class="col-sm-12 mt-4">
         <div id="divColLabel" class="text-center col-sm-12"></div>
         <div id="divColoniaError" class="errorMsg col-xs-12"></div>
         <div
           id="divFindColonia"
-          class="form-group d-flex justify-content-between col-sm-12"
+          class="form-group d-flex justify-content-between col-sm-12 mt-3"
         >
-          <div class="col-sm-6">
+          <div class="col-sm-10">
             <input
               type="text"
               id="txtFindColonia"
               class="form-control"
-              placeholder="Nombre de colonia"
+              placeholder="Buscar colonia"
             />
           </div>
-          <div class="col-sm-6">
+          <div class="col-sm-2">
             <button
               id="btnFindColonia"
-              class="btn btn-warning btn-block"
-              style="text-overflow: ellipsis"
+              class="btn btn-block"
+              style="color:white; background-color: #FF7D04;"
               disabled
             >
-              Buscar Colonia
+              <i class="fa fa-search"></i>
             </button>
           </div>
         </div>
@@ -124,24 +135,24 @@
         <div id="divDelegacionError" class="errorMsg col-xs-12"></div>
         <div
           id="divFindDelegacion"
-          class="form-group d-flex justify-content-between col-sm-12"
+          class="form-group d-flex justify-content-between col-sm-12 mt-3"
         >
-          <div class="col-sm-6">
+          <div class="col-sm-10">
             <input
               type="text"
               id="txtFindDelegacion"
               class="form-control"
-              placeholder="Nombre de delegación"
+              placeholder="Buscar delegación"
             />
           </div>
-          <div class="col-sm-6">
+          <div class="col-sm-2">
             <button
               id="btnFindDelegacion"
-              class="btn btn-warning btn-block"
-              style="text-overflow: ellipsis"
+              class="btn btn-block"
+              style="color:white; background-color: #FF7D04;"
               disabled
             >
-              Buscar Delegación
+              <i class="fa fa-search"></i>
             </button>
           </div>
         </div>
@@ -149,9 +160,7 @@
       </div>
 
       <ul class="list-group mt-4" style="list-style-type: none">
-        <li
-          class="form-control list-group-item list-group-item-action list-group-item-warning"
-        >
+        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
           <div class="form-switch">
             <input
               class="form-check-input me-3"
@@ -173,9 +182,17 @@
             />Colonias
           </div>
         </li>
-        <li
-          class="form-control list-group-item list-group-item-action list-group-item-warning"
-        >
+        <!-- <li class="form-control list-group-item list-group-item-action list-group-item-warning">
+          <div class="form-switch">
+            <input
+              class="form-check-input me-3"
+              type="checkbox"
+              id="switchLuminarias"
+              onchange="switchLayers('switchLuminarias', capaLuminarias)"
+            />Luminarias
+          </div>
+        </li> -->
+        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
           <div class="form-switch">
             <input
               class="form-check-input me-3"
@@ -214,8 +231,14 @@
       <div id="tablaEst" class="text-center col-sm-12 mt-4"></div>
 
       <div class="d-grid gap-2">
-        <button id="btnLocate" class="btn btn-danger mt-4">Ubicame</button>
+        <button id="btnLocate" class="btn mt-4" style="color:white; background-color: #FF7D04;">Ubicame</button>
       </div>
+
+      <div class='text-center mt-3'>
+        <label id="lblRadioDist" class="form-label" for="radioDist">Radio: 500 m</label>
+        <input type="range" id="radioDist" class="form-range" name="radioDist" min="300" max="1000" value="500" step="100" />
+      </div>
+
     </div>
     <div id="mapdiv"></div>
 
@@ -313,25 +336,29 @@
           "+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
         );
 
+        // capaLuminarias = L.Geoserver.wms("https://www.clustersig.com/geoserver/wms", {
+        //   layers: "servicios:luminarias",
+        //   format: 'image/png',
+        // });
+
         capaDelegaciones = new L.WFS({
           url: "https://www.clustersig.com/geoserver/wfs",
           typeNS: "gobierno",
           typeName: "delegaciones",
           geometryField: "geom",
-          fillOpacity: 0.3,
-          opacity: 0.5,
+          fillOpacity: 0.1,
+          opacity: 1,
           style: {
-            color: "blue",
-            weight: 1,
-            fillColor: "blue",
+            color: "black",
+            weight: 3,
+            fillColor: "white",
           },
-        });
-        capaDelegaciones.on("load", function (e) {
+        }).on("load", function (e) {
           var capad = e.target.toGeoJSON();
           L.geoJSON(capad, {
             onEachFeature: function (feature, layer) {
               attr = feature.properties;
-              layer.bindPopup("<p>Delegacion:<p>" + attr.delegacion);
+              layer.bindPopup("<p>Delegacion:<p>" + attr.delegacion).openPopup();
               if (!arrayDelegaciones.includes(attr.delegacion)) {
                 arrayDelegaciones.push(attr.delegacion.toString());
               }
@@ -345,7 +372,7 @@
         });
 
         capaRutasReco = new L.WFS({
-          url: "http://10.10.250.97:8080/geoserver/wfs",
+          url: "https://www.clustersig.com/geoserver/wfs",
           typeNS: "servicios",
           typeName: "rutas_recoleccion",
           geometryField: "geom",
@@ -355,11 +382,33 @@
             color: "orange",
             weight: 2,
           },
-        });
+        })
+        // .on("load", function (e) {
+        //   var capar = e.target.toGeoJSON();
+        //   L.geoJSON(capar, {
+        //     onEachFeature: function (feature, layer) {
+        //       pointOnPolygon = turf.pointOnFeature(layer.toGeoJSON());
+        //       L.geoJSON(pointOnPolygon, {
+        //         pointToLayer: function (feature, latlng) {
+        //           return L.circleMarker(latlng, {
+        //             radius: 3,
+        //             fillColor: "purple",
+        //             color: "black",
+        //             weight: 1,
+        //             fillOpacity: 1,
+        //           });
+        //         },
+        //       }).addTo(map2);
+        //     }
+        //   })
+        // })
+        ;
+
+
         capaFortamun = new L.WFS({
-            url: "http://10.10.250.97:8080/geoserver/wfs",
+            url: "https://www.clustersig.com/geoserver/wfs",
             typeNS: "doium",
-            typeName: "poligonos_fortamun_2023",
+            typeName: "poligon_fortamun",
             geometryField: "geom",
             crs: crs32611,
             opacity: 0.8,
@@ -371,9 +420,9 @@
           });
 
         capaDesarenadores = new L.WFS({
-          url: "http://10.10.250.97:8080/geoserver/wfs",
+          url: "https://www.clustersig.com/geoserver/wfs",
           typeNS: "doium",
-          typeName: "pl_desarenadores",
+          typeName: "desarenadores",
           geometryField: "geom",
           crs: crs32611,
         });
@@ -383,10 +432,10 @@
           typeNS: "catastro",
           typeName: "colonias",
           geometryField: "geom",
-          fillOpacity: 0.5,
+          fillOpacity: 0.1,
           style: {
-            fillColor: "#C8A2C8",
-            color: "pink",
+            fillColor: "white",
+            color: "#ac905b",
             weight: 2,
           },
         }).on("load", function (e) {
@@ -415,7 +464,7 @@
           }
           drawnPolygon.clearLayers();
           var selectedFeature = event.layer.toGeoJSON();
-          event.layer.bindPopup('hola mundo').openPopup();;
+          event.layer.bindPopup('colonia: ' + selectedFeature.properties.nomb_fracc).openPopup();
           lumProcess(selectedFeature.geometry);
         });
 
@@ -438,6 +487,12 @@
           console.log(selectedRec.geometry);
         });
 
+
+        document.getElementById('radioDist').addEventListener('change', (event)=>{
+            label = document.getElementById('lblRadioDist');
+            label.innerHTML = "Radio: " + event.target.value + " m";
+          });
+
         map2.on("locationfound", function (e) {
           if (mrkCurrentLocation) {
             mrkCurrentLocation.remove();
@@ -445,11 +500,15 @@
           }
           mrkCurrentLocation = L.marker(e.latlng).addTo(map2);
           map2.setView(e.latlng, 16);
-          jsonCurrentLocation = turf.buffer(
-            mrkCurrentLocation.toGeoJSON(),
-            0.6,
+          var radioInput = document.getElementById('radioDist');
+          var radioValue = (radioInput.value)/1000;
+
+
+          jsonCurrentLocation = turf.buffer(mrkCurrentLocation.toGeoJSON(),
+            radioValue,
             { units: "kilometers" }
           );
+          
           lyrCurrentLoc = L.geoJSON(jsonCurrentLocation, {
             style: { color: "blue", fillColor: "blue", fillOpacity: 0.2 },
           }).addTo(map2);
@@ -457,6 +516,7 @@
           drawnPolygon.clearLayers();
           lumProcess(jsonCurrentLocation.geometry);
         });
+
 
         map2.on("locationerror", function (e) {
           console.log(e);
@@ -480,18 +540,16 @@
               lyrSearchCol.remove();
             }
             lyrSearchCol = L.geoJSON(lyr.toGeoJSON(), {
-              style: { color: "red", weigth: 10, opacity: 0.5 },
+              style: { color: "red", fillColor: "none", weigth: 10, opacity: 0.5 },
             }).addTo(map2);
             map2.fitBounds(lyr.getBounds().pad(1));
             $("#divFindColonia").removeClass("has-error");
             $("#divColoniaError").html("");
             var attr = lyr.feature.properties;
             $("#divColoniaData").html(
-              "<h4 class='text-center'>Atributos</h4><h5>Colonia: " +
-                attr.nomb_fracc +
-                "</h5><h5>Area: " +
+              "<h6>Colonia: " + attr.nomb_fracc + "</h6><h6>Area: " +
                 area +
-                " m </h5>"
+                " m2 </h6>"
             );
           } else {
             $("#divColoniaError").html("****** Colonia no encontrada ******");
@@ -519,18 +577,17 @@
               lyrSearchDel.remove();
             }
             lyrSearchDel = L.geoJSON(lyr.toGeoJSON(), {
-              style: { color: "yellow", weigth: 10, opacity: 0.5 },
+              style: { color: "red", fillColor: "none", weigth: 10, opacity: 0.5 },
             }).addTo(map2);
             map2.fitBounds(lyr.getBounds().pad(1));
             $("#divFindDelegacion").removeClass("has-error");
             $("#divDelegacionError").html("");
             var attr = lyr.feature.properties;
             $("#divDelegacionData").html(
-              "<h4 class='text-center'>Atributos</h4><h5>Delegacion: " +
-                attr.delegacion +
-                "</h5><h5>Area: " +
+              "<h6>Delegación: " + attr.delegacion +
+                "</h6><h6>Area: " +
                 area +
-                " m </h5>"
+                " m2 </h6>"
             );
           } else {
             $("#divDelegacionError").html(
@@ -571,12 +628,6 @@
             $(btnFind).attr("disabled", true);
           }
         }
-
-        // function toggleCapas(){
-        //   var RutasRec= document.getElementById('switchRutasReco');
-        //   var BachFort= document.getElementById('switchFortamun');
-        //   var Desarena= document.getElementById('switchDesarenadores');
-        // };
 
         function lumProcess(geom) {
           pointsLayer.clearLayers();

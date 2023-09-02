@@ -51,7 +51,6 @@ while ($row = pg_fetch_assoc($result)) {
     );
     array_push($GeoJSON['features'], $feature);
 }
-// echo json_encode($selectedPoints);
 
 // Return the GeoJSON as a JSON response
 echo json_encode($GeoJSON);
