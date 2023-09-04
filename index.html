@@ -29,7 +29,7 @@
     <link rel="stylesheet" href="src/fontawesome-6.4.2/css/all.min.css" />
     <script src="src/fontawesome-6.4.2/js/all.min.js"></script>
 
-    <script src="src/turf/turf.min.js"></script>
+    <script src="src/turf/turf.min.js" charset="utf-8"></script>
 
     <link rel="stylesheet" href="src/geoman/leaflet-geoman.css" />
     <script src="src/geoman/leaflet-geoman.min.js"></script>
@@ -45,11 +45,8 @@
 
     <script src="src/leaflet.providers/leaflet-providers.js"></script>
 
-    <link rel="stylesheet" href="src/leaflet.searchbox/Leaflet.AnimatedSearchBox.css" />
-    <script src="src/leaflet.searchbox/Leaflet.AnimatedSearchBox.js"></script>
-
-    <link rel="preconnect" href="https://rsms.me/">
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <!-- <link rel="stylesheet" href="src/leaflet.searchbox/Leaflet.AnimatedSearchBox.css" />
+    <script src="src/leaflet.searchbox/Leaflet.AnimatedSearchBox.js"></script> -->
 
     <script>
       function switchLayers(lyrId, lyrName) {
@@ -263,7 +260,10 @@
       var mrkCurrentLocation;
       var arrayColonias = [];
       var arrayDelegaciones = [];
-      var pointsLayer;
+      var lumSelected;
+      var rutasrecoSelected;
+      var fortamunSelected;
+      var desarenaSelected;
       var drawnPolygon;
       var crs32611;
       var searchbox;
@@ -296,16 +296,16 @@
           ctrSidebar.toggle();
         }).addTo(map2);
 
-        searchbox = L.control
-          .searchbox({
-            position: "topright",
-            expand: "left",
-            collapsed: true,
-            id: "searchItem",
-            autocompleteFeatures: "setValueOnClick",
-            iconPath: "./assets/img/search_icon.png",
-          })
-          .addTo(map2);
+        // searchbox = L.control
+        //   .searchbox({
+        //     position: "topright",
+        //     expand: "left",
+        //     collapsed: true,
+        //     id: "searchItem",
+        //     autocompleteFeatures: "setValueOnClick",
+        //     iconPath: "./assets/img/search_icon.png",
+        //   })
+        //   .addTo(map2);
 
         new L.basemapsSwitcher(
           [
@@ -328,7 +328,9 @@
           "Esri Imagery": lyrEsri,
         };
 
-        pointsLayer = L.layerGroup().addTo(map2);
+        lumSelected = L.layerGroup().addTo(map2);
+        recoSelected = L.layerGroup().addTo(map2);
+        fortamunSelected = L.layerGroup().addTo(map2);
         drawnPolygon = L.layerGroup().addTo(map2);
 
         crs32611 = new L.Proj.CRS(
@@ -465,7 +467,10 @@
           drawnPolygon.clearLayers();
           var selectedFeature = event.layer.toGeoJSON();
           event.layer.bindPopup('colonia: ' + selectedFeature.properties.nomb_fracc).openPopup();
+          $("#tablaEst").empty();
           lumProcess(selectedFeature.geometry);
+          fortamunProcess(selectedFeature.geometry);
+          recoProcess(selectedFeature.geometry);
         });
 
         // objOverlays = {
@@ -483,8 +488,10 @@
           drawnPolygon.clearLayers();
           const selectedRec = e.layer.toGeoJSON();
           drawnPolygon.addLayer(e.layer);
+          $("#tablaEst").empty();
           lumProcess(selectedRec.geometry);
-          console.log(selectedRec.geometry);
+          fortamunProcess(selectedRec.geometry);
+          recoProcess(selectedRec.geometry);
         });
 
 
@@ -514,7 +521,10 @@
           }).addTo(map2);
 
           drawnPolygon.clearLayers();
+          $("#tablaEst").empty();
           lumProcess(jsonCurrentLocation.geometry);
+          fortamunProcess(jsonCurrentLocation.geometry);
+          recoProcess(jsonCurrentLocation.geometry);
         });
 
 
@@ -548,7 +558,7 @@
             var attr = lyr.feature.properties;
             $("#divColoniaData").html(
               "<h6>Colonia: " + attr.nomb_fracc + "</h6><h6>Area: " +
-                area +
+                area.toFixed(3) +
                 " m2 </h6>"
             );
           } else {
@@ -586,7 +596,7 @@
             $("#divDelegacionData").html(
               "<h6>Delegación: " + attr.delegacion +
                 "</h6><h6>Area: " +
-                area +
+                area.toFixed(3) +
                 " m2 </h6>"
             );
           } else {
@@ -630,16 +640,17 @@
         }
 
         function lumProcess(geom) {
-          pointsLayer.clearLayers();
+          lumSelected.clearLayers();
           $.ajax({
             type: "POST",
-            url: "dataExtractor.php",
+            url: "lumExtractor.php",
             data: JSON.stringify(geom),
             contentType: "json",
             success: function (data) {
               const intersectedGeoJSON = JSON.parse(data);
-              $("#tablaEst").html(
-                "<h4 class='text-center'>Atributos de Selección</h4><h5>Cantidad de Luminarias: " +
+
+              $("#tablaEst").prepend(
+                "<h4 class='text-center'>Atributos de Selección</h4><h5>Luminarias: " +
                   intersectedGeoJSON.features.length +
                   "</h5>"
               );
@@ -655,7 +666,66 @@
                   });
                 },
                 onEachFeature: function (feature, layer) {
-                  pointsLayer.addLayer(layer);
+                  lumSelected.addLayer(layer);
+                },
+              }).addTo(map2);
+            },
+            error: function (error) {
+              console.error("Error:", error);
+            },
+          });
+        }
+
+        function recoProcess(geom) {
+          recoSelected.clearLayers();
+          $.ajax({
+            type: "POST",
+            url: "recoExtractor.php",
+            data: JSON.stringify(geom),
+            contentType: "json",
+            success: function (data) {
+              const intersectedGeoJSON = JSON.parse(data);
+              $("#tablaEst").append(
+                "<h5>Rutas Recolecciòn: " +
+                  intersectedGeoJSON.features.length +
+                  "</h5>"
+              );
+              L.geoJSON(intersectedGeoJSON, {
+                onEachFeature: function (feature, layer) {
+                  recoSelected.addLayer(layer);
+                },
+              }).addTo(map2);
+            },
+            error: function (error) {
+              console.error("Error:", error);
+            },
+          });
+        }
+
+        function fortamunProcess(geom) {
+          fortamunSelected.clearLayers();
+          $.ajax({
+            type: "POST",
+            url: "fortamunExtractor.php",
+            data: JSON.stringify(geom),
+            contentType: "json",
+            success: function (data) {
+              const intersectedGeoJSON = JSON.parse(data);
+              $("#tablaEst").append(
+                "<h5>Bacheo Fortamun: " +
+                  intersectedGeoJSON.features.length +
+                  "</h5>"
+              );
+              L.geoJSON(intersectedGeoJSON, {
+                style: {                    
+                    color: "black",
+                    fillColor: "grey",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 1,
+                  },
+                onEachFeature: function (feature, layer) {
+                  fortamunSelected.addLayer(layer);
                 },
               }).addTo(map2);
             },
