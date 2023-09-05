@@ -179,7 +179,7 @@
             />Colonias
           </div>
         </li>
-        <!-- <li class="form-control list-group-item list-group-item-action list-group-item-warning">
+        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
           <div class="form-switch">
             <input
               class="form-check-input me-3"
@@ -188,7 +188,7 @@
               onchange="switchLayers('switchLuminarias', capaLuminarias)"
             />Luminarias
           </div>
-        </li> -->
+        </li>
         <li class="form-control list-group-item list-group-item-action list-group-item-warning">
           <div class="form-switch">
             <input
@@ -227,13 +227,17 @@
 
       <div id="tablaEst" class="text-center col-sm-12 mt-4"></div>
 
-      <div class="d-grid gap-2">
-        <button id="btnLocate" class="btn mt-4" style="color:white; background-color: #FF7D04;">Ubicame</button>
+      <div class="d-grid gap-2 mt-4">
+        <button id="btnLocate" class="btn" style="color:white; background-color: #FF7D04;">Ubicame</button>
       </div>
 
       <div class='text-center mt-3'>
         <label id="lblRadioDist" class="form-label" for="radioDist">Radio: 500 m</label>
         <input type="range" id="radioDist" class="form-range" name="radioDist" min="300" max="1000" value="500" step="100" />
+      </div>
+
+      <div class="d-grid gap-2  mt-3">
+        <button id="btnClear" class="btn" style="color:white; background-color: #FF7D04;">Limpiar todo</button>
       </div>
 
     </div>
@@ -270,8 +274,8 @@
 
       $(document).ready(function () {
         map2 = L.map("mapdiv", {
-          center: [32.50079, -116.932811],
-          zoom: 12,
+          center: [32.487112, -116.964755],
+          zoom: 13,
         });
 
         map2.pm.addControls({
@@ -331,6 +335,7 @@
         lumSelected = L.layerGroup().addTo(map2);
         recoSelected = L.layerGroup().addTo(map2);
         fortamunSelected = L.layerGroup().addTo(map2);
+        desarenaSelected = L.layerGroup().addTo(map2);
         drawnPolygon = L.layerGroup().addTo(map2);
 
         crs32611 = new L.Proj.CRS(
@@ -384,28 +389,7 @@
             color: "orange",
             weight: 2,
           },
-        })
-        // .on("load", function (e) {
-        //   var capar = e.target.toGeoJSON();
-        //   L.geoJSON(capar, {
-        //     onEachFeature: function (feature, layer) {
-        //       pointOnPolygon = turf.pointOnFeature(layer.toGeoJSON());
-        //       L.geoJSON(pointOnPolygon, {
-        //         pointToLayer: function (feature, latlng) {
-        //           return L.circleMarker(latlng, {
-        //             radius: 3,
-        //             fillColor: "purple",
-        //             color: "black",
-        //             weight: 1,
-        //             fillOpacity: 1,
-        //           });
-        //         },
-        //       }).addTo(map2);
-        //     }
-        //   })
-        // })
-        ;
-
+        });
 
         capaFortamun = new L.WFS({
             url: "https://www.clustersig.com/geoserver/wfs",
@@ -466,11 +450,27 @@
           }
           drawnPolygon.clearLayers();
           var selectedFeature = event.layer.toGeoJSON();
-          event.layer.bindPopup('colonia: ' + selectedFeature.properties.nomb_fracc).openPopup();
+          var lumin = document.getElementById("switchLuminarias");
+          var bacheoFort = document.getElementById("switchFortamun");
+          var rutRec = document.getElementById("switchRutasReco");
+          var desare = document.getElementById("switchDesarenadores");
+
+          // event.layer.bindPopup('colonia: ' + selectedFeature.properties.nomb_fracc).openPopup();
+
           $("#tablaEst").empty();
-          lumProcess(selectedFeature.geometry);
-          fortamunProcess(selectedFeature.geometry);
-          recoProcess(selectedFeature.geometry);
+
+          if (lumin.checked) {
+            lumProcess(selectedFeature.geometry);
+          };
+          if (bacheoFort.checked) {
+            fortamunProcess(selectedFeature.geometry);
+          };
+          if (rutRec.checked) {
+            recoProcess(selectedFeature.geometry);
+          };
+          if (desare.checked) {
+          desarenaProcess(selectedFeature.geometry);
+          };
         });
 
         // objOverlays = {
@@ -492,6 +492,7 @@
           lumProcess(selectedRec.geometry);
           fortamunProcess(selectedRec.geometry);
           recoProcess(selectedRec.geometry);
+          desarenaProcess(selectedRec.geometry);
         });
 
 
@@ -525,6 +526,7 @@
           lumProcess(jsonCurrentLocation.geometry);
           fortamunProcess(jsonCurrentLocation.geometry);
           recoProcess(jsonCurrentLocation.geometry);
+          desarenaProcess(jsonCurrentLocation.geometry);
         });
 
 
@@ -537,6 +539,32 @@
           map2.locate();
         });
 
+
+        document.getElementById("btnClear").onclick = function () {
+          drawnPolygon.clearLayers();
+          lumSelected.clearLayers();
+          recoSelected.clearLayers();
+          fortamunSelected.clearLayers();
+          desarenaSelected.clearLayers();
+          $("#tablaEst").empty();
+          if(mrkCurrentLocation){
+            mrkCurrentLocation.remove();
+          };
+          if(lyrCurrentLoc){
+            lyrCurrentLoc.remove();
+          }; 
+          if(lyrSearchCol){
+            lyrSearchCol.remove();
+            $("#divColoniaData").html("");
+          };
+          if(lyrSearchDel){
+            lyrSearchDel.remove();
+            $("#divDelegacionData").html("");
+
+          };  
+        }
+    
+
         //PARA SEARCH DE COLONIA
 
         document.getElementById("btnFindColonia").onclick = function () {
@@ -544,8 +572,8 @@
             .getElementById("txtFindColonia")
             .value.toUpperCase();
           var lyr = returnLayerByName(capaColonias, "nomb_fracc", col);
-          var area = turf.area(lyr.toGeoJSON());
           if (lyr) {
+            var area = turf.area(lyr.toGeoJSON());
             if (lyrSearchCol) {
               lyrSearchCol.remove();
             }
@@ -557,9 +585,9 @@
             $("#divColoniaError").html("");
             var attr = lyr.feature.properties;
             $("#divColoniaData").html(
-              "<h6>Colonia: " + attr.nomb_fracc + "</h6><h6>Area: " +
+              "<div class='mt-3'><h6>Colonia: " + attr.nomb_fracc + "</h6><h6>Area: " +
                 area.toFixed(3) +
-                " m2 </h6>"
+                " m2 </h6></div>"
             );
           } else {
             $("#divColoniaError").html("****** Colonia no encontrada ******");
@@ -581,8 +609,8 @@
         document.getElementById("btnFindDelegacion").onclick = function () {
           var del = document.getElementById("txtFindDelegacion").value;
           var lyr = returnLayerByName(capaDelegaciones, "delegacion", del);
-          var area = turf.area(lyr.toGeoJSON());
           if (lyr) {
+            var area = turf.area(lyr.toGeoJSON());
             if (lyrSearchDel) {
               lyrSearchDel.remove();
             }
@@ -594,10 +622,10 @@
             $("#divDelegacionError").html("");
             var attr = lyr.feature.properties;
             $("#divDelegacionData").html(
-              "<h6>Delegación: " + attr.delegacion +
+              "<div class='mt-3'><h6>Delegación: " + attr.delegacion +
                 "</h6><h6>Area: " +
-                area.toFixed(3) +
-                " m2 </h6>"
+                (area/1000).toFixed(3) +
+                " km2 </h6></div>"
             );
           } else {
             $("#divDelegacionError").html(
@@ -686,7 +714,7 @@
             success: function (data) {
               const intersectedGeoJSON = JSON.parse(data);
               $("#tablaEst").append(
-                "<h5>Rutas Recolecciòn: " +
+                "<h5>Rutas Recolección: " +
                   intersectedGeoJSON.features.length +
                   "</h5>"
               );
@@ -726,6 +754,42 @@
                   },
                 onEachFeature: function (feature, layer) {
                   fortamunSelected.addLayer(layer);
+                },
+              }).addTo(map2);
+            },
+            error: function (error) {
+              console.error("Error:", error);
+            },
+          });
+        }
+
+        function desarenaProcess(geom) {
+          desarenaSelected.clearLayers();
+          $.ajax({
+            type: "POST",
+            url: "desarenaExtractor.php",
+            data: JSON.stringify(geom),
+            contentType: "json",
+            success: function (data) {
+              const intersectedGeoJSON = JSON.parse(data);
+              $("#tablaEst").append(
+                "<h5>Desarenadores: " +
+                  intersectedGeoJSON.features.length +
+                  "</h5>"
+              );
+              L.geoJSON(intersectedGeoJSON, {
+                pointToLayer: function (feature, latlng) {
+                  return L.circleMarker(latlng, {
+                    radius: 4,
+                    fillColor: "brown",
+                    color: "black",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 1,
+                  });
+                },
+                onEachFeature: function (feature, layer) {
+                  desarenaSelected.addLayer(layer);
                 },
               }).addTo(map2);
             },
