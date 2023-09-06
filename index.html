@@ -52,10 +52,8 @@
       function switchLayers(lyrId, lyrName) {
         var lyr = document.getElementById(lyrId);
         if (lyr.checked) {
-          console.log('is now active');
           lyrName.addTo(map2);
         } else {
-          console.log({lyrName} +'is not  active');
           map2.removeLayer(lyrName);
         }
       }
@@ -365,7 +363,7 @@
           L.geoJSON(capad, {
             onEachFeature: function (feature, layer) {
               attr = feature.properties;
-              layer.bindPopup("<p>Delegacion:<p>" + attr.delegacion).openPopup();
+              // layer.bindTooltip("<p>Delegacion:<p>" + attr.delegacion).openTooltip();
               if (!arrayDelegaciones.includes(attr.delegacion)) {
                 arrayDelegaciones.push(attr.delegacion.toString());
               }
@@ -428,6 +426,7 @@
           var capa = e.target.toGeoJSON();
           L.geoJSON(capa, {
             onEachFeature: function (feature, layer) {
+              var colCentro = turf.centroid(layer.toGeoJSON());
               attr = feature.properties;
               if (attr && attr.nomb_fracc !== undefined) {
                 if (!arrayColonias.includes(attr.nomb_fracc)) {
@@ -450,27 +449,9 @@
           }
           drawnPolygon.clearLayers();
           var selectedFeature = event.layer.toGeoJSON();
-          var lumin = document.getElementById("switchLuminarias");
-          var bacheoFort = document.getElementById("switchFortamun");
-          var rutRec = document.getElementById("switchRutasReco");
-          var desare = document.getElementById("switchDesarenadores");
-
           // event.layer.bindPopup('colonia: ' + selectedFeature.properties.nomb_fracc).openPopup();
-
           $("#tablaEst").empty();
-
-          if (lumin.checked) {
-            lumProcess(selectedFeature.geometry);
-          };
-          if (bacheoFort.checked) {
-            fortamunProcess(selectedFeature.geometry);
-          };
-          if (rutRec.checked) {
-            recoProcess(selectedFeature.geometry);
-          };
-          if (desare.checked) {
-          desarenaProcess(selectedFeature.geometry);
-          };
+          toggleProcesses(selectedFeature.geometry);
         });
 
         // objOverlays = {
@@ -489,10 +470,7 @@
           const selectedRec = e.layer.toGeoJSON();
           drawnPolygon.addLayer(e.layer);
           $("#tablaEst").empty();
-          lumProcess(selectedRec.geometry);
-          fortamunProcess(selectedRec.geometry);
-          recoProcess(selectedRec.geometry);
-          desarenaProcess(selectedRec.geometry);
+          toggleProcesses(selectedRec.geometry);
         });
 
 
@@ -523,10 +501,7 @@
 
           drawnPolygon.clearLayers();
           $("#tablaEst").empty();
-          lumProcess(jsonCurrentLocation.geometry);
-          fortamunProcess(jsonCurrentLocation.geometry);
-          recoProcess(jsonCurrentLocation.geometry);
-          desarenaProcess(jsonCurrentLocation.geometry);
+          toggleProcesses(jsonCurrentLocation.geometry);
         });
 
 
@@ -677,8 +652,8 @@
             success: function (data) {
               const intersectedGeoJSON = JSON.parse(data);
 
-              $("#tablaEst").prepend(
-                "<h4 class='text-center'>Atributos de Selección</h4><h5>Luminarias: " +
+              $("#tablaEst").append(
+                "<h5>Luminarias: " +
                   intersectedGeoJSON.features.length +
                   "</h5>"
               );
@@ -798,6 +773,34 @@
             },
           });
         }
+
+        function toggleProcesses(geom){
+          var lumin = document.getElementById("switchLuminarias");
+          var bacheoFort = document.getElementById("switchFortamun");
+          var rutRec = document.getElementById("switchRutasReco");
+          var desare = document.getElementById("switchDesarenadores");
+
+          drawnPolygon.clearLayers();
+          lumSelected.clearLayers();
+          recoSelected.clearLayers();
+          fortamunSelected.clearLayers();
+          desarenaSelected.clearLayers();
+          $("#tablaEst").prepend("<h4 class='text-center'>Atributos de Selección</h4>")
+
+          if (lumin.checked) {
+            lumProcess(geom);
+          };
+          if (bacheoFort.checked) {
+            fortamunProcess(geom);
+          };
+          if (rutRec.checked) {
+            recoProcess(geom);
+          };
+          if (desare.checked) {
+          desarenaProcess(geom);
+          };
+        }
+
       });
     </script>
   </body>
