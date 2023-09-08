@@ -189,6 +189,10 @@ $(document).ready(function () {
 
   map2.on("pm:create", function (e) {
     drawnPolygon.clearLayers();
+    if (mrkCurrentLocation) {
+      mrkCurrentLocation.remove();
+      lyrCurrentLoc.remove();
+    };
     const selectedRec = e.layer.toGeoJSON();
     drawnPolygon.addLayer(e.layer);
     $("#tablaEst").empty();
@@ -235,11 +239,11 @@ $(document).ready(function () {
   });
 
   document.getElementById("btnClear").onclick = function () {
-    drawnPolygon.clearLayers();
-    lumSelected.clearLayers();
-    recoSelected.clearLayers();
-    fortamunSelected.clearLayers();
-    desarenaSelected.clearLayers();
+   var layersToClear = [drawnPolygon, lumSelected, recoSelected, fortamunSelected, desarenaSelected];
+   for (var i = 0; i < layersToClear.length; i++) {
+     layersToClear[i].clearLayers();
+   }
+
     $("#tablaEst").empty();
     if (mrkCurrentLocation) {
       mrkCurrentLocation.remove();
@@ -368,15 +372,19 @@ $(document).ready(function () {
       success: function (data) {
         const intersectedGeoJSON = JSON.parse(data);
         $("#tablaEst").append(
-          "<h5>" + layerName + ": " + intersectedGeoJSON.features.length + "</h5>"
+          "<h5>" +
+            layerName +
+            ": " +
+            intersectedGeoJSON.features.length +
+            "</h5>"
         );
-  
+
         if (layerName === "Luminarias") {
           L.geoJSON(intersectedGeoJSON, {
             pointToLayer: function (feature, latlng) {
               var att = feature.properties;
               var color = att.apagada == 0 ? "yellow" : "black";
-  
+
               return L.circleMarker(latlng, {
                 radius: 3,
                 fillColor: color,
@@ -389,8 +397,7 @@ $(document).ready(function () {
             onEachFeature: function (feature, layer) {
               var att = feature.properties;
               var estado = att.apagada == 0 ? "Funcionando" : "Apagada";
-              layer
-                .bindTooltip(
+              layer.bindTooltip(
                   "<p>Estado: " +
                     estado +
                     "</p><p>Capacidad: " +
@@ -398,8 +405,7 @@ $(document).ready(function () {
                     "</p><p>Tecnologia: " +
                     att.tecnologia +
                     "</p>"
-                )
-                .openTooltip();
+                ).openTooltip();
               layerToAdd.addLayer(layer);
             },
           }).addTo(map2);

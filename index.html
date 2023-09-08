@@ -56,39 +56,7 @@
       }
     </script>
 
-    <style>
-
-      :root { font-family: 'Inter', sans-serif; }
-      @supports (font-variation-settings: normal) {
-        :root { font-family: 'Inter var', sans-serif; }
-      }
-
-      html,
-      body,
-      #mapdiv {
-        height: 100%;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      }
-
-      .errorMsg {
-        padding: 0;
-        text-align: center;
-        background-color: salmon;
-      }
-
-      .col-xs-12,
-      .col-xs-6,
-      .col-xs-4 {
-        padding: 3px;
-      }
-
-      .ui-autocomplete {
-        max-height: 80%;
-        overflow-y: auto;
-        /* prevent horizontal scrollbar */
-        overflow-x: hidden;
-      }
-    </style>
+    <link rel="stylesheet" href="includes/css/style.css" />
   </head>
 
   <body>
@@ -125,10 +93,7 @@
       <div id="divDel" class="col-sm-12 mt-4">
         <div id="divDelLabel" class="text-center col-sm-12"></div>
         <div id="divDelegacionError" class="errorMsg col-xs-12"></div>
-        <div
-          id="divFindDelegacion"
-          class="form-group d-flex justify-content-between col-sm-12 mt-3"
-        >
+        <div id="divFindDelegacion" class="form-group d-flex justify-content-between col-sm-12 mt-3">
           <div class="col-sm-10">
             <input
               type="text"
@@ -162,9 +127,7 @@
             />Delegaciones
           </div>
         </li>
-        <li
-          class="form-control list-group-item list-group-item-action list-group-item-warning"
-        >
+        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
           <div class="form-switch">
             <input
               class="form-check-input me-3"
@@ -194,9 +157,7 @@
             />Rutas de Recolección
           </div>
         </li>
-        <li
-          class="form-control list-group-item list-group-item-action list-group-item-warning"
-        >
+        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
           <div class="form-switch">
             <input
               class="form-check-input me-3"
@@ -206,9 +167,7 @@
             />Bacheo Fortamun
           </div>
         </li>
-        <li
-          class="form-control list-group-item list-group-item-action list-group-item-warning"
-        >
+        <li class="form-control list-group-item list-group-item-action list-group-item-warning">
           <div class="form-switch">
             <input
               class="form-check-input me-3"
@@ -234,10 +193,10 @@
       <div class="d-grid gap-2  mt-3">
         <button id="btnClear" class="btn" style="color:white; background-color: #FF7D04;">Limpiar todo</button>
       </div>
-
     </div>
+
     <div id="mapdiv"></div>
 
-    <script src="procesamiento.js"></script>
+    <script src="includes/js/procesamiento.js"></script>
   </body>
 </html>
