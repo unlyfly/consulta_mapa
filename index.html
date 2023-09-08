@@ -52,10 +52,8 @@
       function switchLayers(lyrId, lyrName) {
         var lyr = document.getElementById(lyrId);
         if (lyr.checked) {
-          console.log('is now active');
           lyrName.addTo(map2);
         } else {
-          console.log({lyrName} +'is not  active');
           map2.removeLayer(lyrName);
         }
       }
@@ -227,6 +225,8 @@
 
       <div id="tablaEst" class="text-center col-sm-12 mt-4"></div>
 
+      <div><canvas id="grafica"></canvas></div>
+
       <div class="d-grid gap-2 mt-4">
         <button id="btnLocate" class="btn" style="color:white; background-color: #FF7D04;">Ubicame</button>
       </div>
@@ -244,6 +244,8 @@
     <div id="mapdiv"></div>
 
     <script>
+      // import Chart from 'chart.js/auto';
+
       var map2;
       var lyrOSM;
       var lyrEsri;
@@ -293,7 +295,7 @@
         });
 
         ctrSidebar = L.control
-          .sidebar("side-bar", { closeButton: false })
+          .sidebar("side-bar", { closeButton: true })
           .addTo(map2);
 
         ctrEasybutton = L.easyButton("fas fa-arrow-right", function () {
@@ -365,7 +367,6 @@
           L.geoJSON(capad, {
             onEachFeature: function (feature, layer) {
               attr = feature.properties;
-              layer.bindPopup("<p>Delegacion:<p>" + attr.delegacion).openPopup();
               if (!arrayDelegaciones.includes(attr.delegacion)) {
                 arrayDelegaciones.push(attr.delegacion.toString());
               }
@@ -383,7 +384,6 @@
           typeNS: "servicios",
           typeName: "rutas_recoleccion",
           geometryField: "geom",
-          crs: crs32611,
           opacity: 0.8,
           style: {
             color: "orange",
@@ -396,7 +396,6 @@
             typeNS: "doium",
             typeName: "poligon_fortamun",
             geometryField: "geom",
-            crs: crs32611,
             opacity: 0.8,
             fillOpacity: 0.4,
             style: {
@@ -410,7 +409,6 @@
           typeNS: "doium",
           typeName: "desarenadores",
           geometryField: "geom",
-          crs: crs32611,
         });
 
         capaColonias = new L.WFS({
@@ -428,6 +426,7 @@
           var capa = e.target.toGeoJSON();
           L.geoJSON(capa, {
             onEachFeature: function (feature, layer) {
+              var colCentro = turf.centroid(layer.toGeoJSON());
               attr = feature.properties;
               if (attr && attr.nomb_fracc !== undefined) {
                 if (!arrayColonias.includes(attr.nomb_fracc)) {
@@ -450,49 +449,17 @@
           }
           drawnPolygon.clearLayers();
           var selectedFeature = event.layer.toGeoJSON();
-          var lumin = document.getElementById("switchLuminarias");
-          var bacheoFort = document.getElementById("switchFortamun");
-          var rutRec = document.getElementById("switchRutasReco");
-          var desare = document.getElementById("switchDesarenadores");
-
-          // event.layer.bindPopup('colonia: ' + selectedFeature.properties.nomb_fracc).openPopup();
-
           $("#tablaEst").empty();
-
-          if (lumin.checked) {
-            lumProcess(selectedFeature.geometry);
-          };
-          if (bacheoFort.checked) {
-            fortamunProcess(selectedFeature.geometry);
-          };
-          if (rutRec.checked) {
-            recoProcess(selectedFeature.geometry);
-          };
-          if (desare.checked) {
-          desarenaProcess(selectedFeature.geometry);
-          };
+          drawnPolygon.clearLayers();
+          toggleProcesses(selectedFeature.geometry);
         });
-
-        // objOverlays = {
-        //   Luminarias: capaLuminarias,
-        //   Subsectores: capaSubsectores,
-        //   Colonias: capaColonias,
-        //   Delegaciones: capaDelegaciones,
-        //   'Rutas Recolección': capaRutasReco,
-        //   'Bacheo Fortamun': capaFortamun,
-        //   Desarenadores: capaDesarenadores
-        // };
-        // ctrLayers = L.control.layers('' ,objOverlays).addTo(map2);
 
         map2.on("pm:create", function (e) {
           drawnPolygon.clearLayers();
           const selectedRec = e.layer.toGeoJSON();
           drawnPolygon.addLayer(e.layer);
           $("#tablaEst").empty();
-          lumProcess(selectedRec.geometry);
-          fortamunProcess(selectedRec.geometry);
-          recoProcess(selectedRec.geometry);
-          desarenaProcess(selectedRec.geometry);
+          toggleProcesses(selectedRec.geometry);
         });
 
 
@@ -511,7 +478,6 @@
           var radioInput = document.getElementById('radioDist');
           var radioValue = (radioInput.value)/1000;
 
-
           jsonCurrentLocation = turf.buffer(mrkCurrentLocation.toGeoJSON(),
             radioValue,
             { units: "kilometers" }
@@ -523,10 +489,7 @@
 
           drawnPolygon.clearLayers();
           $("#tablaEst").empty();
-          lumProcess(jsonCurrentLocation.geometry);
-          fortamunProcess(jsonCurrentLocation.geometry);
-          recoProcess(jsonCurrentLocation.geometry);
-          desarenaProcess(jsonCurrentLocation.geometry);
+          toggleProcesses(jsonCurrentLocation.geometry);
         });
 
 
@@ -538,7 +501,6 @@
         $("#btnLocate").click(function () {
           map2.locate();
         });
-
 
         document.getElementById("btnClear").onclick = function () {
           drawnPolygon.clearLayers();
@@ -563,7 +525,6 @@
 
           };  
         }
-    
 
         //PARA SEARCH DE COLONIA
 
@@ -667,6 +628,24 @@
           }
         }
 
+        function graficaEst(selec) {
+          new Chart(
+            document.getElementById('estadistica'),
+            {
+              type: 'bar',
+              data: {
+                labels: selec.map(row => row.apagada),
+                datasets: [
+                  {
+                    label: 'Estado de luminarias',
+                    data: slec.map(row => row.count)
+                  }
+                ]
+              }
+            }
+          );
+        };
+
         function lumProcess(geom) {
           lumSelected.clearLayers();
           $.ajax({
@@ -676,17 +655,22 @@
             contentType: "json",
             success: function (data) {
               const intersectedGeoJSON = JSON.parse(data);
-
-              $("#tablaEst").prepend(
-                "<h4 class='text-center'>Atributos de Selección</h4><h5>Luminarias: " +
+              $("#tablaEst").append(
+                "<h5>Luminarias: " +
                   intersectedGeoJSON.features.length +
                   "</h5>"
               );
               L.geoJSON(intersectedGeoJSON, {
                 pointToLayer: function (feature, latlng) {
+                  var att = feature.properties;
+                  if (att.apagada == 0){
+                    var color = "yellow"
+                  }else{
+                    var color = "black"
+                  }
                   return L.circleMarker(latlng, {
                     radius: 3,
-                    fillColor: "yellow",
+                    fillColor: color,
                     color: "black",
                     weight: 1,
                     opacity: 1,
@@ -694,9 +678,17 @@
                   });
                 },
                 onEachFeature: function (feature, layer) {
+                  var att = feature.properties;
+                  if (att.apagada == 0){
+                    var estado = "Funcionando"
+                  }else{
+                    var estado = "Apagada"
+                  }
+                  layer.bindTooltip("<p>Estado: "+ estado +"</p><p>Capacidad: "+ att.capacidad +"</p><p>Tecnologia: "+ att.tecnologia +"</p>").openTooltip();
                   lumSelected.addLayer(layer);
                 },
               }).addTo(map2);
+              graficaEst(intersectedGeoJSON);
             },
             error: function (error) {
               console.error("Error:", error);
@@ -719,6 +711,7 @@
                   "</h5>"
               );
               L.geoJSON(intersectedGeoJSON, {
+                style: {color: "red"},
                 onEachFeature: function (feature, layer) {
                   recoSelected.addLayer(layer);
                 },
@@ -797,6 +790,32 @@
               console.error("Error:", error);
             },
           });
+        }
+
+        function toggleProcesses(geom){
+          var lumin = document.getElementById("switchLuminarias");
+          var bacheoFort = document.getElementById("switchFortamun");
+          var rutRec = document.getElementById("switchRutasReco");
+          var desare = document.getElementById("switchDesarenadores");
+
+          lumSelected.clearLayers();
+          recoSelected.clearLayers();
+          fortamunSelected.clearLayers();
+          desarenaSelected.clearLayers();
+          $("#tablaEst").prepend("<h4 class='text-center'>Atributos de Selección</h4>")
+
+          if (lumin.checked) {
+            lumProcess(geom);
+          };
+          if (bacheoFort.checked) {
+            fortamunProcess(geom);
+          };
+          if (rutRec.checked) {
+            recoProcess(geom);
+          };
+          if (desare.checked) {
+          desarenaProcess(geom);
+          };
         }
       });
     </script>
