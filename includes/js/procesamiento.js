@@ -6,8 +6,11 @@ var lyrSearchCol;
 var lyrSearchDel;
 var lyrCurrentLoc;
 var jsonCurrentLocation;
-var ctrSidebar;
-var ctrEasybutton;
+var ctrlSidebar;
+var ctrlButtonSidebar;
+var ctrlEstadisticas;
+var ctrlButtonEstats;
+var ctrlSearch;
 var objBasemaps;
 var capaColonias;
 var capaDelegaciones;
@@ -21,7 +24,6 @@ var fortamunSelected;
 var desarenaSelected;
 var drawnPolygon;
 var crs32611;
-var ctrSearch;
 
 $(document).ready(function () {
   map2 = L.map("mapdiv", {
@@ -42,21 +44,44 @@ $(document).ready(function () {
     rotateMode: false,
   });
 
-  ctrSidebar = L.control.sidebar("side-bar", { closeButton: true }).addTo(map2);
-
-  ctrEasybutton = L.easyButton("fas fa-arrow-right", function () {
-    ctrSidebar.toggle();
-  }).addTo(map2);
-
-  ctrSearch = L.layerGroup().addTo(map2);
+  ctrlSearch = L.layerGroup().addTo(map2);
   map2.addControl(new L.Control.Search({
     position: 'topright',
     textPlaceholder: 'Buscar por...',
   }));
 
-  map2.on('search:expanded', function() {
-    alert('seleccione capa de busqueda');
-  })
+  ctrlSidebar = L.control.sidebar("side-bar", { closeButton: true }).addTo(map2);
+
+  ctrlButtonSidebar = L.easyButton({
+    position: 'topleft',
+    states:[{
+      stateName: 'abrirConsulta',
+      onClick: function(){
+        ctrlSidebar.toggle();
+      },
+      title: 'Abrir Capas de Consulta',
+      icon: "fas fa-layer-group",
+    }]
+  }).addTo(map2);
+
+
+  ctrlEstadisticas = L.control.sidebar("stadistic-bar", { closeButton: true, position: 'right'}).addTo(map2);
+
+  ctrlButtonEstats = L.easyButton({
+    position: 'topright',
+    states:[{
+      stateName: 'abrirEstats',
+      onClick: function(){
+        ctrlEstadisticas.toggle();
+      },
+      title: 'Abrir Estadisticas',
+      icon: "fas fa-chart-bar",
+    }]
+  }).addTo(map2);
+
+  // map2.on('search:expanded', function() {
+  //   alert('seleccione capa de busqueda');
+  // })
 
   new L.basemapsSwitcher(
     [
@@ -316,6 +341,7 @@ $(document).ready(function () {
   document.getElementById("btnFindDelegacion").onclick = function () {
     var del = document.getElementById("txtFindDelegacion").value;
     var lyr = returnLayerByName(capaDelegaciones, "delegacion", del);
+    console.log(lyr);
     if (lyr) {
       var area = turf.area(lyr.toGeoJSON());
       if (lyrSearchDel) {
@@ -354,6 +380,7 @@ $(document).ready(function () {
 
   function returnLayerByName(lyr, att, val) {
     var arLayer = lyr.getLayers();
+    console.log(arLayer);
     for (i = 0; i < arLayer.length; i++) {
       var featureCol = arLayer[i].feature.properties[att];
       if (featureCol == val) {
@@ -391,6 +418,7 @@ $(document).ready(function () {
         );
 
         if (layerName === "Luminarias") {
+          pruebaTabla(intersectedGeoJSON);
           L.geoJSON(intersectedGeoJSON, {
             pointToLayer: function (feature, latlng) {
               var att = feature.properties;
@@ -480,6 +508,12 @@ $(document).ready(function () {
 
     if (lumin.checked) {
       procesandoData(geom, "lumExtractor.php", lumSelected, "Luminarias");
+      var lums = lumSelected.getLayers();
+      for (i = 0; i < lums.length; i++) {
+        var lumRow = lums[i];
+        console.log(lumRow);
+        geojson.features.push(lumRow);
+      }
     }
     if (rutRec.checked) {
       procesandoData(geom, "recoExtractor.php", recoSelected, "Rutas Recolección");
@@ -491,4 +525,5 @@ $(document).ready(function () {
       procesandoData(geom, "desarenaExtractor.php", desarenaSelected, "Desarenadores");
     }
   }
+  
 });

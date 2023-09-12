@@ -63,8 +63,23 @@
   </head>
 
   <body>
-    <div id="side-bar" class="sidebar collapsed" style="border-radius: 1rem;">
-      <div id="divCol" class="col-sm-12 mt-4">
+    
+    <div id="stadistic-bar" style="border-radius: 1rem;">
+      <h2 class="mt-2" style="color: #FF7D04;">Estadisticas</h2>
+
+      <table id="geojsonTable" class="table table-striped">
+        <thead class="table-dark">
+          <tr id="columnas">
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="side-bar" style="border-radius: 1rem;">
+      <h3 class="mt-2" style="color: #FF7D04;">Consulta Capas</h3>
+      <div id="divCol" class="col-sm-12 mt-3">
         <div id="divColLabel" class="text-center col-sm-12"></div>
         <div id="divColoniaError" class="errorMsg col-xs-12"></div>
         <div
@@ -201,5 +216,6 @@
     <div id="mapdiv"></div>
 
     <script src="includes/js/procesamiento.js"></script>
+    <script src="includes/js/pruebaTabla.js"></script>
   </body>
 </html>
