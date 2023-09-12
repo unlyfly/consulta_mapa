@@ -21,6 +21,7 @@ var fortamunSelected;
 var desarenaSelected;
 var drawnPolygon;
 var crs32611;
+var ctrSearch;
 
 $(document).ready(function () {
   map2 = L.map("mapdiv", {
@@ -46,6 +47,16 @@ $(document).ready(function () {
   ctrEasybutton = L.easyButton("fas fa-arrow-right", function () {
     ctrSidebar.toggle();
   }).addTo(map2);
+
+  ctrSearch = L.layerGroup().addTo(map2);
+  map2.addControl(new L.Control.Search({
+    position: 'topright',
+    textPlaceholder: 'Buscar por...',
+  }));
+
+  map2.on('search:expanded', function() {
+    alert('seleccione capa de busqueda');
+  })
 
   new L.basemapsSwitcher(
     [
