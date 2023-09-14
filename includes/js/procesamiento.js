@@ -79,10 +79,6 @@ $(document).ready(function () {
     }]
   }).addTo(map2);
 
-  // map2.on('search:expanded', function() {
-  //   alert('seleccione capa de busqueda');
-  // })
-
   new L.basemapsSwitcher(
     [
       {
@@ -297,6 +293,18 @@ $(document).ready(function () {
     }
   };
 
+  document.getElementById("btnTabla").onclick = function () {
+    var tabla = document.getElementById('statsTable');
+    tabla.innerHTML = '';
+    
+    var generarTabla = [lumSelected, recoSelected, fortamunSelected, desarenaSelected];
+    for (var i = 0; i < generarTabla.length; i++) {
+      if(generarTabla[i]!==null){
+        pruebaTabla(generarTabla[i].toGeoJSON());
+      }
+    }
+  }
+
   //PARA SEARCH DE COLONIA
 
   document.getElementById("btnFindColonia").onclick = function () {
@@ -341,7 +349,6 @@ $(document).ready(function () {
   document.getElementById("btnFindDelegacion").onclick = function () {
     var del = document.getElementById("txtFindDelegacion").value;
     var lyr = returnLayerByName(capaDelegaciones, "delegacion", del);
-    console.log(lyr);
     if (lyr) {
       var area = turf.area(lyr.toGeoJSON());
       if (lyrSearchDel) {
@@ -380,7 +387,6 @@ $(document).ready(function () {
 
   function returnLayerByName(lyr, att, val) {
     var arLayer = lyr.getLayers();
-    console.log(arLayer);
     for (i = 0; i < arLayer.length; i++) {
       var featureCol = arLayer[i].feature.properties[att];
       if (featureCol == val) {
@@ -418,7 +424,6 @@ $(document).ready(function () {
         );
 
         if (layerName === "Luminarias") {
-          pruebaTabla(intersectedGeoJSON);
           L.geoJSON(intersectedGeoJSON, {
             pointToLayer: function (feature, latlng) {
               var att = feature.properties;
@@ -447,14 +452,14 @@ $(document).ready(function () {
                 ).openTooltip();
               layerToAdd.addLayer(layer);
             },
-          }).addTo(map2);
+          });
         } else if (layerName === "Rutas Recolección") {
           L.geoJSON(intersectedGeoJSON, {
             style: { color: "red" },
             onEachFeature: function (feature, layer) {
               layerToAdd.addLayer(layer);
             },
-          }).addTo(map2);
+          });
         } else if (layerName === "Bacheo Fortamun") {
           L.geoJSON(intersectedGeoJSON, {
             style: {
@@ -467,7 +472,7 @@ $(document).ready(function () {
             onEachFeature: function (feature, layer) {
               layerToAdd.addLayer(layer);
             },
-          }).addTo(map2);
+          });
         } else if (layerName === "Desarenadores") {
           L.geoJSON(intersectedGeoJSON, {
             pointToLayer: function (feature, latlng) {
@@ -483,7 +488,7 @@ $(document).ready(function () {
             onEachFeature: function (feature, layer) {
               layerToAdd.addLayer(layer);
             },
-          }).addTo(map2);
+          });
         }
       },
       error: function (error) {
@@ -508,12 +513,6 @@ $(document).ready(function () {
 
     if (lumin.checked) {
       procesandoData(geom, "lumExtractor.php", lumSelected, "Luminarias");
-      var lums = lumSelected.getLayers();
-      for (i = 0; i < lums.length; i++) {
-        var lumRow = lums[i];
-        console.log(lumRow);
-        geojson.features.push(lumRow);
-      }
     }
     if (rutRec.checked) {
       procesandoData(geom, "recoExtractor.php", recoSelected, "Rutas Recolección");

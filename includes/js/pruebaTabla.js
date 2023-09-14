@@ -1,9 +1,12 @@
 function pruebaTabla(layer) {
   var features = layer.features;
 
-  var table = document.getElementById("geojsonTable");
-  var tr = document.getElementById("columnas");
-  tr.innerHTML = "";
+  var table = document.getElementById("statsTable");
+  var thead = document.createElement("thead");
+  var tr = document.createElement("tr");
+  tr.classList.add("table-dark");
+
+  // tr.innerHTML = "";
 
   // Assuming all features have the same properties
   var properties = Object.keys(features[0].properties);
@@ -13,12 +16,12 @@ function pruebaTabla(layer) {
     th.textContent = properties[i];
     tr.appendChild(th);
   }
-  //   console.log(tr);
-  //   thead.appendChild(tr);
+  thead.appendChild(tr);
+  table.appendChild(thead);
 
   
-  var tbody = table.getElementsByTagName("tbody")[0];
-  tbody.innerHTML = "";
+  var tbody = document.createElement("tbody");
+  // tbody.innerHTML = "";
 
   for (var i = 0; i < features.length; i++) {
     var tr = document.createElement("tr");
@@ -32,5 +35,6 @@ function pruebaTabla(layer) {
       }
     }
     tbody.appendChild(tr);
+    table.appendChild(tbody);
   }
 }
