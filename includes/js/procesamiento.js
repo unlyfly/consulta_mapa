@@ -1,3 +1,5 @@
+// DECLARACION DE VARIABLES GLOBALES
+
 var map2;
 var lyrOSM;
 var lyrEsri;
@@ -22,8 +24,11 @@ var lumSelected;
 var recoSelected;
 var fortamunSelected;
 var desarenaSelected;
-var drawnPolygon;
+var selectionPolygon;
 var crs32611;
+
+
+//  CREACION DE MAPA 
 
 $(document).ready(function () {
   map2 = L.map("mapdiv", {
@@ -31,6 +36,11 @@ $(document).ready(function () {
     zoom: 13,
   });
 
+
+  // SECCION DONDE SE ENCUENTRAN LOS CONTROLES QUE SE UTILIZAN  EN LA INTERFAZ DEL MAPA
+  // CONTROL DE HERRAMINETAS DE DIBUJO GEOMAN
+
+  map2.pm.setLang("es");
   map2.pm.addControls({
     position: "topleft",
     drawCircle: false,
@@ -44,11 +54,17 @@ $(document).ready(function () {
     rotateMode: false,
   });
 
+
+  // CONTROL DE BARRA DE BUSQUEDA 
+
   ctrlSearch = L.layerGroup().addTo(map2);
   map2.addControl(new L.Control.Search({
     position: 'topright',
     textPlaceholder: 'Buscar por...',
   }));
+
+
+  // CONTROLES DE SIDE BAR, EN LA IZQUIERDA EL DE CAPAS DISPONIBLES Y EN LA DERECHA EL DE ESTADISTICAS (POR DEFINIR MAS USOS)
 
   ctrlSidebar = L.control.sidebar("side-bar", { closeButton: true }).addTo(map2);
 
@@ -64,7 +80,6 @@ $(document).ready(function () {
     }]
   }).addTo(map2);
 
-
   ctrlEstadisticas = L.control.sidebar("stadistic-bar", { closeButton: true, position: 'right'}).addTo(map2);
 
   ctrlButtonEstats = L.easyButton({
@@ -78,6 +93,9 @@ $(document).ready(function () {
       icon: "fas fa-chart-bar",
     }]
   }).addTo(map2);
+
+
+  // PLUGIN DE INTERCAMBIO DE BASE MAPS
 
   new L.basemapsSwitcher(
     [
@@ -100,16 +118,25 @@ $(document).ready(function () {
     "Esri Imagery": lyrEsri,
   };
 
+
+  // SE DECLARAN LA CREACION DE LOS LAYER GROUPS DONDE VAMOS A ALMACENAR LOS LAYERS
+
   lumSelected = L.layerGroup().addTo(map2);
   recoSelected = L.layerGroup().addTo(map2);
   fortamunSelected = L.layerGroup().addTo(map2);
   desarenaSelected = L.layerGroup().addTo(map2);
-  drawnPolygon = L.layerGroup().addTo(map2);
+  selectionPolygon = L.layerGroup().addTo(map2);
+
+
+  // VARIABLE PARA CONVERSION DE CAPAS A ESTA PROYECCION (POR EL MOMENTO ESTA EN DESUSO POR CAMBIOS EN EL GEOSERVER)
 
   crs32611 = new L.Proj.CRS(
     "EPSG:32611",
     "+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
   );
+
+
+  //SECCION DE SOLICITUD DE CAPAS GEOGRAFICAS DISPONIBLES EN GEOSERVER
 
   // capaLuminarias = L.Geoserver.wms("https://www.clustersig.com/geoserver/wms", {
   //   layers: "servicios:luminarias",
@@ -207,28 +234,31 @@ $(document).ready(function () {
     geometryField: "geom",
   });
 
-  capaColonias.on("click", function (event) {
+
+  // LAS 3 PRINCIPALES ACCIONES DE SELECCION DE ELEMENTOS DE CAPAS (AL SELECCIONAR COLONIA, CREAR POLIGONO O ENCONTRAR LOCALIZACION)
+
+  capaColonias.on("click", function (e) {
+    selectionPolygon.clearLayers();
     if (mrkCurrentLocation) {
       mrkCurrentLocation.remove();
       lyrCurrentLoc.remove();
     }
-    drawnPolygon.clearLayers();
-    var selectedFeature = event.layer.toGeoJSON();
+    var selectedCol = e.layer.toGeoJSON();
+    selectionPolygon.addLayer(e.layer);
     $("#tablaEst").empty();
-    drawnPolygon.clearLayers();
-    toggleProcesses(selectedFeature.geometry);
+    // toggleProcesses(selectedCol.geometry);
   });
 
   map2.on("pm:create", function (e) {
-    drawnPolygon.clearLayers();
+    selectionPolygon.clearLayers();
     if (mrkCurrentLocation) {
       mrkCurrentLocation.remove();
       lyrCurrentLoc.remove();
     };
-    const selectedRec = e.layer.toGeoJSON();
-    drawnPolygon.addLayer(e.layer);
+    const selectedPolygon = e.layer.toGeoJSON();
+    selectionPolygon.addLayer(e.layer);
     $("#tablaEst").empty();
-    toggleProcesses(selectedRec.geometry);
+    // toggleProcesses(selectedPolygon.geometry);
   });
 
   map2.on("locationfound", function (e) {
@@ -248,66 +278,60 @@ $(document).ready(function () {
     );
 
     lyrCurrentLoc = L.geoJSON(jsonCurrentLocation, {
-      style: { color: "blue", fillColor: "blue", fillOpacity: 0.2 },
+      style: { color: "#279EFF", fillColor: "#279EFF", opacity: 0.6, fillOpacity: 0.2 },
     }).addTo(map2);
 
-    drawnPolygon.clearLayers();
+    selectionPolygon.clearLayers();
     $("#tablaEst").empty();
     toggleProcesses(jsonCurrentLocation.geometry);
   });
-
   map2.on("locationerror", function (e) {
     console.log(e);
     alert("Lacalizacion no encontrada");
   });
-
   $("#btnLocate").click(function () {
     map2.locate();
   });
+
+
+  // EVENTOS ACTIVADOS POR ELEMENTOS EN EL DOM (RADIO, BOTONES, CLICKS)
+
+  map2.on("pm:drawstart", limpiarTodo);
 
   document.getElementById("radioDist").addEventListener("change", (event) => {
     label = document.getElementById("lblRadioDist");
     label.innerHTML = "Radio: " + event.target.value + " m";
   });
 
-  document.getElementById("btnClear").onclick = function () {
-   var layersToClear = [drawnPolygon, lumSelected, recoSelected, fortamunSelected, desarenaSelected];
-   for (var i = 0; i < layersToClear.length; i++) {
-     layersToClear[i].clearLayers();
-   }
+  $("#btnClear").click(limpiarTodo);
 
-    $("#tablaEst").empty();
-    if (mrkCurrentLocation) {
-      mrkCurrentLocation.remove();
-    }
-    if (lyrCurrentLoc) {
-      lyrCurrentLoc.remove();
-    }
-    if (lyrSearchCol) {
-      lyrSearchCol.remove();
-      $("#divColoniaData").html("");
-    }
-    if (lyrSearchDel) {
-      lyrSearchDel.remove();
-      $("#divDelegacionData").html("");
-    }
-  };
-
-  document.getElementById("btnTabla").onclick = function () {
+  $("#btnTabla").click(function () {
     var tabla = document.getElementById('statsTable');
     tabla.innerHTML = '';
     
     var generarTabla = [lumSelected, recoSelected, fortamunSelected, desarenaSelected];
     for (var i = 0; i < generarTabla.length; i++) {
-      if(generarTabla[i]!==null){
+      if(generarTabla[i]!=null){
         pruebaTabla(generarTabla[i].toGeoJSON());
       }
     }
-  }
+  });
 
-  //PARA SEARCH DE COLONIA
+  $("#switchLuminarias").click(function(){
+    var j = selectionPolygon.getLayers();
+    var j2 = j[0].toGeoJSON();
+    $("#tablaEst").empty();
+    if (this.checked) {
+      procesandoData(j2.geometry, "lumExtractor.php", lumSelected, "Luminarias");
+    }else{
+      lumSelected.clearLayers();
+    }
+  });
 
-  document.getElementById("btnFindColonia").onclick = function () {
+
+  //PARA SEARCH DE COLONIA (PENDIENTE: GENERALIZAR FUNCIONES DE BUSQUEDA)
+
+  $("#btnFindColonia").click(function () {
     var col = document.getElementById("txtFindColonia").value.toUpperCase();
     var lyr = returnLayerByName(capaColonias, "nomb_fracc", col);
     if (lyr) {
@@ -332,7 +356,7 @@ $(document).ready(function () {
     } else {
       $("#divColoniaError").html("****** Colonia no encontrada ******");
     }
-  };
+  });
 
   $("#txtFindColonia").on("keyup paste", function () {
     var col = $("#txtFindColonia").val();
@@ -344,9 +368,10 @@ $(document).ready(function () {
     );
   });
 
-  //PARA SEARCH DE DELEGACION
 
-  document.getElementById("btnFindDelegacion").onclick = function () {
+  //PARA SEARCH DE DELEGACION (PENDIENTE: GENERALIZAR FUNCIONES DE BUSQUEDA)
+
+  $("#btnFindDelegacion").click(function () {
     var del = document.getElementById("txtFindDelegacion").value;
     var lyr = returnLayerByName(capaDelegaciones, "delegacion", del);
     if (lyr) {
@@ -371,7 +396,7 @@ $(document).ready(function () {
     } else {
       $("#divDelegacionError").html("****** Delegacion no encontrada ******");
     }
-  };
+  });
 
   $("#txtFindDelegacion").on("keyup paste", function () {
     var del = $("#txtFindDelegacion").val();
@@ -382,6 +407,7 @@ $(document).ready(function () {
       "#btnFindDelegacion"
     );
   });
+
 
   // FORMULAS GENERALES
 
@@ -497,32 +523,68 @@ $(document).ready(function () {
     });
   }
 
-  function toggleProcesses(geom) {
-    var lumin = document.getElementById("switchLuminarias");
-    var bacheoFort = document.getElementById("switchFortamun");
-    var rutRec = document.getElementById("switchRutasReco");
-    var desare = document.getElementById("switchDesarenadores");
+  function limpiarTodo() {
+      var layersToClear = [selectionPolygon, lumSelected, recoSelected, fortamunSelected, desarenaSelected];
+      for (var i = 0; i < layersToClear.length; i++) {
+        layersToClear[i].clearLayers();
+      }
+   
+      var layersToDesactivate = [capaLuminarias, capaRutasReco, capaFortamun, capaDesarenadores];
+      for (var i = 0; i < layersToDesactivate.length; i++) {
+        if(layersToDesactivate[i]){
+          map2.removeLayer(layersToDesactivate[i]);
+        }
+      }
 
-    lumSelected.clearLayers();
-    recoSelected.clearLayers();
-    fortamunSelected.clearLayers();
-    desarenaSelected.clearLayers();
-    $("#tablaEst").prepend(
-      "<h4 class='text-center'>Atributos de Selección</h4>"
-    );
+      let toggleButtons = document.getElementsByClassName("layers");
+      for (i = 0; i < toggleButtons.length; i++) {
+        if (toggleButtons[i].checked) {
+          toggleButtons[i].checked = false;
+        }
+      }
 
-    if (lumin.checked) {
-      procesandoData(geom, "lumExtractor.php", lumSelected, "Luminarias");
-    }
-    if (rutRec.checked) {
-      procesandoData(geom, "recoExtractor.php", recoSelected, "Rutas Recolección");
-    }
-    if (bacheoFort.checked) {
-      procesandoData(geom, "fortamunExtractor.php", fortamunSelected, "Bacheo Fortamun");
-    }
-    if (desare.checked) {
-      procesandoData(geom, "desarenaExtractor.php", desarenaSelected, "Desarenadores");
-    }
-  }
-  
+      $("#tablaEst").empty();
+      if (mrkCurrentLocation) {
+        mrkCurrentLocation.remove();
+      }
+      if (lyrCurrentLoc) {
+        lyrCurrentLoc.remove();
+      }
+      if (lyrSearchCol) {
+        lyrSearchCol.remove();
+        $("#divColoniaData").html("");
+      }
+      if (lyrSearchDel) {
+        lyrSearchDel.remove();
+        $("#divDelegacionData").html("");
+      }
+  }  
+
+  // function toggleProcesses(geom) {
+  //   var lumin = document.getElementById("switchLuminarias");
+  //   var bacheoFort = document.getElementById("switchFortamun");
+  //   var rutRec = document.getElementById("switchRutasReco");
+  //   var desare = document.getElementById("switchDesarenadores");
+
+  //   lumSelected.clearLayers();
+  //   recoSelected.clearLayers();
+  //   fortamunSelected.clearLayers();
+  //   desarenaSelected.clearLayers();
+  //   $("#tablaEst").prepend(
+  //     "<h4 class='text-center'>Atributos de Selección</h4>"
+  //   );
+
+  //   if (lumin.checked) {
+  //     procesandoData(geom, "lumExtractor.php", lumSelected, "Luminarias");
+  //   }
+  //   if (rutRec.checked) {
+  //     procesandoData(geom, "recoExtractor.php", recoSelected, "Rutas Recolección");
+  //   }
+  //   if (bacheoFort.checked) {
+  //     procesandoData(geom, "fortamunExtractor.php", fortamunSelected, "Bacheo Fortamun");
+  //   }
+  //   if (desare.checked) {
+  //     procesandoData(geom, "desarenaExtractor.php", desarenaSelected, "Desarenadores");
+  //   }
+  // }
 });
