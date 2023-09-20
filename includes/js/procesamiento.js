@@ -1,5 +1,4 @@
 // DECLARACION DE VARIABLES GLOBALES
-
 var map2;
 var lyrOSM;
 var lyrEsri;
@@ -26,6 +25,7 @@ var fortamunSelected;
 var desarenaSelected;
 var selectionPolygon;
 var crs32611;
+var arrayCapasActivas;
 
 
 //  CREACION DE MAPA 
@@ -204,7 +204,7 @@ $(document).ready(function () {
 
   capaRutasReco = new L.WFS({
     url: "https://www.clustersig.com/geoserver/wfs",
-    typeNS: "servicios",
+    typeNS: "dspm_limpia",
     typeName: "rutas_recoleccion",
     geometryField: "geom",
     opacity: 0.8,
@@ -216,7 +216,7 @@ $(document).ready(function () {
 
   capaFortamun = new L.WFS({
     url: "https://www.clustersig.com/geoserver/wfs",
-    typeNS: "doium",
+    typeNS: "doium_bacheo",
     typeName: "poligon_fortamun",
     geometryField: "geom",
     opacity: 0.8,
@@ -229,7 +229,7 @@ $(document).ready(function () {
 
   capaDesarenadores = new L.WFS({
     url: "https://www.clustersig.com/geoserver/wfs",
-    typeNS: "doium",
+    typeNS: "doium_mantenimiento",
     typeName: "desarenadores",
     geometryField: "geom",
   });
@@ -238,14 +238,19 @@ $(document).ready(function () {
   // LAS 3 PRINCIPALES ACCIONES DE SELECCION DE ELEMENTOS DE CAPAS (AL SELECCIONAR COLONIA, CREAR POLIGONO O ENCONTRAR LOCALIZACION)
 
   capaColonias.on("click", function (e) {
-    selectionPolygon.clearLayers();
+    selectionPolygon.removeLayer(e.layer);
     if (mrkCurrentLocation) {
       mrkCurrentLocation.remove();
       lyrCurrentLoc.remove();
     }
-    var selectedCol = e.layer.toGeoJSON();
-    selectionPolygon.addLayer(e.layer);
+    // var colored = "";
+    // var colored = L.geoJSON(e.layer.toGeoJSON(), {
+    //   style: {color: 'red', fillColor: 'none'}
+    // }).addTo(map2);
+    var colonia = e.layer;
+    selectionPolygon.addLayer(colonia);
     $("#tablaEst").empty();
+    $("#btnTabla").empty();
     // toggleProcesses(selectedCol.geometry);
   });
 
@@ -258,6 +263,7 @@ $(document).ready(function () {
     const selectedPolygon = e.layer.toGeoJSON();
     selectionPolygon.addLayer(e.layer);
     $("#tablaEst").empty();
+    $("#btnTabla").empty();
     // toggleProcesses(selectedPolygon.geometry);
   });
 
@@ -283,6 +289,7 @@ $(document).ready(function () {
 
     selectionPolygon.clearLayers();
     $("#tablaEst").empty();
+    $("#btnTabla").empty();
     toggleProcesses(jsonCurrentLocation.geometry);
   });
   map2.on("locationerror", function (e) {
@@ -317,15 +324,46 @@ $(document).ready(function () {
     }
   });
 
-  $("#switchLuminarias").click(function(){
-    var j = selectionPolygon.getLayers();
-    var j2 = j[0].toGeoJSON();
-    $("#tablaEst").empty();
-    if (this.checked) {
-      procesandoData(j2.geometry, "lumExtractor.php", lumSelected, "Luminarias");
-    }else{
-      lumSelected.clearLayers();
-    }
+  arrayCapasActivas = document.getElementsByClassName("layers");
+
+  Array.from(arrayCapasActivas).forEach(function(element) {
+    element.addEventListener("click", (event) => {
+      var j = selectionPolygon.getLayers();
+      var j2 = j[0].toGeoJSON();
+      // $("#tablaEst").empty();
+      if (element.id == "switchLuminarias"){
+        if (event.target.checked === true) {
+          procesandoData(j2.geometry, "lumExtractor.php", lumSelected, "Luminarias");
+        }else{
+          lumSelected.clearLayers();
+          $("#lumText").remove();
+        }
+      }else if (element.id == "switchRutasReco") {
+        if (event.target.checked === true){
+          procesandoData(j2.geometry, "recoExtractor.php", recoSelected, "Rutas Recolección");
+        }else{
+          recoSelected.clearLayers();
+          $("#recoText").remove();
+
+        }
+      }else if (element.id == "switchFortamun") {
+        if(event.target.checked === true){
+          procesandoData(j2.geometry, "fortamunExtractor.php", fortamunSelected, "Bacheo Fortamun");
+        }else{
+          fortamunSelected.clearLayers();
+          $("#fortText").remove();
+
+        }
+      }else if (element.id == "switchDesarenadores") {
+        if(event.target.checked === true){
+          procesandoData(j2.geometry, "desarenaExtractor.php", desarenaSelected, "Desarenadores");
+        }else{
+          desarenaSelected.clearLayers();
+          $("#desarenaText").remove();
+
+        }
+      }
+    });
   });
 
 
@@ -441,13 +479,6 @@ $(document).ready(function () {
       contentType: "json",
       success: function (data) {
         const intersectedGeoJSON = JSON.parse(data);
-        $("#tablaEst").append(
-          "<h5>" +
-            layerName +
-            ": " +
-            intersectedGeoJSON.features.length +
-            "</h5>"
-        );
 
         if (layerName === "Luminarias") {
           L.geoJSON(intersectedGeoJSON, {
@@ -479,6 +510,13 @@ $(document).ready(function () {
               layerToAdd.addLayer(layer);
             },
           });
+          $("#tablaEst").append(
+            "<h5 id='lumText'>" +
+              layerName +
+              ": " +
+              intersectedGeoJSON.features.length +
+              "</h5>"
+          );
         } else if (layerName === "Rutas Recolección") {
           L.geoJSON(intersectedGeoJSON, {
             style: { color: "red" },
@@ -486,6 +524,13 @@ $(document).ready(function () {
               layerToAdd.addLayer(layer);
             },
           });
+          $("#tablaEst").append(
+            "<h5 id='recoText'>" +
+              layerName +
+              ": " +
+              intersectedGeoJSON.features.length +
+              "</h5>"
+          );
         } else if (layerName === "Bacheo Fortamun") {
           L.geoJSON(intersectedGeoJSON, {
             style: {
@@ -499,6 +544,13 @@ $(document).ready(function () {
               layerToAdd.addLayer(layer);
             },
           });
+          $("#tablaEst").append(
+            "<h5 id='fortText'>" +
+              layerName +
+              ": " +
+              intersectedGeoJSON.features.length +
+              "</h5>"
+          );
         } else if (layerName === "Desarenadores") {
           L.geoJSON(intersectedGeoJSON, {
             pointToLayer: function (feature, latlng) {
@@ -515,6 +567,13 @@ $(document).ready(function () {
               layerToAdd.addLayer(layer);
             },
           });
+          $("#tablaEst").append(
+            "<h5 id='desarenaText'>" +
+              layerName +
+              ": " +
+              intersectedGeoJSON.features.length +
+              "</h5>"
+          );
         }
       },
       error: function (error) {
@@ -544,6 +603,7 @@ $(document).ready(function () {
       }
 
       $("#tablaEst").empty();
+      $("#btnTabla").empty();
       if (mrkCurrentLocation) {
         mrkCurrentLocation.remove();
       }

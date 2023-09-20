@@ -57,7 +57,11 @@ var geoServerUrl =
 
 getLayerNamesFromGeoServer(geoServerUrl)
   .then((typeNS) => {
-    console.log(typeNS);
+    typeNS.forEach((element) => {
+      var tre = element.split(":");
+      console.log(element);
+      console.log(tre);
+    })
   })
   .catch((error) => {
     console.error("Error:", error);
