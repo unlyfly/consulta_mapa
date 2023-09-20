@@ -43,6 +43,9 @@
     <link rel="stylesheet" href="src/L.switchBasemap/L.switchBasemap.css" />
     <script src="src/L.switchBasemap/L.switchBasemap.js"></script>
 
+    <link rel="stylesheet" href="src/leaflet.search/leaflet.search.css" />
+    <script src="src/leaflet.search/leaflet.search.js"></script>
+
     <script src="src/leaflet.providers/leaflet-providers.js"></script>
 
     <script>
@@ -57,11 +60,21 @@
     </script>
 
     <link rel="stylesheet" href="includes/css/style.css" />
+    <link rel="stylesheet" href="includes/css/table.css" />
   </head>
 
   <body>
-    <div id="side-bar" class="sidebar collapsed" style="border-radius: 1rem;">
-      <div id="divCol" class="col-sm-12 mt-4">
+    
+    <div id="stadistic-bar" style="border-radius: 1rem;">
+      <h2 class="mt-2" style="color: #FF7D04;">Estadisticas</h2>
+
+      <table id="statsTable" class="table table-striped">
+      </table>
+    </div>
+
+    <div id="side-bar" style="border-radius: 1rem;">
+      <h3 class="mt-2" style="color: #FF7D04;">Consulta Capas</h3>
+      <div id="divCol" class="col-sm-12 mt-3">
         <div id="divColLabel" class="text-center col-sm-12"></div>
         <div id="divColoniaError" class="errorMsg col-xs-12"></div>
         <div
@@ -137,22 +150,24 @@
             />Colonias
           </div>
         </li>
+      </ul>
+      <ul class="list-group mt-2" style="list-style-type: none">    
         <li class="form-control list-group-item list-group-item-action list-group-item-warning">
           <div class="form-switch">
             <input
-              class="form-check-input me-3"
+              class="form-check-input me-3 layers"
               type="checkbox"
               id="switchLuminarias"
-              onchange="switchLayers('switchLuminarias', capaLuminarias)"
             />Luminarias
           </div>
         </li>
         <li class="form-control list-group-item list-group-item-action list-group-item-warning">
           <div class="form-switch">
             <input
-              class="form-check-input me-3"
+              class="form-check-input me-3 layers"
               type="checkbox"
               id="switchRutasReco"
+              value="capaRutasReco"
               onchange="switchLayers('switchRutasReco', capaRutasReco)"
             />Rutas de Recolección
           </div>
@@ -160,9 +175,10 @@
         <li class="form-control list-group-item list-group-item-action list-group-item-warning">
           <div class="form-switch">
             <input
-              class="form-check-input me-3"
+              class="form-check-input me-3 layers"
               type="checkbox"
               id="switchFortamun"
+              value="capaFortamun"
               onchange="switchLayers('switchFortamun', capaFortamun)"
             />Bacheo Fortamun
           </div>
@@ -170,9 +186,10 @@
         <li class="form-control list-group-item list-group-item-action list-group-item-warning">
           <div class="form-switch">
             <input
-              class="form-check-input me-3"
+              class="form-check-input me-3 layers"
               type="checkbox"
               id="switchDesarenadores"
+              value="capaDesarenadores"
               onchange="switchLayers('switchDesarenadores', capaDesarenadores)"
             />Desarenadores
           </div>
@@ -193,10 +210,16 @@
       <div class="d-grid gap-2  mt-3">
         <button id="btnClear" class="btn" style="color:white; background-color: #FF7D04;">Limpiar todo</button>
       </div>
+
+      <div class="d-grid gap-2  mt-3">
+        <button id="btnTabla" class="btn" style="color:white; background-color: #FF7D04;">Tabla</button>
+      </div>
     </div>
 
     <div id="mapdiv"></div>
 
     <script src="includes/js/procesamiento.js"></script>
+    <script src="includes/js/pruebaTabla.js"></script>
+    <script src="includes/js/pruebaGetLayers.js"></script>
   </body>
 </html>
