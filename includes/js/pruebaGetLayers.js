@@ -1,4 +1,4 @@
-async function getLayerNamesFromGeoServer(geoServerUrl) {
+function getLayerNamesFromGeoServer(geoServerUrl) {
   return new Promise((resolve, reject) => {
     // Crear una nueva solicitud XMLHttpRequest
     var xhr = new XMLHttpRequest();
@@ -50,19 +50,3 @@ async function getLayerNamesFromGeoServer(geoServerUrl) {
     xhr.send();
   });
 }
-
-// Define la URL de tu solicitud GetCapabilities de GeoServer
-var geoServerUrl =
-  "https://www.clustersig.com/geoserver/ows?service=WFS&version=2.0.0&request=GetCapabilities";
-
-getLayerNamesFromGeoServer(geoServerUrl)
-  .then((typeNS) => {
-    typeNS.forEach((element) => {
-      var tre = element.split(":");
-      console.log(element);
-      console.log(tre);
-    })
-  })
-  .catch((error) => {
-    console.error("Error:", error);
-  });
