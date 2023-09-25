@@ -189,7 +189,7 @@
       setLayer: function (layer) { // set search layer at runtime
         // this.options.layer = layer; //setting this, run only this._recordsFromLayer()
         this._layer = layer
-        this._layer.addTo(this._map)
+        // this._layer.addTo(this._map)
         return this
       },
   

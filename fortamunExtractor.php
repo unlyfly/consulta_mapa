@@ -25,7 +25,7 @@ $polygon = $reader->read($data);
 
 $selectedGeom = $polygon->asText();
 
-$query = "SELECT b.* FROM doium.poligon_fortamun as b, ST_GeomFromText('$selectedGeom') as a WHERE ST_Intersects(ST_GeomFromText('$selectedGeom', 4326), b.geom)";
+$query = "SELECT b.* FROM doium_bacheo.poligon_fortamun as b, ST_GeomFromText('$selectedGeom') as a WHERE ST_Intersects(ST_GeomFromText('$selectedGeom', 4326), b.geom)";
 
 $result = pg_query($db, $query);
 

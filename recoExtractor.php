@@ -25,7 +25,7 @@ $polygon = $reader->read($data);
 
 $selectedGeom = $polygon->asText();
 
-$query = "SELECT b.* FROM servicios.rutas_recoleccion as b, ST_GeomFromText('$selectedGeom') as a WHERE ST_Intersects(ST_GeomFromText('$selectedGeom', 4326), b.geom)";
+$query = "SELECT b.* FROM dspm_limpia.rutas_recoleccion as b, ST_GeomFromText('$selectedGeom') as a WHERE ST_Intersects(ST_GeomFromText('$selectedGeom', 4326), b.geom)";
 
 $result = pg_query($db, $query);
 

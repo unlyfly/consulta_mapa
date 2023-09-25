@@ -25,7 +25,7 @@ $polygon = $reader->read($data);
 
 $selectedGeom = $polygon->asText();
 
-$query = "SELECT b.* FROM doium.desarenadores as b, ST_GeomFromText('$selectedGeom') as a WHERE ST_Contains(ST_GeomFromText('$selectedGeom', 4326), b.geom)";
+$query = "SELECT b.* FROM doium_mantenimiento.desarenadores as b, ST_GeomFromText('$selectedGeom') as a WHERE ST_Contains(ST_GeomFromText('$selectedGeom', 4326), b.geom)";
 
 $result = pg_query($db, $query);
 

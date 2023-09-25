@@ -23,7 +23,10 @@
 
     <script src="src/leaflet.geoserver/L.Geoserver.js"></script>
 
-    <link rel="stylesheet" href="src/bootstrap-5.3.1-dist/css/bootstrap.min.css" />
+    <link
+      rel="stylesheet"
+      href="src/bootstrap-5.3.1-dist/css/bootstrap.min.css"
+    />
     <script src="src/bootstrap-5.3.1-dist/js/bootstrap.min.js"></script>
 
     <link rel="stylesheet" href="src/fontawesome-6.4.2/css/all.min.css" />
@@ -64,16 +67,14 @@
   </head>
 
   <body>
-    
-    <div id="stadistic-bar" style="border-radius: 1rem;">
-      <h2 class="mt-2" style="color: #FF7D04;">Estadisticas</h2>
+    <div id="stadistic-bar" style="border-radius: 1rem">
+      <h2 class="mt-2" style="color: #ff7d04">Estadisticas</h2>
 
-      <table id="statsTable" class="table table-striped">
-      </table>
+      <table id="statsTable" class="table table-striped"></table>
     </div>
 
-    <div id="side-bar" style="border-radius: 1rem;">
-      <h3 class="mt-2" style="color: #FF7D04;">Consulta Capas</h3>
+    <div id="side-bar" style="border-radius: 1rem">
+      <h3 class="mt-2" style="color: #ff7d04">Consulta Capas</h3>
       <div id="divCol" class="col-sm-12 mt-3">
         <div id="divColLabel" class="text-center col-sm-12"></div>
         <div id="divColoniaError" class="errorMsg col-xs-12"></div>
@@ -93,7 +94,7 @@
             <button
               id="btnFindColonia"
               class="btn btn-block"
-              style="color:white; background-color: #FF7D04;"
+              style="color: white; background-color: #ff7d04"
               disabled
             >
               <i class="fa fa-search"></i>
@@ -103,60 +104,66 @@
         <div id="divColoniaData"></div>
       </div>
 
-      <div id="divDel" class="col-sm-12 mt-4">
-        <div id="divDelLabel" class="text-center col-sm-12"></div>
-        <div id="divDelegacionError" class="errorMsg col-xs-12"></div>
-        <div id="divFindDelegacion" class="form-group d-flex justify-content-between col-sm-12 mt-3">
-          <div class="col-sm-10">
-            <input
-              type="text"
-              id="txtFindDelegacion"
-              class="form-control"
-              placeholder="Buscar delegación"
-            />
-          </div>
-          <div class="col-sm-2">
-            <button
-              id="btnFindDelegacion"
-              class="btn btn-block"
-              style="color:white; background-color: #FF7D04;"
-              disabled
-            >
-              <i class="fa fa-search"></i>
-            </button>
-          </div>
-        </div>
-        <div id="divDelegacionData"></div>
-      </div>
-
-
-      <ul id="layerSelects" class="list-group mt-4" style="list-style-type: none"></ul>
+      <ul
+        id="layerSelects"
+        class="list-group mt-4"
+        style="list-style-type: none"
+      ></ul>
 
       <div id="tablaEst" class="text-center col-sm-12 mt-4"></div>
 
       <div class="d-grid gap-2 mt-4">
-        <button id="btnLocate" class="btn" style="color:white; background-color: #FF7D04;">Ubicame</button>
+        <button
+          id="btnLocate"
+          class="btn"
+          style="color: white; background-color: #ff7d04"
+        >
+          Ubicame
+        </button>
       </div>
 
-      <div class='text-center mt-3'>
-        <label id="lblRadioDist" class="form-label" for="radioDist">Radio: 500 m</label>
-        <input type="range" id="radioDist" class="form-range" name="radioDist" min="300" max="1000" value="500" step="100" />
+      <div class="text-center mt-3">
+        <label id="lblRadioDist" class="form-label" for="radioDist"
+          >Radio: 500 m</label
+        >
+        <input
+          type="range"
+          id="radioDist"
+          class="form-range"
+          name="radioDist"
+          min="300"
+          max="1000"
+          value="500"
+          step="100"
+        />
       </div>
 
-      <div class="d-grid gap-2  mt-3">
-        <button id="btnClear" class="btn" style="color:white; background-color: #FF7D04;">Limpiar todo</button>
+      <div class="d-grid gap-2 mt-3">
+        <button
+          id="btnClear"
+          class="btn"
+          style="color: white; background-color: #ff7d04"
+        >
+          Limpiar todo
+        </button>
       </div>
 
-      <div class="d-grid gap-2  mt-3">
-        <button id="btnTabla" class="btn" style="color:white; background-color: #FF7D04;">Tabla</button>
+      <div class="d-grid gap-2 mt-3">
+        <button
+          id="btnTabla"
+          class="btn"
+          style="color: white; background-color: #ff7d04"
+        >
+          Tabla
+        </button>
       </div>
     </div>
 
     <div id="mapdiv"></div>
 
+    <script src="includes/js/procesamiento.js"></script>
     <script src="includes/js/pruebaGetLayers.js"></script>
     <script src="includes/js/pruebaLyrsFromGeo.js"></script>
-    <script src="includes/js/procesamiento.js"></script>
     <script src="includes/js/pruebaTabla.js"></script>
   </body>
 </html>
