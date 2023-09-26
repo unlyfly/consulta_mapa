@@ -153,15 +153,24 @@ getLayerNamesFromGeoServer(geoServerUrl)
   .then(() => {
     // CONTROL DE BARRA DE BUSQUEDA
     var lr = geoserverLyrGroup.getLayers();
-    L.control.search({
+    searchControl = L.control.search({
         layer: lr[0],
         propertyName: "nomb_fracc",
         initial: false,
         position: "topright",
         textPlaceholder: "Buscar por...",
         textErr: "Busqueda no encontrada",
-        textCancel: "Cancelar"
+        textCancel: "Cancelar",
+        marker: false,
+        moveToLocation: function(latlng, title, map) {
+          map2.fitBounds(latlng.layer.getBounds());
+        }
       }).addTo(map2);
+
+      searchControl.on("search:locationfound", function (e) {
+        e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3});
+        e.layer.addTo(map2);
+      });
   })
   .catch((error) => {
     console.error("Error:", error);

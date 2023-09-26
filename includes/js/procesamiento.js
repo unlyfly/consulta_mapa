@@ -22,6 +22,8 @@ var desarenaSelected;
 var selectionPolygon;
 var crs32611;
 var arrayCapasActivas;
+var searchControl;
+
 
 //  CREACION DE MAPA
 
@@ -30,6 +32,7 @@ $(document).ready(function () {
     center: [32.487112, -116.964755],
     zoom: 13,
   });
+
 
   // SECCION DONDE SE ENCUENTRAN LOS CONTROLES QUE SE UTILIZAN  EN LA INTERFAZ DEL MAPA
   // CONTROL DE HERRAMINETAS DE DIBUJO GEOMAN
@@ -87,6 +90,7 @@ $(document).ready(function () {
     ],
   }).addTo(map2);
 
+
   // PLUGIN DE INTERCAMBIO DE BASE MAPS
 
   new L.basemapsSwitcher(
@@ -110,6 +114,7 @@ $(document).ready(function () {
     "Esri Imagery": lyrEsri,
   };
 
+
   // SE DECLARAN LA CREACION DE LOS LAYER GROUPS DONDE VAMOS A ALMACENAR LOS LAYERS
 
   lumSelected = L.layerGroup().addTo(map2);
@@ -118,6 +123,7 @@ $(document).ready(function () {
   desarenaSelected = L.layerGroup().addTo(map2);
   selectionPolygon = L.layerGroup().addTo(map2);
 
+
   // VARIABLE PARA CONVERSION DE CAPAS A ESTA PROYECCION (POR EL MOMENTO ESTA EN DESUSO POR CAMBIOS EN EL GEOSERVER)
 
   crs32611 = new L.Proj.CRS(
@@ -125,54 +131,23 @@ $(document).ready(function () {
     "+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
   );
 
-  //SECCION DE SOLICITUD DE CAPAS GEOGRAFICAS DISPONIBLES EN GEOSERVER
-
-  capaColonias = new L.WFS({
-    url: "https://www.clustersig.com/geoserver/wfs",
-    typeNS: "catastro",
-    typeName: "colonias",
-    geometryField: "geom",
-    fillOpacity: 0.1,
-    style: {
-      fillColor: "white",
-      color: "#ac905b",
-      weight: 2,
-    },
-  }).on("load", function (e) {
-    var capa = e.target.toGeoJSON();
-    L.geoJSON(capa, {
-      onEachFeature: function (feature, layer) {
-        attr = feature.properties;
-        if (attr && attr.nomb_fracc !== undefined) {
-          if (!arrayColonias.includes(attr.nomb_fracc)) {
-            arrayColonias.push(attr.nomb_fracc.toString());
-          }
-        }
-      },
-    });
-  });
-  $(function () {
-    $("#txtFindColonia").autocomplete({
-      source: arrayColonias,
-    });
-  });
 
   // LAS 3 PRINCIPALES ACCIONES DE SELECCION DE ELEMENTOS DE CAPAS (AL SELECCIONAR COLONIA, CREAR POLIGONO O ENCONTRAR LOCALIZACION)
 
-  capaColonias.on("click", function (e) {
-    selectionPolygon.removeLayer(e.layer);
-    if (mrkCurrentLocation) {
-      mrkCurrentLocation.remove();
-      lyrCurrentLoc.remove();
-    }
+  // capaColonias.on("click", function (e) {
+  //   selectionPolygon.removeLayer(e.layer);
+  //   if (mrkCurrentLocation) {
+  //     mrkCurrentLocation.remove();
+  //     lyrCurrentLoc.remove();
+  //   }
     // var colored = "";
     // var colored = L.geoJSON(e.layer.toGeoJSON(), {
     //   style: {color: 'red', fillColor: 'none'}
     // }).addTo(map2);
-    var colonia = e.layer;
-    selectionPolygon.addLayer(colonia);
-    $("#tablaEst").empty();
-  });
+  //   var colonia = e.layer;
+  //   selectionPolygon.addLayer(colonia);
+  //   $("#tablaEst").empty();
+  // });
 
   map2.on("pm:create", function (e) {
     selectionPolygon.clearLayers();
@@ -222,6 +197,7 @@ $(document).ready(function () {
     map2.locate();
   });
 
+  
   // EVENTOS ACTIVADOS POR ELEMENTOS EN EL DOM (RADIO, BOTONES, CLICKS)
 
   map2.on("pm:drawstart", limpiarTodo);
@@ -244,74 +220,14 @@ $(document).ready(function () {
       desarenaSelected,
     ];
     for (var i = 0; i < generarTabla.length; i++) {
-      if (generarTabla[i] != null) {
+      if (generarTabla[i] !== null  && typeof generarTabla[i] !== 'undefined') {
         pruebaTabla(generarTabla[i].toGeoJSON());
       }
     }
   });
 
-  //PARA SEARCH DE COLONIA (PENDIENTE: GENERALIZAR FUNCIONES DE BUSQUEDA)
-
-  $("#btnFindColonia").click(function () {
-    var col = document.getElementById("txtFindColonia").value.toUpperCase();
-    var lyr = returnLayerByName(capaColonias, "nomb_fracc", col);
-    if (lyr) {
-      var area = turf.area(lyr.toGeoJSON());
-      if (lyrSearchCol) {
-        lyrSearchCol.remove();
-      }
-      lyrSearchCol = L.geoJSON(lyr.toGeoJSON(), {
-        style: { color: "red", fillColor: "none", weigth: 10, opacity: 0.5 },
-      }).addTo(map2);
-      map2.fitBounds(lyr.getBounds().pad(1));
-      $("#divFindColonia").remove("has-error");
-      $("#divColoniaError").html("");
-      var attr = lyr.feature.properties;
-      $("#divColoniaData").html(
-        "<div class='mt-3'><h6>Colonia: " +
-          attr.nomb_fracc +
-          "</h6><h6>Area: " +
-          area.toFixed(3) +
-          " m2 </h6></div>"
-      );
-    } else {
-      $("#divColoniaError").html("****** Colonia no encontrada ******");
-    }
-  });
-
-  $("#txtFindColonia").on("keyup paste", function () {
-    var col = $("#txtFindColonia").val();
-    testLayerNameStatus(
-      arrayColonias,
-      col,
-      "#divFindColonia",
-      "#btnFindColonia"
-    );
-  });
 
   // FORMULAS GENERALES
-
-  function returnLayerByName(lyr, att, val) {
-    var arLayer = lyr.getLayers();
-    for (i = 0; i < arLayer.length; i++) {
-      var featureCol = arLayer[i].feature.properties[att];
-      if (featureCol == val) {
-        return arLayer[i];
-      }
-    }
-    return false;
-  }
-
-  function testLayerNameStatus(arr, val, divFind, btnFind) {
-    if (arr.indexOf(val) < 0) {
-      $(divFind).addClass("has-error");
-      $(btnFind).attr("disabled", false);
-    } else {
-      $(divFind).removeClass("has-error");
-      $(btnFind).attr("disabled", true);
-    }
-  }
-
 
   function limpiarTodo() {
     var layersToClear = [
