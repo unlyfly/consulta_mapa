@@ -2,8 +2,6 @@
 var geoServerUrl =
   "https://www.clustersig.com/geoserver/ows?service=WFS&version=2.0.0&request=GetCapabilities";
 
-var geoserverLyrGroup = new L.layerGroup();
-
 getLayerNamesFromGeoServer(geoServerUrl)
   .then((typeNS) => {
     var selectGroup = document.getElementById("layerSelects");
@@ -45,7 +43,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
       switchCapa.type = "checkbox";
 
       if (nomCapa === "colonias" || nomCapa === "delegaciones") {
-        switchCapa.classList.add("form-check-input", "me-3");
+        switchCapa.classList.add("form-check-input", "me-3", "base");
       } else {
         switchCapa.classList.add("form-check-input", "me-3", "layers");
       }
@@ -91,8 +89,39 @@ getLayerNamesFromGeoServer(geoServerUrl)
       });
     }
 
+    arrayCapasBase = document.getElementsByClassName("base");
     arrayCapasActivas = document.getElementsByClassName("layers");
 
+    Array.from(arrayCapasBase).forEach(function (element) {
+      element.addEventListener("click", (event) => {
+        if (element.id == "switchColonias") {
+          if (event.target.checked === true) {
+            lyrs[0]
+              .setStyle({
+                fillColor: "red",
+                color: "#C07F00",
+                weight: 2,
+              })
+              .addTo(map2);
+          } else {
+            lyrs[0].removeFrom(map2);
+          }
+        } else if (element.id == "switchDelegaciones") {
+          if (event.target.checked === true) {
+            lyrs[1]
+              .setStyle({
+                fillColor: "none",
+                color: "black",
+                weight: 3,
+              })
+              .addTo(map2);
+          } else {
+            lyrs[1].removeFrom(map2);
+          }
+        }
+      });
+    });
+    
     Array.from(arrayCapasActivas).forEach(function (element) {
       element.addEventListener("click", (event) => {
         var j = selectionPolygon.getLayers();
@@ -153,7 +182,8 @@ getLayerNamesFromGeoServer(geoServerUrl)
   .then(() => {
     // CONTROL DE BARRA DE BUSQUEDA
     var lr = geoserverLyrGroup.getLayers();
-    searchControl = L.control.search({
+    searchControl = L.control
+      .search({
         layer: lr[0],
         propertyName: "nomb_fracc",
         initial: false,
@@ -162,15 +192,18 @@ getLayerNamesFromGeoServer(geoServerUrl)
         textErr: "Busqueda no encontrada",
         textCancel: "Cancelar",
         marker: false,
-        moveToLocation: function(latlng, title, map) {
+        moveToLocation: function (latlng, title, map) {
           map2.fitBounds(latlng.layer.getBounds());
-        }
-      }).addTo(map2);
+        },
+      })
+      .addTo(map2);
 
-      searchControl.on("search:locationfound", function (e) {
-        e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3});
-        e.layer.addTo(map2);
-      });
+    searchControl.on("search:locationfound", function (e) {
+      e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3 });
+      e.layer.addTo(map2);
+
+      coloniasLyr = geoserverLyrGroup.getLayers()[0];
+    });
   })
   .catch((error) => {
     console.error("Error:", error);

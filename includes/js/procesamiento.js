@@ -23,7 +23,8 @@ var selectionPolygon;
 var crs32611;
 var arrayCapasActivas;
 var searchControl;
-
+var geoserverLyrGroup;
+var coloniasLyr;
 
 //  CREACION DE MAPA
 
@@ -32,7 +33,6 @@ $(document).ready(function () {
     center: [32.487112, -116.964755],
     zoom: 13,
   });
-
 
   // SECCION DONDE SE ENCUENTRAN LOS CONTROLES QUE SE UTILIZAN  EN LA INTERFAZ DEL MAPA
   // CONTROL DE HERRAMINETAS DE DIBUJO GEOMAN
@@ -50,7 +50,6 @@ $(document).ready(function () {
     removalMode: false,
     rotateMode: false,
   });
-
 
   // CONTROLES DE SIDE BAR, EN LA IZQUIERDA EL DE CAPAS DISPONIBLES Y EN LA DERECHA EL DE ESTADISTICAS (POR DEFINIR MAS USOS)
 
@@ -90,7 +89,6 @@ $(document).ready(function () {
     ],
   }).addTo(map2);
 
-
   // PLUGIN DE INTERCAMBIO DE BASE MAPS
 
   new L.basemapsSwitcher(
@@ -114,7 +112,6 @@ $(document).ready(function () {
     "Esri Imagery": lyrEsri,
   };
 
-
   // SE DECLARAN LA CREACION DE LOS LAYER GROUPS DONDE VAMOS A ALMACENAR LOS LAYERS
 
   lumSelected = L.layerGroup().addTo(map2);
@@ -122,7 +119,7 @@ $(document).ready(function () {
   fortamunSelected = L.layerGroup().addTo(map2);
   desarenaSelected = L.layerGroup().addTo(map2);
   selectionPolygon = L.layerGroup().addTo(map2);
-
+  geoserverLyrGroup = L.layerGroup();
 
   // VARIABLE PARA CONVERSION DE CAPAS A ESTA PROYECCION (POR EL MOMENTO ESTA EN DESUSO POR CAMBIOS EN EL GEOSERVER)
 
@@ -131,23 +128,23 @@ $(document).ready(function () {
     "+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
   );
 
-
   // LAS 3 PRINCIPALES ACCIONES DE SELECCION DE ELEMENTOS DE CAPAS (AL SELECCIONAR COLONIA, CREAR POLIGONO O ENCONTRAR LOCALIZACION)
 
-  // capaColonias.on("click", function (e) {
-  //   selectionPolygon.removeLayer(e.layer);
-  //   if (mrkCurrentLocation) {
-  //     mrkCurrentLocation.remove();
-  //     lyrCurrentLoc.remove();
-  //   }
-    // var colored = "";
-    // var colored = L.geoJSON(e.layer.toGeoJSON(), {
-    //   style: {color: 'red', fillColor: 'none'}
-    // }).addTo(map2);
-  //   var colonia = e.layer;
-  //   selectionPolygon.addLayer(colonia);
-  //   $("#tablaEst").empty();
-  // });
+  geoserverLyrGroup.eachLayer(function (layer) {
+    if (layer.options.typeName === "colonias") {
+      layer.on("click", function (e) {
+        selectionPolygon.removeLayer(e.layer);
+        if (mrkCurrentLocation) {
+          mrkCurrentLocation.remove();
+          lyrCurrentLoc.remove();
+        }
+        var colonia = e.layer;
+        selectionPolygon.addLayer(colonia);
+        console.log(selectionPolygon);
+        $("#tablaEst").empty();
+      });
+    }
+  });
 
   map2.on("pm:create", function (e) {
     selectionPolygon.clearLayers();
@@ -155,12 +152,13 @@ $(document).ready(function () {
       mrkCurrentLocation.remove();
       lyrCurrentLoc.remove();
     }
-    const selectedPolygon = e.layer.toGeoJSON();
     selectionPolygon.addLayer(e.layer);
+
     $("#tablaEst").empty();
   });
 
   map2.on("locationfound", function (e) {
+    limpiarTodo();
     if (mrkCurrentLocation) {
       mrkCurrentLocation.remove();
       lyrCurrentLoc.remove();
@@ -176,19 +174,21 @@ $(document).ready(function () {
       { units: "kilometers" }
     );
 
-    lyrCurrentLoc = L.geoJSON(jsonCurrentLocation, {
+    selectionPolygon.clearLayers();
+
+    lyrCurrentLoc = L.geoJSON(jsonCurrentLocation.geometry, {
       style: {
         color: "#279EFF",
         fillColor: "#279EFF",
         opacity: 0.6,
         fillOpacity: 0.2,
       },
-    }).addTo(map2);
-
-    selectionPolygon.clearLayers();
-    $("#tablaEst").empty();
-    toggleProcesses(jsonCurrentLocation.geometry);
+      onEachFeature: function (feature, layer) {
+        selectionPolygon.addLayer(layer);
+      },
+    });
   });
+
   map2.on("locationerror", function (e) {
     console.log(e);
     alert("Lacalizacion no encontrada");
@@ -197,7 +197,6 @@ $(document).ready(function () {
     map2.locate();
   });
 
-  
   // EVENTOS ACTIVADOS POR ELEMENTOS EN EL DOM (RADIO, BOTONES, CLICKS)
 
   map2.on("pm:drawstart", limpiarTodo);
@@ -220,12 +219,11 @@ $(document).ready(function () {
       desarenaSelected,
     ];
     for (var i = 0; i < generarTabla.length; i++) {
-      if (generarTabla[i] !== null  && typeof generarTabla[i] !== 'undefined') {
+      if (generarTabla[i] !== null && typeof generarTabla[i] !== "undefined") {
         pruebaTabla(generarTabla[i].toGeoJSON());
       }
     }
   });
-
 
   // FORMULAS GENERALES
 
