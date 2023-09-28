@@ -15,15 +15,14 @@ var ctrlSearch;
 var objBasemaps;
 var mrkCurrentLocation;
 var arrayColonias = [];
-var lumSelected;
-var recoSelected;
-var fortamunSelected;
-var desarenaSelected;
+var luminariasSelected;
+var rutasrecoleccionSelected;
+var poligonfortamunSelected;
+var desarenadoresSelected;
 var selectionPolygon;
 var crs32611;
 var arrayCapasActivas;
 var searchControl;
-var geoserverLyrGroup;
 var coloniasLyr;
 
 //  CREACION DE MAPA
@@ -114,12 +113,11 @@ $(document).ready(function () {
 
   // SE DECLARAN LA CREACION DE LOS LAYER GROUPS DONDE VAMOS A ALMACENAR LOS LAYERS
 
-  lumSelected = L.layerGroup().addTo(map2);
-  recoSelected = L.layerGroup().addTo(map2);
-  fortamunSelected = L.layerGroup().addTo(map2);
-  desarenaSelected = L.layerGroup().addTo(map2);
+  luminariasSelected = L.layerGroup().addTo(map2);
+  rutasrecoleccionSelected = L.layerGroup().addTo(map2);
+  poligonfortamunSelected = L.layerGroup().addTo(map2);
+  desarenadoresSelected = L.layerGroup().addTo(map2);
   selectionPolygon = L.layerGroup().addTo(map2);
-  geoserverLyrGroup = L.layerGroup();
 
   // VARIABLE PARA CONVERSION DE CAPAS A ESTA PROYECCION (POR EL MOMENTO ESTA EN DESUSO POR CAMBIOS EN EL GEOSERVER)
 
@@ -230,10 +228,10 @@ $(document).ready(function () {
   function limpiarTodo() {
     var layersToClear = [
       selectionPolygon,
-      lumSelected,
-      recoSelected,
-      fortamunSelected,
-      desarenaSelected,
+      luminariasSelected,
+      rutasrecoleccionSelected,
+      poligonfortamunSelected,
+      desarenadoresSelected,
     ];
     for (var i = 0; i < layersToClear.length; i++) {
       layersToClear[i].clearLayers();

@@ -2,6 +2,8 @@
 var geoServerUrl =
   "https://www.clustersig.com/geoserver/ows?service=WFS&version=2.0.0&request=GetCapabilities";
 
+var geoserverLyrGroup = L.layerGroup();
+
 getLayerNamesFromGeoServer(geoServerUrl)
   .then((typeNS) => {
     var selectGroup = document.getElementById("layerSelects");
@@ -48,6 +50,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
         switchCapa.classList.add("form-check-input", "me-3", "layers");
       }
       switchCapa.id = "switch" + nomCapaFix;
+      switchCapa.name = element;
 
       if ($("#grupo" + nomDependeciaFix).length === 0) {
         selectGroup.appendChild(grupo);
@@ -121,60 +124,27 @@ getLayerNamesFromGeoServer(geoServerUrl)
         }
       });
     });
-    
+
     Array.from(arrayCapasActivas).forEach(function (element) {
       element.addEventListener("click", (event) => {
-        var j = selectionPolygon.getLayers();
-        var j2 = j[0].toGeoJSON();
-        // $("#tablaEst").empty();
-        if (element.id == "switchLuminarias") {
-          if (event.target.checked === true) {
-            procesandoData(
-              j2.geometry,
-              "lumExtractor.php",
-              lumSelected,
-              "Luminarias"
-            );
-          } else {
-            lumSelected.clearLayers();
-            $("#lumText").remove();
-          }
-        } else if (element.id == "switchRutas_recoleccion") {
-          if (event.target.checked === true) {
-            procesandoData(
-              j2.geometry,
-              "recoExtractor.php",
-              recoSelected,
-              "Rutas Recolección"
-            );
-          } else {
-            recoSelected.clearLayers();
-            $("#recoText").remove();
-          }
-        } else if (element.id == "switchPoligon_fortamun") {
-          if (event.target.checked === true) {
-            procesandoData(
-              j2.geometry,
-              "fortamunExtractor.php",
-              fortamunSelected,
-              "Bacheo Fortamun"
-            );
-          } else {
-            fortamunSelected.clearLayers();
-            $("#fortText").remove();
-          }
-        } else if (element.id == "switchDesarenadores") {
-          if (event.target.checked === true) {
-            procesandoData(
-              j2.geometry,
-              "desarenaExtractor.php",
-              desarenaSelected,
-              "Desarenadores"
-            );
-          } else {
-            desarenaSelected.clearLayers();
-            $("#desarenaText").remove();
-          }
+        const capa = element.name.replace(":", ".");
+        const g = selectionPolygon.getLayers()[0].toGeoJSON();
+        const id = element.id;
+        const name = id.replace("switch", "").replace(/_/g, " ");
+        const selectedLayerId = `${name
+          .replace(" ", "")
+          .toLowerCase()}Selected`;
+
+        const selectedLayer = window[selectedLayerId];
+        const conteo = `${selectedLayerId
+          .replace("Selected", "")
+          .toLowerCase()}Text`;
+
+        if (event.target.checked === true) {
+          procesandoData(g.geometry, capa, selectedLayer, name, conteo);
+        } else {
+          selectedLayer.clearLayers();
+          $("#" + conteo).remove();
         }
       });
     });
@@ -209,111 +179,25 @@ getLayerNamesFromGeoServer(geoServerUrl)
     console.error("Error:", error);
   });
 
-function procesandoData(geom, url, layerToAdd, layerName) {
-  layerToAdd.clearLayers();
+function procesandoData(geom, capa, layerGroup, layerName, conteo) {
   $.ajax({
     type: "POST",
-    url: url,
-    data: JSON.stringify(geom),
-    contentType: "json",
+    url: "extractor.php",
+    data: { geom: JSON.stringify(geom), capa: capa },
     success: function (data) {
       const intersectedGeoJSON = JSON.parse(data);
-
-      if (layerName === "Luminarias") {
-        L.geoJSON(intersectedGeoJSON, {
-          pointToLayer: function (feature, latlng) {
-            var att = feature.properties;
-            var color = att.apagada == 0 ? "yellow" : "black";
-
-            return L.circleMarker(latlng, {
-              radius: 3,
-              fillColor: color,
-              color: "black",
-              weight: 1,
-              opacity: 1,
-              fillOpacity: 1,
-            });
-          },
-          onEachFeature: function (feature, layer) {
-            var att = feature.properties;
-            var estado = att.apagada == 0 ? "Funcionando" : "Apagada";
-            layer
-              .bindTooltip(
-                "<p>Estado: " +
-                  estado +
-                  "</p><p>Capacidad: " +
-                  att.capacidad +
-                  "</p><p>Tecnologia: " +
-                  att.tecnologia +
-                  "</p>"
-              )
-              .openTooltip();
-            layerToAdd.addLayer(layer);
-          },
-        });
-        $("#tablaEst").append(
-          "<h5 id='lumText'>" +
-            layerName +
-            ": " +
-            intersectedGeoJSON.features.length +
-            "</h5>"
+      if (intersectedGeoJSON.features.length === 0) {
+        $("#tablaEst").append(`<h5 id='${conteo}'>${layerName}: ${intersectedGeoJSON.features.length}</h5>`
         );
-      } else if (layerName === "Rutas Recolección") {
-        L.geoJSON(intersectedGeoJSON, {
-          style: { color: "red" },
-          onEachFeature: function (feature, layer) {
-            layerToAdd.addLayer(layer);
-          },
-        });
+        return;
+      }
+      const tipoDato = intersectedGeoJSON.features[0].geometry.type;
+      console.log(tipoDato);
+      const styleConfig = getStyleConfig(tipoDato, getRandomColor());
+      if (styleConfig) {
+        L.geoJSON(intersectedGeoJSON, styleConfig).addTo(layerGroup);
         $("#tablaEst").append(
-          "<h5 id='recoText'>" +
-            layerName +
-            ": " +
-            intersectedGeoJSON.features.length +
-            "</h5>"
-        );
-      } else if (layerName === "Bacheo Fortamun") {
-        L.geoJSON(intersectedGeoJSON, {
-          style: {
-            color: "black",
-            fillColor: "grey",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 1,
-          },
-          onEachFeature: function (feature, layer) {
-            layerToAdd.addLayer(layer);
-          },
-        });
-        $("#tablaEst").append(
-          "<h5 id='fortText'>" +
-            layerName +
-            ": " +
-            intersectedGeoJSON.features.length +
-            "</h5>"
-        );
-      } else if (layerName === "Desarenadores") {
-        L.geoJSON(intersectedGeoJSON, {
-          pointToLayer: function (feature, latlng) {
-            return L.circleMarker(latlng, {
-              radius: 4,
-              fillColor: "brown",
-              color: "black",
-              weight: 1,
-              opacity: 1,
-              fillOpacity: 1,
-            });
-          },
-          onEachFeature: function (feature, layer) {
-            layerToAdd.addLayer(layer);
-          },
-        });
-        $("#tablaEst").append(
-          "<h5 id='desarenaText'>" +
-            layerName +
-            ": " +
-            intersectedGeoJSON.features.length +
-            "</h5>"
+          `<h5 id='${conteo}'>${layerName}: ${intersectedGeoJSON.features.length}</h5>`
         );
       }
     },
@@ -321,4 +205,41 @@ function procesandoData(geom, url, layerToAdd, layerName) {
       console.error("Error:", error);
     },
   });
+}
+
+function getRandomColor() {
+  return "#" + ((Math.random() * 0xffffff) << 0).toString(16);
+}
+
+function getStyleConfig(geomType, fillColor) {
+  const styleConfigs = {
+    Point: {
+      pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, {
+          radius: 3,
+          fillColor: fillColor,
+          color: "black",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 1,
+        });
+      },
+    },
+    MultiLineString: {
+      style: {
+        color: fillColor,
+      },
+    },
+    MultiPolygon: {
+      style: {
+        color: fillColor,
+        fillColor: fillColor,
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.3,
+      },
+    },
+  };
+
+  return styleConfigs[geomType];
 }

@@ -16,16 +16,18 @@ $db = connectToDB();
 
 // Get the selected coordinates from the AJAX request
 $data = file_get_contents('php://input');
+$geom = $_POST['geom'];
+$capa = $_POST['capa'];
 
 // Convert the data reseived in GeoJason to a Geometry
 $reader = new GeoJSONReader();
-$polygon = $reader->read($data);
+$polygon = $reader->read($geom);
 
 // echo $polygon->SRID();
 
 $selectedGeom = $polygon->asText();
 
-$query = "SELECT b.* FROM doium_bacheo.poligon_fortamun as b, ST_GeomFromText('$selectedGeom') as a WHERE ST_Intersects(ST_GeomFromText('$selectedGeom', 4326), b.geom)";
+$query = "SELECT b.* FROM $capa as b, ST_GeomFromText('$selectedGeom') as a WHERE ST_Intersects(ST_GeomFromText('$selectedGeom', 4326), b.geom)";
 
 $result = pg_query($db, $query);
 
