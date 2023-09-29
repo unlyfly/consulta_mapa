@@ -88,6 +88,13 @@ $(document).ready(function () {
     ],
   }).addTo(map2);
 
+  var styleEditor = L.control.styleEditor({
+    position: 'topleft',
+    markers: ['circle-stroked', 'circle', 'square-stroked', 'square']
+  });
+
+  map2.addControl(styleEditor);
+
   // PLUGIN DE INTERCAMBIO DE BASE MAPS
 
   new L.basemapsSwitcher(
@@ -208,19 +215,29 @@ $(document).ready(function () {
 
   $("#btnTabla").click(function () {
     var tabla = document.getElementById("statsTable");
-    tabla.innerHTML = "";
 
     var generarTabla = [
-      lumSelected,
-      recoSelected,
-      fortamunSelected,
-      desarenaSelected,
+      luminariasSelected,
+      rutasrecoleccionSelected,
+      poligonfortamunSelected,
+      desarenadoresSelected
     ];
+
     for (var i = 0; i < generarTabla.length; i++) {
-      if (generarTabla[i] !== null && typeof generarTabla[i] !== "undefined") {
+      if (generarTabla[i].toGeoJSON().features.length !== 0) {
         pruebaTabla(generarTabla[i].toGeoJSON());
       }
+      console.log("Completado " + [i])
     }
+
+    var botonesExp = document.getElementsByClassName("btnExport");
+    Array.from(botonesExp).forEach(function (element) {
+      element.addEventListener("click", (event) => {
+        var wb = XLSX.utils.table_to_book(element.previousElementSibling);
+        XLSX.writeFile(wb, "SheetJSTable.xlsx");
+      })
+    })
+    console.log(botonesExp[0].previousElementSibling);
   });
 
   // FORMULAS GENERALES
@@ -231,23 +248,11 @@ $(document).ready(function () {
       luminariasSelected,
       rutasrecoleccionSelected,
       poligonfortamunSelected,
-      desarenadoresSelected,
+      desarenadoresSelected
     ];
     for (var i = 0; i < layersToClear.length; i++) {
       layersToClear[i].clearLayers();
     }
-
-    // var layersToDesactivate = [
-    //   capaLuminarias,
-    //   capaRutasReco,
-    //   capaFortamun,
-    //   capaDesarenadores,
-    // ];
-    // for (var i = 0; i < layersToDesactivate.length; i++) {
-    //   if (layersToDesactivate[i]) {
-    //     map2.removeLayer(layersToDesactivate[i]);
-    //   }
-    // }
 
     let toggleButtons = document.getElementsByClassName("layers");
     for (i = 0; i < toggleButtons.length; i++) {

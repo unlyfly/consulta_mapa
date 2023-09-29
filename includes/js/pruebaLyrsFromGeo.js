@@ -65,15 +65,15 @@ getLayerNamesFromGeoServer(geoServerUrl)
       dropContainer.appendChild(divSwitches);
       divSwitches.prepend(switchCapa);
 
-      var ele = new L.WFS({
-        url: "https://www.clustersig.com/geoserver/wfs",
-        typeNS: nomSeparado[0],
-        typeName: nomSeparado[1],
-        geometryField: "geom",
-        opacity: 0.8,
-      });
-
-      geoserverLyrGroup.addLayer(ele);
+      if (nomCapa === "colonias" || nomCapa === "delegaciones") {
+        var ele = new L.WFS({
+          url: "https://www.clustersig.com/geoserver/wfs",
+          typeNS: nomSeparado[0],
+          typeName: nomSeparado[1],
+          geometryField: "geom",
+        });
+        geoserverLyrGroup.addLayer(ele);
+      }
     });
 
     lyrs = geoserverLyrGroup.getLayers();
@@ -101,8 +101,9 @@ getLayerNamesFromGeoServer(geoServerUrl)
           if (event.target.checked === true) {
             lyrs[0]
               .setStyle({
-                fillColor: "red",
+                fillColor: "white",
                 color: "#C07F00",
+                fillOpacity: 0.1,
                 weight: 2,
               })
               .addTo(map2);
@@ -187,12 +188,12 @@ function procesandoData(geom, capa, layerGroup, layerName, conteo) {
     success: function (data) {
       const intersectedGeoJSON = JSON.parse(data);
       if (intersectedGeoJSON.features.length === 0) {
-        $("#tablaEst").append(`<h5 id='${conteo}'>${layerName}: ${intersectedGeoJSON.features.length}</h5>`
+        $("#tablaEst").append(
+          `<h5 id='${conteo}'>${layerName}: ${intersectedGeoJSON.features.length}</h5>`
         );
         return;
       }
       const tipoDato = intersectedGeoJSON.features[0].geometry.type;
-      console.log(tipoDato);
       const styleConfig = getStyleConfig(tipoDato, getRandomColor());
       if (styleConfig) {
         L.geoJSON(intersectedGeoJSON, styleConfig).addTo(layerGroup);

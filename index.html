@@ -1,140 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mapa de Acceso a la Información</title>
 
-    <link rel="stylesheet" href="src/leaflet/leaflet.css" />
-    <script src="src/leaflet/leaflet.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mapa de Acceso a la Información</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+  <link rel="stylesheet" href="src/leaflet/leaflet.css" />
+  <script src="src/leaflet/leaflet.js"></script>
 
-    <script src="src/jquery-3.7.0/jquery.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
 
-    <link rel="stylesheet" href="src/jquery-3.7.0/jquery-ui.min.css" />
-    <script src="src/jquery-3.7.0/jquery-ui.min.js"></script>
+  <script src="src/jquery-3.7.0/jquery.js"></script>
 
-    <script src="src/L.crs/proj4leaflet.js"></script>
+  <link rel="stylesheet" href="src/jquery-3.7.0/jquery-ui.min.css" />
+  <script src="src/jquery-3.7.0/jquery-ui.min.js"></script>
 
-    <script src="src/leaflet.ajax/leaflet-ajax.min.js"></script>
+  <script src="src/L.crs/proj4leaflet.js"></script>
 
-    <script src="src/wfst/leaflet-wfst.src.js"></script>
+  <script src="src/leaflet.ajax/leaflet-ajax.min.js"></script>
 
-    <script src="src/leaflet.geoserver/L.Geoserver.js"></script>
+  <script src="src/wfst/leaflet-wfst.src.js"></script>
 
-    <link
-      rel="stylesheet"
-      href="src/bootstrap-5.3.1-dist/css/bootstrap.min.css"
-    />
-    <script src="src/bootstrap-5.3.1-dist/js/bootstrap.min.js"></script>
+  <script src="src/leaflet.geoserver/L.Geoserver.js"></script>
 
-    <link rel="stylesheet" href="src/fontawesome-6.4.2/css/all.min.css" />
-    <script src="src/fontawesome-6.4.2/js/all.min.js"></script>
+  <link rel="stylesheet" href="src/bootstrap-5.3.1-dist/css/bootstrap.min.css" />
+  <script src="src/bootstrap-5.3.1-dist/js/bootstrap.min.js"></script>
 
-    <script src="src/turf/turf.min.js" charset="utf-8"></script>
+  <link rel="stylesheet" href="src/fontawesome-6.4.2/css/all.min.css" />
+  <script src="src/fontawesome-6.4.2/js/all.min.js"></script>
 
-    <link rel="stylesheet" href="src/geoman/leaflet-geoman.css" />
-    <script src="src/geoman/leaflet-geoman.min.js"></script>
+  <script src="src/turf/turf.min.js" charset="utf-8"></script>
 
-    <link rel="stylesheet" href="src/easybutton/easy-button.css" />
-    <script src="src/easybutton/easy-button.js"></script>
+  <link rel="stylesheet" href="src/geoman/leaflet-geoman.css" />
+  <script src="src/geoman/leaflet-geoman.min.js"></script>
 
-    <link rel="stylesheet" href="src/sidebar/L.Control.Sidebar.css" />
-    <script src="src/sidebar/L.Control.Sidebar.js"></script>
+  <link rel="stylesheet" href="src/easybutton/easy-button.css" />
+  <script src="src/easybutton/easy-button.js"></script>
 
-    <link rel="stylesheet" href="src/L.switchBasemap/L.switchBasemap.css" />
-    <script src="src/L.switchBasemap/L.switchBasemap.js"></script>
+  <link rel="stylesheet" href="src/sidebar/L.Control.Sidebar.css" />
+  <script src="src/sidebar/L.Control.Sidebar.js"></script>
 
-    <link rel="stylesheet" href="src/leaflet.search/leaflet.search.css" />
-    <script src="src/leaflet.search/leaflet.search.js"></script>
+  <link rel="stylesheet" href="src/L.switchBasemap/L.switchBasemap.css" />
+  <script src="src/L.switchBasemap/L.switchBasemap.js"></script>
 
-    <script src="src/leaflet.providers/leaflet-providers.js"></script>
+  <link rel="stylesheet" href="src/leaflet.search/leaflet.search.css" />
+  <script src="src/leaflet.search/leaflet.search.js"></script>
 
-    <script>
-      function switchLayers(lyrId, lyrName) {
-        var lyr = document.getElementById(lyrId);
-        if (lyr.checked) {
-          lyrName.addTo(map2);
-        } else {
-          map2.removeLayer(lyrName);
-        }
+  <link rel="stylesheet" href="src/leaflet.styleEditor/css/Leaflet.StyleEditor.css" />
+  <script src="src/leaflet.styleEditor/js/Leaflet.StyleEditor.js"></script>
+
+  <script src="src/leaflet.providers/leaflet-providers.js"></script>
+
+  <script src="src/sheetjs/xlsx.full.min.js"></script>
+
+  <script>
+    function switchLayers(lyrId, lyrName) {
+      var lyr = document.getElementById(lyrId);
+      if (lyr.checked) {
+        lyrName.addTo(map2);
+      } else {
+        map2.removeLayer(lyrName);
       }
-    </script>
+    }
+  </script>
 
-    <link rel="stylesheet" href="includes/css/style.css" />
-    <link rel="stylesheet" href="includes/css/table.css" />
-  </head>
+  <link rel="stylesheet" href="includes/css/style.css" />
+  <link rel="stylesheet" href="includes/css/table.css" />
+</head>
 
-  <body>
-    <div id="stadistic-bar" style="border-radius: 1rem">
-      <h2 class="mt-2" style="color: #ff7d04">Estadisticas</h2>
+<body>
+  <div id="stadistic-bar" style="border-radius: 1rem">
+    <h2 class="mt-2" style="color: #ff7d04">Estadisticas</h2>
+    <div id="statsTables"></div>
+  </div>
 
-      <table id="statsTable" class="table table-striped"></table>
+  <div id="side-bar" style="border-radius: 1rem">
+    <h3 class="mt-2" style="color: #ff7d04">Consulta Capas</h3>
+    <ul id="layerSelects" class="list-group mt-4" style="list-style-type: none"></ul>
+
+    <div id="tablaEst" class="text-center col-sm-12 mt-4"></div>
+
+    <div class="d-grid gap-2 mt-4">
+      <button id="btnLocate" class="btn" style="color: white; background-color: #ff7d04">
+        Ubicame
+      </button>
     </div>
 
-    <div id="side-bar" style="border-radius: 1rem">
-      <h3 class="mt-2" style="color: #ff7d04">Consulta Capas</h3>
-      <ul
-        id="layerSelects"
-        class="list-group mt-4"
-        style="list-style-type: none"
-      ></ul>
-
-      <div id="tablaEst" class="text-center col-sm-12 mt-4"></div>
-
-      <div class="d-grid gap-2 mt-4">
-        <button
-          id="btnLocate"
-          class="btn"
-          style="color: white; background-color: #ff7d04"
-        >
-          Ubicame
-        </button>
-      </div>
-
-      <div class="text-center mt-3">
-        <label id="lblRadioDist" class="form-label" for="radioDist"
-          >Radio: 500 m</label
-        >
-        <input
-          type="range"
-          id="radioDist"
-          class="form-range"
-          name="radioDist"
-          min="300"
-          max="1000"
-          value="500"
-          step="100"
-        />
-      </div>
-
-      <div class="d-grid gap-2 mt-3">
-        <button
-          id="btnClear"
-          class="btn"
-          style="color: white; background-color: #ff7d04"
-        >
-          Limpiar todo
-        </button>
-      </div>
-
-      <div class="d-grid gap-2 mt-3">
-        <button
-          id="btnTabla"
-          class="btn"
-          style="color: white; background-color: #ff7d04"
-        >
-          Tabla
-        </button>
-      </div>
+    <div class="text-center mt-3">
+      <label id="lblRadioDist" class="form-label" for="radioDist">Radio: 500 m</label>
+      <input type="range" id="radioDist" class="form-range" name="radioDist" min="300" max="1000" value="500" step="100" />
     </div>
 
-    <div id="mapdiv"></div>
-    
-    <script src="includes/js/procesamiento.js"></script>
-    <script src="includes/js/pruebaGetLayers.js"></script>
-    <script src="includes/js/pruebaLyrsFromGeo.js"></script>
-    <script src="includes/js/pruebaTabla.js"></script>
-  </body>
+    <div class="d-grid gap-2 mt-3">
+      <button id="btnClear" class="btn" style="color: white; background-color: #ff7d04">
+        Limpiar todo
+      </button>
+    </div>
+
+    <div class="d-grid gap-2 mt-3">
+      <button id="btnTabla" class="btn" style="color: white; background-color: #ff7d04">
+        Tabla
+      </button>
+    </div>
+  </div>
+
+  <div id="mapdiv"></div>
+
+  <script src="includes/js/procesamiento.js"></script>
+  <script src="includes/js/pruebaGetLayers.js"></script>
+  <script src="includes/js/pruebaLyrsFromGeo.js"></script>
+  <script src="includes/js/pruebaTabla.js"></script>
+</body>
+
 </html>
