@@ -152,22 +152,16 @@ $(document).ready(function () {
   });
 
   map2.on("pm:create", function (e) {
-    selectionPolygon.clearLayers();
-    if (mrkCurrentLocation) {
-      mrkCurrentLocation.remove();
-      lyrCurrentLoc.remove();
-    }
+    var actionBtns = document.getElementById("btnClear");
+    actionBtns.style.display = "block";
     selectionPolygon.addLayer(e.layer);
-
-    $("#tablaEst").empty();
   });
 
   map2.on("locationfound", function (e) {
     limpiarTodo();
-    if (mrkCurrentLocation) {
-      mrkCurrentLocation.remove();
-      lyrCurrentLoc.remove();
-    }
+    var actionBtns = document.getElementById("btnClear");
+    actionBtns.style.display = "block";
+
     mrkCurrentLocation = L.marker(e.latlng).addTo(map2);
     map2.setView(e.latlng, 16);
     var radioInput = document.getElementById("radioDist");
@@ -178,8 +172,6 @@ $(document).ready(function () {
       radioValue,
       { units: "kilometers" }
     );
-
-    selectionPolygon.clearLayers();
 
     lyrCurrentLoc = L.geoJSON(jsonCurrentLocation.geometry, {
       style: {
@@ -214,20 +206,17 @@ $(document).ready(function () {
   $("#btnClear").click(limpiarTodo);
 
   $("#btnTabla").click(function () {
-    var tabla = document.getElementById("statsTable");
-
+    $("#statsTables").empty();
     var generarTabla = [
       luminariasSelected,
       rutasrecoleccionSelected,
       poligonfortamunSelected,
       desarenadoresSelected
     ];
-
     for (var i = 0; i < generarTabla.length; i++) {
       if (generarTabla[i].toGeoJSON().features.length !== 0) {
         pruebaTabla(generarTabla[i].toGeoJSON());
       }
-      console.log("Completado " + [i])
     }
 
     var botonesExp = document.getElementsByClassName("btnExport");
@@ -237,7 +226,7 @@ $(document).ready(function () {
         XLSX.writeFile(wb, "SheetJSTable.xlsx");
       })
     })
-    console.log(botonesExp[0].previousElementSibling);
+    ctrlEstadisticas.show();
   });
 
   // FORMULAS GENERALES
@@ -261,8 +250,13 @@ $(document).ready(function () {
       }
     }
 
+    var actionBtns = document.getElementsByClassName("actions");
+    Array.from(actionBtns).forEach(function(element){
+      element.style.display = "none";
+    });
+
     $("#tablaEst").empty();
-    $("#statsTable").empty();
+    $("#statsTables").empty();
 
     if (mrkCurrentLocation) {
       mrkCurrentLocation.remove();

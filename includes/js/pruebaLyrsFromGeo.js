@@ -77,6 +77,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
     });
 
     lyrs = geoserverLyrGroup.getLayers();
+    console.log(lyrs);
 
     var dropdownBtn = document.getElementsByClassName("dropdown-btn");
 
@@ -126,8 +127,11 @@ getLayerNamesFromGeoServer(geoServerUrl)
       });
     });
 
+    var activosCount = 0;
     Array.from(arrayCapasActivas).forEach(function (element) {
       element.addEventListener("click", (event) => {
+        var activateTable = document.getElementById("btnTabla");
+        activateTable.style.display = "block";
         const capa = element.name.replace(":", ".");
         const g = selectionPolygon.getLayers()[0].toGeoJSON();
         const id = element.id;
@@ -143,9 +147,15 @@ getLayerNamesFromGeoServer(geoServerUrl)
 
         if (event.target.checked === true) {
           procesandoData(g.geometry, capa, selectedLayer, name, conteo);
+          activosCount++;
         } else {
           selectedLayer.clearLayers();
           $("#" + conteo).remove();
+          activosCount--;
+        }
+        if (activosCount === 0){
+          var btnTabla = document.getElementById("btnTabla");
+          btnTabla.style.display = "none";
         }
       });
     });
