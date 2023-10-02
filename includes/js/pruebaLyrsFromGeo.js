@@ -77,7 +77,6 @@ getLayerNamesFromGeoServer(geoServerUrl)
     });
 
     lyrs = geoserverLyrGroup.getLayers();
-    console.log(lyrs);
 
     var dropdownBtn = document.getElementsByClassName("dropdown-btn");
 
@@ -140,20 +139,23 @@ getLayerNamesFromGeoServer(geoServerUrl)
           .replace(" ", "")
           .toLowerCase()}Selected`;
 
-        const selectedLayer = window[selectedLayerId];
         const conteo = `${selectedLayerId
           .replace("Selected", "")
           .toLowerCase()}Text`;
 
         if (event.target.checked === true) {
-          procesandoData(g.geometry, capa, selectedLayer, name, conteo);
+          procesandoData(g.geometry, capa, name, conteo);
           activosCount++;
         } else {
-          selectedLayer.clearLayers();
+          selectedFeatures.eachLayer(function (layer) {
+            if (layer.options.name === name) {
+              selectedFeatures.removeLayer(layer);
+            }
+          });
           $("#" + conteo).remove();
           activosCount--;
         }
-        if (activosCount === 0){
+        if (activosCount === 0) {
           var btnTabla = document.getElementById("btnTabla");
           btnTabla.style.display = "none";
         }
@@ -163,7 +165,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
   .then(() => {
     // CONTROL DE BARRA DE BUSQUEDA
     var lr = geoserverLyrGroup.getLayers();
-    searchControl = L.control
+    ctrlSearch = L.control
       .search({
         layer: lr[0],
         propertyName: "nomb_fracc",
@@ -179,7 +181,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
       })
       .addTo(map2);
 
-    searchControl.on("search:locationfound", function (e) {
+    ctrlSearch.on("search:locationfound", function (e) {
       e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3 });
       e.layer.addTo(map2);
 
@@ -190,7 +192,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
     console.error("Error:", error);
   });
 
-function procesandoData(geom, capa, layerGroup, layerName, conteo) {
+function procesandoData(geom, capa, layerName, conteo) {
   $.ajax({
     type: "POST",
     url: "extractor.php",
@@ -204,9 +206,9 @@ function procesandoData(geom, capa, layerGroup, layerName, conteo) {
         return;
       }
       const tipoDato = intersectedGeoJSON.features[0].geometry.type;
-      const styleConfig = getStyleConfig(tipoDato, getRandomColor());
+      const styleConfig = getConfig(tipoDato, getRandomColor(), layerName);
       if (styleConfig) {
-        L.geoJSON(intersectedGeoJSON, styleConfig).addTo(layerGroup);
+        L.geoJSON(intersectedGeoJSON, styleConfig).addTo(selectedFeatures);
         $("#tablaEst").append(
           `<h5 id='${conteo}'>${layerName}: ${intersectedGeoJSON.features.length}</h5>`
         );
@@ -222,7 +224,7 @@ function getRandomColor() {
   return "#" + ((Math.random() * 0xffffff) << 0).toString(16);
 }
 
-function getStyleConfig(geomType, fillColor) {
+function getConfig(geomType, fillColor, name) {
   const styleConfigs = {
     Point: {
       pointToLayer: function (feature, latlng) {
@@ -235,11 +237,13 @@ function getStyleConfig(geomType, fillColor) {
           fillOpacity: 1,
         });
       },
+      name: name,
     },
     MultiLineString: {
       style: {
         color: fillColor,
       },
+      name: name,
     },
     MultiPolygon: {
       style: {
@@ -249,6 +253,7 @@ function getStyleConfig(geomType, fillColor) {
         opacity: 1,
         fillOpacity: 0.3,
       },
+      name: name,
     },
   };
 

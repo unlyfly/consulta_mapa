@@ -1,10 +1,8 @@
 // DECLARACION DE VARIABLES GLOBALES
+
 var map2;
 var lyrOSM;
 var lyrEsri;
-var lyrContLumin;
-var lyrSearchCol;
-var lyrSearchDel;
 var lyrCurrentLoc;
 var jsonCurrentLocation;
 var ctrlSidebar;
@@ -15,15 +13,11 @@ var ctrlSearch;
 var objBasemaps;
 var mrkCurrentLocation;
 var arrayColonias = [];
-var luminariasSelected;
-var rutasrecoleccionSelected;
-var poligonfortamunSelected;
-var desarenadoresSelected;
 var selectionPolygon;
 var crs32611;
 var arrayCapasActivas;
-var searchControl;
 var coloniasLyr;
+var selectedFeatures;
 
 //  CREACION DE MAPA
 
@@ -71,8 +65,7 @@ $(document).ready(function () {
   }).addTo(map2);
 
   ctrlEstadisticas = L.control
-    .sidebar("stadistic-bar", { closeButton: true, position: "right" })
-    .addTo(map2);
+    .sidebar("stadistic-bar", { closeButton: true, position: "right" }).addTo(map2);
 
   ctrlButtonEstats = L.easyButton({
     position: "topright",
@@ -86,14 +79,12 @@ $(document).ready(function () {
         icon: "fas fa-chart-bar",
       },
     ],
-  }).addTo(map2);
-
-  var styleEditor = L.control.styleEditor({
-    position: 'topleft',
-    markers: ['circle-stroked', 'circle', 'square-stroked', 'square']
   });
 
-  map2.addControl(styleEditor);
+  var styleEditor = L.control.styleEditor({
+    position: "topleft",
+    markers: ["circle-stroked", "circle", "square-stroked", "square"],
+  });
 
   // PLUGIN DE INTERCAMBIO DE BASE MAPS
 
@@ -120,10 +111,7 @@ $(document).ready(function () {
 
   // SE DECLARAN LA CREACION DE LOS LAYER GROUPS DONDE VAMOS A ALMACENAR LOS LAYERS
 
-  luminariasSelected = L.layerGroup().addTo(map2);
-  rutasrecoleccionSelected = L.layerGroup().addTo(map2);
-  poligonfortamunSelected = L.layerGroup().addTo(map2);
-  desarenadoresSelected = L.layerGroup().addTo(map2);
+  selectedFeatures = L.layerGroup().addTo(map2);
   selectionPolygon = L.layerGroup().addTo(map2);
 
   // VARIABLE PARA CONVERSION DE CAPAS A ESTA PROYECCION (POR EL MOMENTO ESTA EN DESUSO POR CAMBIOS EN EL GEOSERVER)
@@ -155,6 +143,7 @@ $(document).ready(function () {
     var actionBtns = document.getElementById("btnClear");
     actionBtns.style.display = "block";
     selectionPolygon.addLayer(e.layer);
+    map2.addControl(styleEditor);
   });
 
   map2.on("locationfound", function (e) {
@@ -207,70 +196,49 @@ $(document).ready(function () {
 
   $("#btnTabla").click(function () {
     $("#statsTables").empty();
-    var generarTabla = [
-      luminariasSelected,
-      rutasrecoleccionSelected,
-      poligonfortamunSelected,
-      desarenadoresSelected
-    ];
-    for (var i = 0; i < generarTabla.length; i++) {
-      if (generarTabla[i].toGeoJSON().features.length !== 0) {
-        pruebaTabla(generarTabla[i].toGeoJSON());
+
+    selectedFeatures.eachLayer(function (layer) {
+      const geoJSON = layer.toGeoJSON();
+      if (geoJSON.features.length !== 0) {
+          pruebaTabla(geoJSON);
       }
-    }
+    });
 
     var botonesExp = document.getElementsByClassName("btnExport");
-    Array.from(botonesExp).forEach(function (element) {
+    Array.from(botonesExp).forEach(element => {
       element.addEventListener("click", (event) => {
         var wb = XLSX.utils.table_to_book(element.previousElementSibling);
         XLSX.writeFile(wb, "SheetJSTable.xlsx");
-      })
-    })
+      });
+    });
+    ctrlButtonEstats.addTo(map2);
     ctrlEstadisticas.show();
   });
 
   // FORMULAS GENERALES
 
   function limpiarTodo() {
+    ctrlEstadisticas.hide();
+
     var layersToClear = [
       selectionPolygon,
-      luminariasSelected,
-      rutasrecoleccionSelected,
-      poligonfortamunSelected,
-      desarenadoresSelected
+      selectedFeatures
     ];
-    for (var i = 0; i < layersToClear.length; i++) {
-      layersToClear[i].clearLayers();
-    }
 
-    let toggleButtons = document.getElementsByClassName("layers");
-    for (i = 0; i < toggleButtons.length; i++) {
-      if (toggleButtons[i].checked) {
-        toggleButtons[i].checked = false;
-      }
-    }
+    layersToClear.forEach((layer) => layer.clearLayers());
 
-    var actionBtns = document.getElementsByClassName("actions");
-    Array.from(actionBtns).forEach(function(element){
-      element.style.display = "none";
-    });
+    const toggleButtons = document.getElementsByClassName("layers");
+    Array.from(toggleButtons).forEach((button) => (button.checked = false));
 
-    $("#tablaEst").empty();
-    $("#statsTables").empty();
+    const actionBtns = document.getElementsByClassName("actions");
+    Array.from(actionBtns).forEach(
+      (element) => (element.style.display = "none")
+    );
 
-    if (mrkCurrentLocation) {
-      mrkCurrentLocation.remove();
-    }
-    if (lyrCurrentLoc) {
-      lyrCurrentLoc.remove();
-    }
-    if (lyrSearchCol) {
-      lyrSearchCol.remove();
-      $("#divColoniaData").html("");
-    }
-    if (lyrSearchDel) {
-      lyrSearchDel.remove();
-      $("#divDelegacionData").html("");
-    }
+    $("#tablaEst, #statsTables").empty();
+    if (ctrlButtonEstats) ctrlButtonEstats.remove();
+    if (mrkCurrentLocation) mrkCurrentLocation.remove();
+    if (lyrCurrentLoc) lyrCurrentLoc.remove();
+    if (styleEditor) map2.removeControl(styleEditor);
   }
 });
