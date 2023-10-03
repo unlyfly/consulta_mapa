@@ -9,6 +9,8 @@ var ctrlSidebar;
 var ctrlButtonSidebar;
 var ctrlEstadisticas;
 var ctrlButtonEstats;
+var ctrlGraficas;
+var ctrlButtonGraphs;
 var ctrlSearch;
 var objBasemaps;
 var mrkCurrentLocation;
@@ -33,6 +35,8 @@ $(document).ready(function () {
   map2.pm.setLang("es");
   map2.pm.addControls({
     position: "topleft",
+    drawMarker: false,
+    drawRectangle: false,
     drawCircle: false,
     drawCircleMarker: false,
     drawPolyline: false,
@@ -65,7 +69,8 @@ $(document).ready(function () {
   }).addTo(map2);
 
   ctrlEstadisticas = L.control
-    .sidebar("stadistic-bar", { closeButton: true, position: "right" }).addTo(map2);
+    .sidebar("stadistic-bar", { closeButton: true, position: "right" })
+    .addTo(map2);
 
   ctrlButtonEstats = L.easyButton({
     position: "topright",
@@ -80,6 +85,24 @@ $(document).ready(function () {
       },
     ],
   });
+
+  ctrlGraficas = L.control
+    .sidebar("chart-bar", { closeButton: true, position: "right" })
+    .addTo(map2);
+
+  ctrlButtonGraphs = L.easyButton({
+    position: "topright",
+    states: [
+      {
+        stateName: "abrirGraph",
+        onClick: function () {
+          ctrlGraficas.toggle();
+        },
+        title: "Abrir Graficas",
+        icon: "fas fa-chart-pie",
+      },
+    ],
+  }).addTo(map2);
 
   var styleEditor = L.control.styleEditor({
     position: "topleft",
@@ -123,21 +146,21 @@ $(document).ready(function () {
 
   // LAS 3 PRINCIPALES ACCIONES DE SELECCION DE ELEMENTOS DE CAPAS (AL SELECCIONAR COLONIA, CREAR POLIGONO O ENCONTRAR LOCALIZACION)
 
-  geoserverLyrGroup.eachLayer(function (layer) {
-    if (layer.options.typeName === "colonias") {
-      layer.on("click", function (e) {
-        selectionPolygon.removeLayer(e.layer);
-        if (mrkCurrentLocation) {
-          mrkCurrentLocation.remove();
-          lyrCurrentLoc.remove();
-        }
-        var colonia = e.layer;
-        selectionPolygon.addLayer(colonia);
-        console.log(selectionPolygon);
-        $("#tablaEst").empty();
-      });
-    }
-  });
+  // geoserverLyrGroup.eachLayer(function (layer) {
+  //   if (layer.options.typeName === "colonias") {
+  //     layer.on("click", function (e) {
+  //       selectionPolygon.removeLayer(e.layer);
+  //       if (mrkCurrentLocation) {
+  //         mrkCurrentLocation.remove();
+  //         lyrCurrentLoc.remove();
+  //       }
+  //       var colonia = e.layer;
+  //       selectionPolygon.addLayer(colonia);
+  //       console.log(selectionPolygon);
+  //       $("#tablaEst").empty();
+  //     });
+  //   }
+  // });
 
   map2.on("pm:create", function (e) {
     var actionBtns = document.getElementById("btnClear");
@@ -200,12 +223,12 @@ $(document).ready(function () {
     selectedFeatures.eachLayer(function (layer) {
       const geoJSON = layer.toGeoJSON();
       if (geoJSON.features.length !== 0) {
-          pruebaTabla(geoJSON);
+        generarTabla(geoJSON);
       }
     });
 
     var botonesExp = document.getElementsByClassName("btnExport");
-    Array.from(botonesExp).forEach(element => {
+    Array.from(botonesExp).forEach((element) => {
       element.addEventListener("click", (event) => {
         var wb = XLSX.utils.table_to_book(element.previousElementSibling);
         XLSX.writeFile(wb, "SheetJSTable.xlsx");
@@ -215,15 +238,21 @@ $(document).ready(function () {
     ctrlEstadisticas.show();
   });
 
+  $("#btnGrafica").click(function () {
+    selectedFeatures.eachLayer(function (layer) {
+      const geoJSON = layer.toGeoJSON();
+      if (geoJSON.features.length !== 0) {
+        generarGrafica(geoJSON);
+      }
+    });
+  });
+
   // FORMULAS GENERALES
 
   function limpiarTodo() {
     ctrlEstadisticas.hide();
 
-    var layersToClear = [
-      selectionPolygon,
-      selectedFeatures
-    ];
+    var layersToClear = [selectionPolygon, selectedFeatures];
 
     layersToClear.forEach((layer) => layer.clearLayers());
 

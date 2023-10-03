@@ -52,18 +52,9 @@
 
   <script src="src/leaflet.providers/leaflet-providers.js"></script>
 
-  <script src="src/sheetjs/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <script>
-    function switchLayers(lyrId, lyrName) {
-      var lyr = document.getElementById(lyrId);
-      if (lyr.checked) {
-        lyrName.addTo(map2);
-      } else {
-        map2.removeLayer(lyrName);
-      }
-    }
-  </script>
+  <script src="src/sheetjs/xlsx.full.min.js"></script>
 
   <link rel="stylesheet" href="includes/css/style.css" />
   <link rel="stylesheet" href="includes/css/table.css" />
@@ -73,6 +64,11 @@
   <div id="stadistic-bar" style="border-radius: 1rem">
     <h2 class="mt-2" style="color: #ff7d04">Estadisticas</h2>
     <div id="statsTables"></div>
+  </div>
+
+  <div id="chart-bar" class="contenedor" style="border-radius: 1rem">
+    <h2 class="mt-2" style="color: #ff7d04">Graficas</h2>
+    <canvas id="chart"></canvas>
   </div>
 
   <div id="side-bar" style="border-radius: 1rem">
@@ -103,14 +99,22 @@
         Tabla
       </button>
     </div>
+    
+    <div class="d-grid gap-2 mt-3">
+      <button id="btnGrafica" class="btn" style="color: white; background-color: #ff7d04;">
+        Grafica
+      </button>
+    </div>
   </div>
 
   <div id="mapdiv"></div>
 
+  
   <script src="includes/js/procesamiento.js"></script>
-  <script src="includes/js/pruebaGetLayers.js"></script>
-  <script src="includes/js/pruebaLyrsFromGeo.js"></script>
-  <script src="includes/js/pruebaTabla.js"></script>
+  <script src="includes/js/apiGeoserver.js"></script>
+  <script src="includes/js/generadorCapas.js"></script>
+  <script src="includes/js/generadorTablas.js"></script>
+  <script src="includes/js/generadorGraficas.js"></script>
 </body>
 
 </html>

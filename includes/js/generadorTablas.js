@@ -1,4 +1,4 @@
-function pruebaTabla(layer) {
+function generarTabla(layer) {
     var features = layer.features;
     var master = document.getElementById("statsTables");
     var table = document.createElement("table");

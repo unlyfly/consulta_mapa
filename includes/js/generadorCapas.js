@@ -7,7 +7,7 @@ var geoserverLyrGroup = L.layerGroup();
 getLayerNamesFromGeoServer(geoServerUrl)
   .then((typeNS) => {
     var selectGroup = document.getElementById("layerSelects");
-    var lyrs;
+    var baseLyrs;
     typeNS.forEach((element) => {
       var grupo = document.createElement("li");
       var button = document.createElement("button");
@@ -76,7 +76,27 @@ getLayerNamesFromGeoServer(geoServerUrl)
       }
     });
 
-    lyrs = geoserverLyrGroup.getLayers();
+    baseLyrs = geoserverLyrGroup.getLayers();
+
+    geoserverLyrGroup.eachLayer(function (layer) {
+      if (layer.options.typeName === "colonias") {
+        layer.on("click", function (e) {
+          var colonia;
+          if (colonia) {
+            selectionPolygon.removeLayer(colonia);
+          }
+          colonia = new L.geoJSON(e.layer.toGeoJSON(), {
+            style: {
+              color: 'red',
+              weight: 2,
+              opacity: 1
+            },
+          })
+          selectionPolygon.addLayer(colonia);
+          $("#tablaEst").empty();
+        });
+      }
+    });
 
     var dropdownBtn = document.getElementsByClassName("dropdown-btn");
 
@@ -99,7 +119,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
       element.addEventListener("click", (event) => {
         if (element.id == "switchColonias") {
           if (event.target.checked === true) {
-            lyrs[0]
+            baseLyrs[0]
               .setStyle({
                 fillColor: "white",
                 color: "#C07F00",
@@ -108,11 +128,11 @@ getLayerNamesFromGeoServer(geoServerUrl)
               })
               .addTo(map2);
           } else {
-            lyrs[0].removeFrom(map2);
+            baseLyrs[0].removeFrom(map2);
           }
         } else if (element.id == "switchDelegaciones") {
           if (event.target.checked === true) {
-            lyrs[1]
+            baseLyrs[1]
               .setStyle({
                 fillColor: "none",
                 color: "black",
@@ -120,7 +140,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
               })
               .addTo(map2);
           } else {
-            lyrs[1].removeFrom(map2);
+            baseLyrs[1].removeFrom(map2);
           }
         }
       });
