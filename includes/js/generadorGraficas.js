@@ -1,37 +1,35 @@
-const ctx = document.getElementById("chart");
+var chartContainer = document.getElementById("chartContenedor");
 
-function generarGrafica(elements) {
-  let apagadasCount = 0;
-  let encendidasCount = 0;
+function generarGrafica(layer) {
+  var charts = document.createElement("canvas");
+  var nombreGraf = document.createElement("h5");
+  nombreGraf.innerText = layer.options.name;
+  var geoJson = layer.toGeoJSON();
+  let conAdeudoCount = 0;
+  let sinAdeudoCount = 0;
 
-  elements.features.forEach((feature) => {
-    if (feature.properties.apagada === "1") {
-      apagadasCount++;
+  geoJson.features.forEach((feature) => {
+    if (feature.properties.adeudo === "1") {
+      conAdeudoCount++;
     } else {
-      encendidasCount++;
+      sinAdeudoCount++;
     }
   });
 
   // Create a chart to represent the counts
-  const ctx = document.getElementById("chart").getContext("2d");
-  const firtsChart = new Chart(ctx, {
-    type: "pie",
+  const genChart = new Chart(charts.getContext("2d"), {
+    type: "doughnut",
     data: {
-      labels: ["Apagadas", "Encendidas"],
+      labels: ["Deudores", "En Orden"],
       datasets: [
         {
           label: "Conteo",
-          data: [apagadasCount, encendidasCount],
-          backgroundColor: ["black", "yellow"],
+          data: [conAdeudoCount, sinAdeudoCount],
+          backgroundColor: ["yellow", "blue"],
         },
       ],
     },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
-      },
-    },
   });
+  chartContainer.appendChild(nombreGraf);
+  chartContainer.appendChild(charts);
 }

@@ -239,10 +239,11 @@ $(document).ready(function () {
   });
 
   $("#btnGrafica").click(function () {
+    $("#chart-contenedor").empty();
     selectedFeatures.eachLayer(function (layer) {
       const geoJSON = layer.toGeoJSON();
       if (geoJSON.features.length !== 0) {
-        generarGrafica(geoJSON);
+        generarGrafica(layer);
       }
     });
   });
@@ -264,7 +265,7 @@ $(document).ready(function () {
       (element) => (element.style.display = "none")
     );
 
-    $("#tablaEst, #statsTables").empty();
+    $("#tablaEst, #statsTables, #chartContenedor").empty();
     if (ctrlButtonEstats) ctrlButtonEstats.remove();
     if (mrkCurrentLocation) mrkCurrentLocation.remove();
     if (lyrCurrentLoc) lyrCurrentLoc.remove();

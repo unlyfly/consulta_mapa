@@ -2,7 +2,7 @@
 var geoServerUrl =
   "https://www.clustersig.com/geoserver/ows?service=WFS&version=2.0.0&request=GetCapabilities";
 
-var geoserverLyrGroup = L.layerGroup();
+var baseLyrGroup = L.layerGroup();
 
 getLayerNamesFromGeoServer(geoServerUrl)
   .then((typeNS) => {
@@ -72,13 +72,13 @@ getLayerNamesFromGeoServer(geoServerUrl)
           typeName: nomSeparado[1],
           geometryField: "geom",
         });
-        geoserverLyrGroup.addLayer(ele);
+        baseLyrGroup.addLayer(ele);
       }
     });
 
-    baseLyrs = geoserverLyrGroup.getLayers();
+    baseLyrs = baseLyrGroup.getLayers();
 
-    geoserverLyrGroup.eachLayer(function (layer) {
+    baseLyrGroup.eachLayer(function (layer) {
       if (layer.options.typeName === "colonias") {
         layer.on("click", function (e) {
           var colonia;
@@ -184,7 +184,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
   })
   .then(() => {
     // CONTROL DE BARRA DE BUSQUEDA
-    var lr = geoserverLyrGroup.getLayers();
+    var lr = baseLyrGroup.getLayers();
     ctrlSearch = L.control
       .search({
         layer: lr[0],
@@ -205,7 +205,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
       e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3 });
       e.layer.addTo(map2);
 
-      coloniasLyr = geoserverLyrGroup.getLayers()[0];
+      coloniasLyr = baseLyrGroup.getLayers()[0];
     });
   })
   .catch((error) => {
