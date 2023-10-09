@@ -1,18 +1,15 @@
-:root {
-  font-family: "Inter", sans-serif;
-}
-@supports (font-variation-settings: normal) {
-  :root {
-    font-family: "Inter var", sans-serif;
-  }
+* {
+  font-family: 'Public Sans', sans-serif;
 }
 
 html,
 body,
 #mapdiv {
   height: 100%;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+h4{
+  color: #CC7722;
 }
 
 .errorMsg {
@@ -34,9 +31,6 @@ body,
   overflow-x: hidden;
 }
 
-
-
-/* Style the sidenav links and the dropdown button */
 .sidenav a, .dropdown-btn {
   text-decoration: none;
   font-size: 1rem;
@@ -50,24 +44,55 @@ body,
   outline: none;
 }
 
-/* On mouse-over */
 .sidenav a:hover, .dropdown-btn:hover {
-  color: #FF7D04;
+  color: #CC7722;
 }
 
-/* Add an active class to the active dropdown button */
 .active {
-  color: #FF7D04;
+  color: #CC7722;
 }
 
-/* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
 .dropdown-container {
   display: none;
   padding-left: 8px;
 }
 
-/* Optional: Style the caret down icon */
 .fa-caret-down {
   float: right;
   padding-right: 8px;
+}
+
+#btnLocate{
+  color: #fff;
+  background-color: #CC7722;
+  border-color: #CC7722;
+  box-shadow: 0 0.125rem 0.25rem 0 rgba(133, 146, 163, 0.4);
+}
+
+#btnLocate:hover{
+  color: #fff !important;
+  background-color: #E19549 !important;
+  border-color: #E19549 !important;
+  transition-duration: 500ms !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-actions{
+  color: #fff;
+  background-color: #CC7722;
+  border-color: #CC7722;
+  box-shadow: 0 0.125rem 0.25rem 0 rgba(133, 146, 163, 0.4);
+  display: none;
+}
+
+.btn-actions:hover{
+  color: #fff !important;
+  background-color: #E19549 !important;
+  border-color: #E19549 !important;
+  transition-duration: 500ms !important;
+  transform: translateY(-1px) !important;
+}
+
+.leaflet-bar a:hover {
+  background-color: #CC7722;
 }

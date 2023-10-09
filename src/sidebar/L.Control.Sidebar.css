@@ -93,6 +93,7 @@
       -webkit-border-radius: 16px;
       border-radius: 16px;
       cursor: pointer;
+      text-decoration: none;
       z-index: 1000; }
   
   .leaflet-left {

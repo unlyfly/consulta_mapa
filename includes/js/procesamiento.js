@@ -51,7 +51,7 @@ $(document).ready(function () {
   // CONTROLES DE SIDE BAR, EN LA IZQUIERDA EL DE CAPAS DISPONIBLES Y EN LA DERECHA EL DE ESTADISTICAS (POR DEFINIR MAS USOS)
 
   ctrlSidebar = L.control
-    .sidebar("side-bar", { closeButton: true })
+    .sidebar("consulta-bar", { closeButton: true })
     .addTo(map2);
 
   ctrlButtonSidebar = L.easyButton({
@@ -69,7 +69,7 @@ $(document).ready(function () {
   }).addTo(map2);
 
   ctrlEstadisticas = L.control
-    .sidebar("stadistic-bar", { closeButton: true, position: "right" })
+    .sidebar("estadisticas-bar", { closeButton: true, position: "right" })
     .addTo(map2);
 
   ctrlButtonEstats = L.easyButton({
@@ -163,16 +163,16 @@ $(document).ready(function () {
   // });
 
   map2.on("pm:create", function (e) {
-    var actionBtns = document.getElementById("btnClear");
-    actionBtns.style.display = "block";
+    var actionBtns = document.getElementsByClassName("btn-actions");
+    Array.from(actionBtns).forEach((boton)=>(boton.style.display = "block"));
     selectionPolygon.addLayer(e.layer);
     map2.addControl(styleEditor);
   });
 
   map2.on("locationfound", function (e) {
     limpiarTodo();
-    var actionBtns = document.getElementById("btnClear");
-    actionBtns.style.display = "block";
+    var actionBtns = document.getElementsByClassName("btn-actions");
+    Array.from(actionBtns).forEach((boton)=>(boton.style.display = "block"));
 
     mrkCurrentLocation = L.marker(e.latlng).addTo(map2);
     map2.setView(e.latlng, 16);
@@ -238,15 +238,39 @@ $(document).ready(function () {
     ctrlEstadisticas.show();
   });
 
-  $("#btnGrafica").click(function () {
-    $("#chart-contenedor").empty();
-    selectedFeatures.eachLayer(function (layer) {
-      const geoJSON = layer.toGeoJSON();
-      if (geoJSON.features.length !== 0) {
-        generarGrafica(layer);
+$("#btnGrafica").click(function () {
+  $("#chart-contenedor").empty();
+  selectedFeatures.eachLayer(function (layer) {
+    const geoJSON = layer.toGeoJSON();
+    var columnas = Object.keys(geoJSON.features[0].properties);
+    var chartContainer = document.getElementById("chartContenedor");
+    var selectCampo = document.createElement("select");
+    
+    selectCampo.addEventListener("change", function () {
+      if (selectCampo.value) {
+        generarGrafica(layer, selectCampo.value);
       }
     });
+    
+    if (geoJSON.features.length !== 0) {
+      var opcionDefault = document.createElement("option");
+      opcionDefault.value = "";
+      opcionDefault.innerText = "Seleccione un campo";
+      selectCampo.appendChild(opcionDefault);
+    }
+
+    columnas.forEach((campo) => {
+      var opcion = document.createElement("option");
+      opcion.value = campo;
+      opcion.innerText = campo;
+      selectCampo.appendChild(opcion);
+    });
+
+    chartContainer.appendChild(selectCampo);
+
   });
+});
+
 
   // FORMULAS GENERALES
 
@@ -260,7 +284,7 @@ $(document).ready(function () {
     const toggleButtons = document.getElementsByClassName("layers");
     Array.from(toggleButtons).forEach((button) => (button.checked = false));
 
-    const actionBtns = document.getElementsByClassName("actions");
+    const actionBtns = document.getElementsByClassName("btn-actions");
     Array.from(actionBtns).forEach(
       (element) => (element.style.display = "none")
     );

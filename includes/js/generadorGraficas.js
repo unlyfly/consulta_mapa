@@ -1,35 +1,51 @@
 var chartContainer = document.getElementById("chartContenedor");
 
-function generarGrafica(layer) {
+function generarGrafica(layer, selectedCampo) {
   var charts = document.createElement("canvas");
   var nombreGraf = document.createElement("h5");
   nombreGraf.innerText = layer.options.name;
   var geoJson = layer.toGeoJSON();
-  let conAdeudoCount = 0;
-  let sinAdeudoCount = 0;
+  var features = geoJson.features;
+  var conteoDeValores = {};
 
-  geoJson.features.forEach((feature) => {
-    if (feature.properties.adeudo === "1") {
-      conAdeudoCount++;
-    } else {
-      sinAdeudoCount++;
+  features.forEach((feature) => {
+    var value = feature.properties[selectedCampo];
+
+    if (value !== null) {
+      if (!conteoDeValores[value]) {
+        conteoDeValores[value] = 1;
+      } else {
+        conteoDeValores[value]++;
+      }
     }
   });
 
-  // Create a chart to represent the counts
+  const labels = Object.keys(conteoDeValores);
+  const data = labels.map((label) => conteoDeValores[label]);
+  const colors = generateColors(labels.length);
+
   const genChart = new Chart(charts.getContext("2d"), {
-    type: "doughnut",
+    type: "pie",
     data: {
-      labels: ["Deudores", "En Orden"],
+      labels: labels,
       datasets: [
         {
-          label: "Conteo",
-          data: [conAdeudoCount, sinAdeudoCount],
-          backgroundColor: ["yellow", "blue"],
+          label: "Count",
+          data: data,
+          backgroundColor: colors,
         },
       ],
     },
   });
   chartContainer.appendChild(nombreGraf);
   chartContainer.appendChild(charts);
+}
+
+function generateColors(count) {
+  var colors = [];
+  for (var i = 0; i < count; i++) {
+    var color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+    colors.push(color);
+  }
+  return colors;
 }

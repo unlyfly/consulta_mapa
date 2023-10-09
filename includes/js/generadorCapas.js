@@ -81,17 +81,23 @@ getLayerNamesFromGeoServer(geoServerUrl)
     baseLyrGroup.eachLayer(function (layer) {
       if (layer.options.typeName === "colonias") {
         layer.on("click", function (e) {
-          var colonia;
-          if (colonia) {
-            selectionPolygon.removeLayer(colonia);
-          }
-          colonia = new L.geoJSON(e.layer.toGeoJSON(), {
+          var actionBtns = document.getElementsByClassName("btn-actions");
+          Array.from(actionBtns).forEach((boton)=>(boton.style.display = "block"));
+
+          var layersToClear = [selectionPolygon, selectedFeatures];
+          layersToClear.forEach((layer) => layer.clearLayers());
+
+          const toggleButtons = document.getElementsByClassName("layers");
+          Array.from(toggleButtons).forEach((button) => (button.checked = false));
+
+          var coloniaFeature = new L.geoJSON(e.layer.toGeoJSON(), {
             style: {
               color: 'red',
               weight: 2,
               opacity: 1
             },
           })
+          colonia = coloniaFeature.getLayers()[0];
           selectionPolygon.addLayer(colonia);
           $("#tablaEst").empty();
         });
