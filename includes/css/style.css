@@ -69,15 +69,7 @@ h4{
   box-shadow: 0 0.125rem 0.25rem 0 rgba(133, 146, 163, 0.4);
 }
 
-#btnLocate:hover{
-  color: #fff !important;
-  background-color: #E19549 !important;
-  border-color: #E19549 !important;
-  transition-duration: 500ms !important;
-  transform: translateY(-1px) !important;
-}
-
-.btn-actions{
+.btn-actions, #btnClear{
   color: #fff;
   background-color: #CC7722;
   border-color: #CC7722;
@@ -85,7 +77,7 @@ h4{
   display: none;
 }
 
-.btn-actions:hover{
+.btn-actions:hover, #btnLocate:hover, #btnClear:hover{
   color: #fff !important;
   background-color: #E19549 !important;
   border-color: #E19549 !important;
@@ -95,4 +87,19 @@ h4{
 
 .leaflet-bar a:hover {
   background-color: #CC7722;
+}
+
+#btnImprimir{
+  color: #fff;
+  background-color: #26577C;
+  border-color: #26577C;
+  box-shadow: 0 0.125rem 0.25rem 0 rgba(133, 146, 163, 0.4);
+}
+
+#btnImprimir:hover{
+  color: #fff !important;
+  background-color: #5e85cc !important;
+  border-color: #5e85cc !important;
+  transition-duration: 500ms !important;
+  transform: translateY(-1px) !important;
 }

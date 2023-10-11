@@ -60,6 +60,8 @@
 
   <script src="src/sheetjs/xlsx.full.min.js"></script>
 
+  <script src="src/html2canvas/html2canvas.js"></script>
+
   <link rel="stylesheet" href="includes/css/style.css" />
   <link rel="stylesheet" href="includes/css/table.css" />
 </head>
@@ -93,7 +95,7 @@
     </div>
 
     <div class="d-grid gap-2 mt-3">
-      <button id="btnClear" class="btn btn-actions">
+      <button id="btnClear" class="btn">
         Limpiar todo
       </button>
     </div>
@@ -109,6 +111,12 @@
         Grafica
       </button>
     </div>
+
+    <div class="d-grid gap-2 mt-3">
+      <button id="btnImprimir" class="btn btn-actions">
+        Imprimir
+      </button>
+    </div>
   </div>
 
   <div id="mapdiv"></div>
@@ -119,6 +127,7 @@
   <script src="includes/js/generadorCapas.js"></script>
   <script src="includes/js/generadorTablas.js"></script>
   <script src="includes/js/generadorGraficas.js"></script>
+  <script src="includes/js/imprimirSeleccion.js"></script>
 </body>
 
 </html>

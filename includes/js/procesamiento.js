@@ -102,7 +102,7 @@ $(document).ready(function () {
         icon: "fas fa-chart-pie",
       },
     ],
-  }).addTo(map2);
+  });
 
   var styleEditor = L.control.styleEditor({
     position: "topleft",
@@ -163,16 +163,14 @@ $(document).ready(function () {
   // });
 
   map2.on("pm:create", function (e) {
-    var actionBtns = document.getElementsByClassName("btn-actions");
-    Array.from(actionBtns).forEach((boton)=>(boton.style.display = "block"));
     selectionPolygon.addLayer(e.layer);
     map2.addControl(styleEditor);
+    $("#btnClear").show();
   });
 
   map2.on("locationfound", function (e) {
     limpiarTodo();
-    var actionBtns = document.getElementsByClassName("btn-actions");
-    Array.from(actionBtns).forEach((boton)=>(boton.style.display = "block"));
+    $("#btnClear").show();
 
     mrkCurrentLocation = L.marker(e.latlng).addTo(map2);
     map2.setView(e.latlng, 16);
@@ -238,39 +236,47 @@ $(document).ready(function () {
     ctrlEstadisticas.show();
   });
 
-$("#btnGrafica").click(function () {
-  $("#chart-contenedor").empty();
-  selectedFeatures.eachLayer(function (layer) {
-    const geoJSON = layer.toGeoJSON();
-    var columnas = Object.keys(geoJSON.features[0].properties);
-    var chartContainer = document.getElementById("chartContenedor");
-    var selectCampo = document.createElement("select");
-    
-    selectCampo.addEventListener("change", function () {
-      if (selectCampo.value) {
-        generarGrafica(layer, selectCampo.value);
+  $("#btnGrafica").click(function () {
+    $("#chartContenedor").empty();
+    selectedFeatures.eachLayer(function (layer) {
+      const geoJSON = layer.toGeoJSON();
+      var columnas = Object.keys(geoJSON.features[0].properties);
+      var chartContainer = document.getElementById("chartContenedor");
+      
+      var grafica = document.createElement("div");
+      grafica.id = "grafica" + layer.options.name
+      
+      var selectCampo = document.createElement("select");
+      selectCampo.addEventListener("change", function () {
+        if (selectCampo.value) {
+          generarGrafica(layer, selectCampo.value);
+        }
+      });
+
+      if (geoJSON.features.length !== 0) {
+        var opcionDefault = document.createElement("option");
+        opcionDefault.value = "";
+        opcionDefault.innerText = "Seleccione un campo";
+
+        selectCampo.appendChild(opcionDefault);
       }
+
+      columnas.forEach((campo) => {
+        var opcion = document.createElement("option");
+        opcion.value = campo;
+        opcion.innerText = campo;
+        selectCampo.appendChild(opcion);
+      });
+      var nombreGraf = document.createElement("h5");
+      nombreGraf.innerText = layer.options.name;
+
+      grafica.appendChild(nombreGraf);
+      grafica.appendChild(selectCampo);
+      chartContainer.appendChild(grafica);
     });
-    
-    if (geoJSON.features.length !== 0) {
-      var opcionDefault = document.createElement("option");
-      opcionDefault.value = "";
-      opcionDefault.innerText = "Seleccione un campo";
-      selectCampo.appendChild(opcionDefault);
-    }
-
-    columnas.forEach((campo) => {
-      var opcion = document.createElement("option");
-      opcion.value = campo;
-      opcion.innerText = campo;
-      selectCampo.appendChild(opcion);
-    });
-
-    chartContainer.appendChild(selectCampo);
-
+    ctrlButtonGraphs.addTo(map2);
+    ctrlGraficas.show();
   });
-});
-
 
   // FORMULAS GENERALES
 
@@ -289,6 +295,8 @@ $("#btnGrafica").click(function () {
       (element) => (element.style.display = "none")
     );
 
+    
+    $("#btnClear").hide();
     $("#tablaEst, #statsTables, #chartContenedor").empty();
     if (ctrlButtonEstats) ctrlButtonEstats.remove();
     if (mrkCurrentLocation) mrkCurrentLocation.remove();

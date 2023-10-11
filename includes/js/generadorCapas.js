@@ -81,22 +81,23 @@ getLayerNamesFromGeoServer(geoServerUrl)
     baseLyrGroup.eachLayer(function (layer) {
       if (layer.options.typeName === "colonias") {
         layer.on("click", function (e) {
-          var actionBtns = document.getElementsByClassName("btn-actions");
-          Array.from(actionBtns).forEach((boton)=>(boton.style.display = "block"));
+          $("#btnClear").show();
 
           var layersToClear = [selectionPolygon, selectedFeatures];
           layersToClear.forEach((layer) => layer.clearLayers());
 
           const toggleButtons = document.getElementsByClassName("layers");
-          Array.from(toggleButtons).forEach((button) => (button.checked = false));
+          Array.from(toggleButtons).forEach(
+            (button) => (button.checked = false)
+          );
 
           var coloniaFeature = new L.geoJSON(e.layer.toGeoJSON(), {
             style: {
-              color: 'red',
+              color: "red",
               weight: 2,
-              opacity: 1
+              opacity: 1,
             },
-          })
+          });
           colonia = coloniaFeature.getLayers()[0];
           selectionPolygon.addLayer(colonia);
           $("#tablaEst").empty();
@@ -154,6 +155,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
 
     var activosCount = 0;
     Array.from(arrayCapasActivas).forEach(function (element) {
+      var actionBtns = document.getElementsByClassName("btn-actions");
       element.addEventListener("click", (event) => {
         var activateTable = document.getElementById("btnTabla");
         activateTable.style.display = "block";
@@ -170,6 +172,9 @@ getLayerNamesFromGeoServer(geoServerUrl)
           .toLowerCase()}Text`;
 
         if (event.target.checked === true) {
+          Array.from(actionBtns).forEach(
+            (boton) => (boton.style.display = "block")
+          );
           procesandoData(g.geometry, capa, name, conteo);
           activosCount++;
         } else {
@@ -182,6 +187,9 @@ getLayerNamesFromGeoServer(geoServerUrl)
           activosCount--;
         }
         if (activosCount === 0) {
+          Array.from(actionBtns).forEach(
+            (element) => (element.style.display = "none")
+          );
           var btnTabla = document.getElementById("btnTabla");
           btnTabla.style.display = "none";
         }
@@ -250,6 +258,27 @@ function getRandomColor() {
   return "#" + ((Math.random() * 0xffffff) << 0).toString(16);
 }
 
+const popupTable = function (feature, layer) {
+  const popupContent = document.createElement("div");
+  const table = document.createElement("table");
+  table.style.borderRadius = "0.6rem";
+  popupContent.appendChild(table);
+
+  for (const prop in feature.properties) {
+    const row = document.createElement("tr");
+    const cell1 = document.createElement("td");
+    const cell2 = document.createElement("td");
+    cell1.style.color = "white";
+    cell1.style.backgroundColor = "#CC7722";
+    cell1.textContent = prop.toUpperCase();
+    cell2.textContent = feature.properties[prop];
+    row.appendChild(cell1);
+    row.appendChild(cell2);
+    table.appendChild(row);
+  }
+  layer.bindPopup(popupContent);
+};
+
 function getConfig(geomType, fillColor, name) {
   const styleConfigs = {
     Point: {
@@ -264,12 +293,14 @@ function getConfig(geomType, fillColor, name) {
         });
       },
       name: name,
+      onEachFeature: popupTable,
     },
     MultiLineString: {
       style: {
         color: fillColor,
       },
       name: name,
+      onEachFeature: popupTable,
     },
     MultiPolygon: {
       style: {
@@ -280,6 +311,7 @@ function getConfig(geomType, fillColor, name) {
         fillOpacity: 0.3,
       },
       name: name,
+      onEachFeature: popupTable,
     },
   };
 

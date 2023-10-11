@@ -1,9 +1,8 @@
 var chartContainer = document.getElementById("chartContenedor");
 
 function generarGrafica(layer, selectedCampo) {
+  var grafica = document.getElementById("grafica" + layer.options.name)
   var charts = document.createElement("canvas");
-  var nombreGraf = document.createElement("h5");
-  nombreGraf.innerText = layer.options.name;
   var geoJson = layer.toGeoJSON();
   var features = geoJson.features;
   var conteoDeValores = {};
@@ -37,8 +36,7 @@ function generarGrafica(layer, selectedCampo) {
       ],
     },
   });
-  chartContainer.appendChild(nombreGraf);
-  chartContainer.appendChild(charts);
+  grafica.appendChild(charts);
 }
 
 function generateColors(count) {
