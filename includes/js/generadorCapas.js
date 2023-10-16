@@ -87,8 +87,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
           layersToClear.forEach((layer) => layer.clearLayers());
 
           const toggleButtons = document.getElementsByClassName("layers");
-          Array.from(toggleButtons).forEach(
-            (button) => (button.checked = false)
+          Array.from(toggleButtons).forEach((button) => (button.checked = false)
           );
 
           var coloniaFeature = new L.geoJSON(e.layer.toGeoJSON(), {
@@ -216,10 +215,9 @@ getLayerNamesFromGeoServer(geoServerUrl)
       .addTo(map2);
 
     ctrlSearch.on("search:locationfound", function (e) {
+      coloniasLayers.clearLayers();
       e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3 });
-      e.layer.addTo(map2);
-
-      coloniasLyr = baseLyrGroup.getLayers()[0];
+      e.layer.addTo(coloniasLayers);
     });
   })
   .catch((error) => {

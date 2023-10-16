@@ -11,6 +11,7 @@ var ctrlEstadisticas;
 var ctrlButtonEstats;
 var ctrlGraficas;
 var ctrlButtonGraphs;
+var ctrlButtonUbicacion;
 var ctrlSearch;
 var objBasemaps;
 var mrkCurrentLocation;
@@ -18,7 +19,7 @@ var arrayColonias = [];
 var selectionPolygon;
 var crs32611;
 var arrayCapasActivas;
-var coloniasLyr;
+var coloniasLayers;
 var selectedFeatures;
 
 //  CREACION DE MAPA
@@ -49,6 +50,20 @@ $(document).ready(function () {
   });
 
   // CONTROLES DE SIDE BAR, EN LA IZQUIERDA EL DE CAPAS DISPONIBLES Y EN LA DERECHA EL DE ESTADISTICAS (POR DEFINIR MAS USOS)
+
+  ctrlButtonUbicacion = L.easyButton({
+    position: "topleft",
+    states: [
+      {
+        stateName: "ubicame",
+        onClick: function () {
+          map2.locate();
+        },
+        title: "Seleccion por ubicacion",
+        icon: "fas fa-location-crosshairs",
+      },
+    ],
+  }).addTo(map2);
 
   ctrlSidebar = L.control
     .sidebar("consulta-bar", { closeButton: true })
@@ -136,6 +151,7 @@ $(document).ready(function () {
 
   selectedFeatures = L.layerGroup().addTo(map2);
   selectionPolygon = L.layerGroup().addTo(map2);
+  coloniasLayers = L.layerGroup().addTo(map2);
 
   // VARIABLE PARA CONVERSION DE CAPAS A ESTA PROYECCION (POR EL MOMENTO ESTA EN DESUSO POR CAMBIOS EN EL GEOSERVER)
 
@@ -144,33 +160,18 @@ $(document).ready(function () {
     "+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
   );
 
-  // LAS 3 PRINCIPALES ACCIONES DE SELECCION DE ELEMENTOS DE CAPAS (AL SELECCIONAR COLONIA, CREAR POLIGONO O ENCONTRAR LOCALIZACION)
+  // ACCIONES DE SELECCION DE ELEMENTOS DE CAPAS (AL SELECCIONAR COLONIA, CREAR POLIGONO O ENCONTRAR LOCALIZACION)
 
-  // geoserverLyrGroup.eachLayer(function (layer) {
-  //   if (layer.options.typeName === "colonias") {
-  //     layer.on("click", function (e) {
-  //       selectionPolygon.removeLayer(e.layer);
-  //       if (mrkCurrentLocation) {
-  //         mrkCurrentLocation.remove();
-  //         lyrCurrentLoc.remove();
-  //       }
-  //       var colonia = e.layer;
-  //       selectionPolygon.addLayer(colonia);
-  //       console.log(selectionPolygon);
-  //       $("#tablaEst").empty();
-  //     });
-  //   }
-  // });
 
   map2.on("pm:create", function (e) {
     selectionPolygon.addLayer(e.layer);
     map2.addControl(styleEditor);
+    ctrlSidebar.show();
     $("#btnClear").show();
   });
 
   map2.on("locationfound", function (e) {
     limpiarTodo();
-    $("#btnClear").show();
 
     mrkCurrentLocation = L.marker(e.latlng).addTo(map2);
     map2.setView(e.latlng, 16);
@@ -194,14 +195,13 @@ $(document).ready(function () {
         selectionPolygon.addLayer(layer);
       },
     });
+    $("#btnClear").show();
+    ctrlSidebar.show();
   });
 
   map2.on("locationerror", function (e) {
     console.log(e);
     alert("Lacalizacion no encontrada");
-  });
-  $("#btnLocate").click(function () {
-    map2.locate();
   });
 
   // EVENTOS ACTIVADOS POR ELEMENTOS EN EL DOM (RADIO, BOTONES, CLICKS)
