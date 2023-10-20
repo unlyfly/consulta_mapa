@@ -129,23 +129,34 @@ $(document).ready(function () {
   new L.basemapsSwitcher(
     [
       {
-        layer: L.tileLayer.provider("OpenStreetMap.Mapnik").addTo(map2),
+        layer: L.tileLayer(
+          "http://mt1.google.com/vt/lyrs=s&hl=pl&x={x}&y={y}&z={z}",
+          { attribution: "Google" }
+        ).addTo(map2),
+        icon: "./assets/img/google_sate_switch.png",
+        name: "Google Satelite",
+      },
+      {
+        layer: L.tileLayer(
+          "http://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
+          { attribution: "Google" }
+        ),
+        icon: "./assets/img/google_roads_switch.png",
+        name: "Google Roads",
+      },
+      {
+        layer: L.tileLayer.provider("OpenStreetMap.Mapnik"),
         icon: "./assets/img/osm_switch.png",
         name: "OSM",
       },
       {
         layer: L.tileLayer.provider("Esri.WorldImagery"),
         icon: "./assets/img/esri_switch.png",
-        name: "Esri Map",
+        name: "ESRI",
       },
     ],
     { position: "bottomleft" }
   ).addTo(map2);
-
-  objBasemaps = {
-    "Open Street Maps": lyrOSM,
-    "Esri Imagery": lyrEsri,
-  };
 
   // SE DECLARAN LA CREACION DE LOS LAYER GROUPS DONDE VAMOS A ALMACENAR LOS LAYERS
 
@@ -162,7 +173,6 @@ $(document).ready(function () {
 
   // ACCIONES DE SELECCION DE ELEMENTOS DE CAPAS (AL SELECCIONAR COLONIA, CREAR POLIGONO O ENCONTRAR LOCALIZACION)
 
-
   map2.on("pm:create", function (e) {
     selectionPolygon.addLayer(e.layer);
     map2.addControl(styleEditor);
@@ -175,6 +185,8 @@ $(document).ready(function () {
 
     mrkCurrentLocation = L.marker(e.latlng).addTo(map2);
     map2.setView(e.latlng, 16);
+    var radioDiv = document.getElementById("radioDiv");
+    radioDiv.style.display = "block";
     var radioInput = document.getElementById("radioDist");
     var radioValue = radioInput.value / 1000;
 
@@ -210,18 +222,18 @@ $(document).ready(function () {
 
   document.getElementById("radioDist").addEventListener("change", (event) => {
     label = document.getElementById("lblRadioDist");
-    label.innerHTML = "Radio: " + event.target.value + " m";
+    label.innerHTML = "Radio de Selección: " + event.target.value + " m";
+    map2.locate();
   });
 
   $("#btnClear").click(limpiarTodo);
 
   $("#btnTabla").click(function () {
     $("#statsTables").empty();
-
     selectedFeatures.eachLayer(function (layer) {
       const geoJSON = layer.toGeoJSON();
       if (geoJSON.features.length !== 0) {
-        generarTabla(geoJSON);
+        simulateProcess(geoJSON, generarTabla);
       }
     });
 
@@ -242,10 +254,10 @@ $(document).ready(function () {
       const geoJSON = layer.toGeoJSON();
       var columnas = Object.keys(geoJSON.features[0].properties);
       var chartContainer = document.getElementById("chartContenedor");
-      
+
       var grafica = document.createElement("div");
-      grafica.id = "grafica" + layer.options.name
-      
+      grafica.id = "grafica" + layer.options.name;
+
       var selectCampo = document.createElement("select");
       selectCampo.addEventListener("change", function () {
         if (selectCampo.value) {
@@ -278,7 +290,7 @@ $(document).ready(function () {
     ctrlGraficas.show();
   });
 
-  // FORMULAS GENERALES
+  // FUNCIONES GENERALES
 
   function limpiarTodo() {
     ctrlEstadisticas.hide();
@@ -295,8 +307,8 @@ $(document).ready(function () {
       (element) => (element.style.display = "none")
     );
 
-    
     $("#btnClear").hide();
+    $("#radioDiv").hide();
     $("#tablaEst, #statsTables, #chartContenedor").empty();
     if (ctrlButtonEstats) ctrlButtonEstats.remove();
     if (mrkCurrentLocation) mrkCurrentLocation.remove();

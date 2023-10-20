@@ -96,3 +96,7 @@ h4{
   transition-duration: 500ms !important;
   transform: translateY(-1px) !important;
 }
+
+#radioDiv{
+  display: none;
+}

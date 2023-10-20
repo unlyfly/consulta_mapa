@@ -87,7 +87,8 @@ getLayerNamesFromGeoServer(geoServerUrl)
           layersToClear.forEach((layer) => layer.clearLayers());
 
           const toggleButtons = document.getElementsByClassName("layers");
-          Array.from(toggleButtons).forEach((button) => (button.checked = false)
+          Array.from(toggleButtons).forEach(
+            (button) => (button.checked = false)
           );
 
           var coloniaFeature = new L.geoJSON(e.layer.toGeoJSON(), {
@@ -156,8 +157,6 @@ getLayerNamesFromGeoServer(geoServerUrl)
     Array.from(arrayCapasActivas).forEach(function (element) {
       var actionBtns = document.getElementsByClassName("btn-actions");
       element.addEventListener("click", (event) => {
-        var activateTable = document.getElementById("btnTabla");
-        activateTable.style.display = "block";
         const capa = element.name.replace(":", ".");
         const g = selectionPolygon.getLayers()[0].toGeoJSON();
         const id = element.id;
@@ -224,6 +223,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
     console.error("Error:", error);
   });
 
+// FUNCIONES GENERALES
 function procesandoData(geom, capa, layerName, conteo) {
   $.ajax({
     type: "POST",

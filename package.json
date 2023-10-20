@@ -1,5 +1,23 @@
 {
   "dependencies": {
-    "chart.js": "^4.4.0"
-  }
+    "chart.js": "^4.4.0",
+    "request": "^2.88.2"
+  },
+  "name": "mapa_consulta",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unlyfly/consulta_mapa.git"
+  },
+  "author": "FernGO",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/unlyfly/consulta_mapa/issues"
+  },
+  "homepage": "https://github.com/unlyfly/consulta_mapa#readme",
+  "description": ""
 }

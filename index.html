@@ -64,6 +64,7 @@
 
   <link rel="stylesheet" href="includes/css/style.css" />
   <link rel="stylesheet" href="includes/css/table.css" />
+  <link rel="stylesheet" href="includes/css/loader.css" />
 </head>
 
 <body>
@@ -83,8 +84,8 @@
 
     <div id="tablaEst" class="text-center col-sm-12 mt-4"></div>
 
-    <div class="text-center mt-3">
-      <label id="lblRadioDist" class="form-label" for="radioDist">Radio: 500 m</label>
+    <div id="radioDiv" class="text-center mt-3">
+      <label id="lblRadioDist" class="form-label" for="radioDist">Radio de Selección: 500 m</label>
       <input type="range" id="radioDist" class="form-range" name="radioDist" min="300" max="1000" value="500" step="100" />
     </div>
 
@@ -113,6 +114,8 @@
     </div>
   </div>
 
+  <div id="loader"></div>
+
   <div id="mapdiv"></div>
 
   
@@ -122,6 +125,7 @@
   <script src="includes/js/generadorTablas.js"></script>
   <script src="includes/js/generadorGraficas.js"></script>
   <script src="includes/js/imprimirSeleccion.js"></script>
+  <script src="includes/js/loader.js"></script>
 </body>
 
 </html>
