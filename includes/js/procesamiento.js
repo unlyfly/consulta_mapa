@@ -13,6 +13,7 @@ var ctrlGraficas;
 var ctrlButtonGraphs;
 var ctrlButtonUbicacion;
 var ctrlSearch;
+var ctrlLoadlayers;
 var objBasemaps;
 var mrkCurrentLocation;
 var arrayColonias = [];
@@ -20,6 +21,7 @@ var selectionPolygon;
 var crs32611;
 var arrayCapasActivas;
 var coloniasLayers;
+var usuarioLayers;
 var selectedFeatures;
 
 //  CREACION DE MAPA
@@ -158,11 +160,16 @@ $(document).ready(function () {
     { position: "bottomleft" }
   ).addTo(map2);
 
+  ctrlLoadlayers = L.Control.betterFileLayer({
+    button: document.getElementById("btnAddLayer"),
+  }).addTo(map2);
+
   // SE DECLARAN LA CREACION DE LOS LAYER GROUPS DONDE VAMOS A ALMACENAR LOS LAYERS
 
   selectedFeatures = L.layerGroup().addTo(map2);
   selectionPolygon = L.layerGroup().addTo(map2);
   coloniasLayers = L.layerGroup().addTo(map2);
+  usuarioLayers = L.layerGroup().addTo(map2);
 
   // VARIABLE PARA CONVERSION DE CAPAS A ESTA PROYECCION (POR EL MOMENTO ESTA EN DESUSO POR CAMBIOS EN EL GEOSERVER)
 
@@ -174,7 +181,7 @@ $(document).ready(function () {
   // ACCIONES DE SELECCION DE ELEMENTOS DE CAPAS (AL SELECCIONAR COLONIA, CREAR POLIGONO O ENCONTRAR LOCALIZACION)
 
   map2.on("pm:create", function (e) {
-    selectionPolygon.addLayer(e.layer);
+    selectionPolygon.addLayer(e.layer.showMeasurements());
     map2.addControl(styleEditor);
     ctrlSidebar.show();
     $("#btnClear").show();
@@ -204,7 +211,7 @@ $(document).ready(function () {
         fillOpacity: 0.2,
       },
       onEachFeature: function (feature, layer) {
-        selectionPolygon.addLayer(layer);
+        selectionPolygon.addLayer(layer.showMeasurements());
       },
     });
     $("#btnClear").show();

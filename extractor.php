@@ -15,7 +15,6 @@ use Brick\Geo\IO\GeoJSONWriter;
 $db = connectToDB(); 
 
 // Get the selected coordinates from the AJAX request
-$data = file_get_contents('php://input');
 $geom = $_POST['geom'];
 $capa = $_POST['capa'];
 

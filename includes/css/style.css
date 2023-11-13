@@ -82,6 +82,13 @@ h4{
   background-color: #CC7722;
 }
 
+#btnAddLayer{
+  color: #fff;
+  background-color: #26577C;
+  border-color: #26577C;
+  box-shadow: 0 0.125rem 0.25rem 0 rgba(133, 146, 163, 0.4);
+}
+
 #btnImprimir{
   color: #fff;
   background-color: #26577C;
@@ -99,4 +106,8 @@ h4{
 
 #radioDiv{
   display: none;
+}
+
+#btnAddLayer{
+  border-radius: 6px;
 }
