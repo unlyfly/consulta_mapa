@@ -1,6 +1,6 @@
 // Define la URL de tu solicitud GetCapabilities de GeoServer
 var geoServerUrl =
-  "https://www.clustersig.com/geoserver/ows?service=WFS&version=2.0.0&request=GetCapabilities";
+  "https://www.clustersig.com/geoserver/ows?service=WFS&version=1.1.0&request=GetCapabilities";
 
 var baseLyrGroup = L.layerGroup();
 
@@ -66,11 +66,9 @@ getLayerNamesFromGeoServer(geoServerUrl)
       divSwitches.prepend(switchCapa);
 
       if (nomCapa === "colonias" || nomCapa === "delegaciones") {
-        var ele = new L.WFS({
-          url: "https://www.clustersig.com/geoserver/wfs",
-          typeNS: nomSeparado[0],
-          typeName: nomSeparado[1],
-          geometryField: "geom",
+        var ele = L.Geoserver.wfs("https://www.clustersig.com/geoserver/wfs", {
+          layers: element,
+          fitLayer: false,
         });
         baseLyrGroup.addLayer(ele);
       }
@@ -197,10 +195,11 @@ getLayerNamesFromGeoServer(geoServerUrl)
   .then(() => {
     // CONTROL DE BARRA DE BUSQUEDA
     var lr = baseLyrGroup.getLayers();
+
     ctrlSearch = L.control
       .search({
         layer: lr[0],
-        propertyName: "nomb_fracc",
+        propertyName: "1_nomb_fracc",
         initial: false,
         position: "topright",
         textPlaceholder: "Buscar por...",
@@ -214,6 +213,17 @@ getLayerNamesFromGeoServer(geoServerUrl)
       .addTo(map2);
 
     ctrlSearch.on("search:locationfound", function (e) {
+      const geoJSON = baseLyrGroup.toGeoJSON();
+      const uniqueKeys = new Set();
+
+      geoJSON.features.forEach((feature) => {
+        const properties = feature.properties;
+
+        Object.keys(properties).forEach((key) => {
+          uniqueKeys.add(key);
+        });
+      });
+      console.log(uniqueKeys);
       coloniasLayers.clearLayers();
       e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3 });
       e.layer.addTo(coloniasLayers);

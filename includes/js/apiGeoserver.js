@@ -1,7 +1,4 @@
-var geoServerUrl =
-  "https://www.clustersig.com/geoserver/ows?service=WFS&version=2.0.0&request=GetCapabilities";
-  
-function getLayerNamesFromGeoServer(geoServerUrl) {
+async function getLayerNamesFromGeoServer(geoServerUrl) {
   return fetch(geoServerUrl)
     .then((response) => {
       if (!response.ok) {
