@@ -218,7 +218,7 @@ async function fetchData() {
         propertyName: "busqueda",
         initial: false,
         position: "topright",
-        textPlaceholder: "Buscar por...",
+        textPlaceholder: "Buscar...",
         textErr: "Busqueda no encontrada",
         textCancel: "Cancelar",
         marker: false,
@@ -275,7 +275,123 @@ async function fetchData() {
       e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3 });
       e.layer.addTo(coloniasLayers);
     });
+
+    var control = new searchboxControl({
+        sidebarTitleText: 'Header',
+        sidebarMenuItems: {
+            Items: [
+                { type: "link", name: "Link 1 (github.com)", href: "http://github.com", icon: "icon-local-carwash" },
+                { type: "link", name: "Link 2 (google.com)", href: "http://google.com", icon: "icon-cloudy" },
+                { type: "button", name: "Button 1", onclick: "alert('button 1 clicked !')", icon: "icon-potrait" },
+                { type: "button", name: "Button 2", onclick: "button2_click();", icon: "icon-local-dining" },
+                { type: "link", name: "Link 3 (stackoverflow.com)", href: 'http://stackoverflow.com', icon: "icon-bike" },
+            ]
+        }
+    });
+    control._searchfunctionCallBack = function (searchkeywords)
+    {
+        if (!searchkeywords) {
+            searchkeywords = "The search call back is clicked !!"
+        }
+        alert(searchkeywords);
+    }
+    map2.addControl(control);
+
   } catch (error) {
     console.error("Error:", error);
   }
 }
+
+// FUNCIONES GENERALES
+function procesandoData(geom, capa, layerName, conteo) {
+  $.ajax({
+    type: "POST",
+    url: "extractor.php",
+    data: { geom: JSON.stringify(geom), capa: capa },
+    success: function (data) {
+      const intersectedGeoJSON = JSON.parse(data);
+      if (intersectedGeoJSON.features.length === 0) {
+        $("#tablaEst").append(
+          `<h5 id='${conteo}'>${layerName}: ${intersectedGeoJSON.features.length}</h5>`
+        );
+        return;
+      }
+      const tipoDato = intersectedGeoJSON.features[0].geometry.type;
+      const styleConfig = getConfig(tipoDato, getRandomColor(), layerName);
+      if (styleConfig) {
+        L.geoJSON(intersectedGeoJSON, styleConfig).addTo(selectedFeatures);
+        $("#tablaEst").append(
+          `<h5 id='${conteo}'>${layerName}: ${intersectedGeoJSON.features.length}</h5>`
+        );
+      }
+    },
+    error: function (error) {
+      console.error("Error:", error);
+    },
+  });
+}
+
+function getRandomColor() {
+  return "#" + ((Math.random() * 0xffffff) << 0).toString(16);
+}
+
+const popupTable = function (feature, layer) {
+  const popupContent = document.createElement("div");
+  const table = document.createElement("table");
+  table.style.borderRadius = "0.6rem";
+  popupContent.appendChild(table);
+
+  for (const prop in feature.properties) {
+    const row = document.createElement("tr");
+    const cell1 = document.createElement("td");
+    const cell2 = document.createElement("td");
+    cell1.style.color = "white";
+    cell1.style.backgroundColor = "#CC7722";
+    cell1.textContent = prop.toUpperCase();
+    cell2.textContent = feature.properties[prop];
+    row.appendChild(cell1);
+    row.appendChild(cell2);
+    table.appendChild(row);
+  }
+  layer.bindPopup(popupContent);
+};
+
+function getConfig(geomType, fillColor, name) {
+  const styleConfigs = {
+    Point: {
+      pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, {
+          radius: 3,
+          fillColor: fillColor,
+          color: "black",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 1,
+        });
+      },
+      name: name,
+      onEachFeature: popupTable,
+    },
+    MultiLineString: {
+      style: {
+        color: fillColor,
+      },
+      name: name,
+      onEachFeature: popupTable,
+    },
+    MultiPolygon: {
+      style: {
+        color: fillColor,
+        fillColor: fillColor,
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.3,
+      },
+      name: name,
+      onEachFeature: popupTable,
+    },
+  };
+
+  return styleConfigs[geomType];
+}
+

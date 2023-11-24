@@ -13,6 +13,7 @@ var ctrlGraficas;
 var ctrlButtonGraphs;
 var ctrlButtonUbicacion;
 var ctrlSearch;
+var searchboxControl;
 var ctrlLoadlayers;
 var objBasemaps;
 var mrkCurrentLocation;
@@ -120,6 +121,8 @@ $(document).ready(function () {
       },
     ],
   });
+
+  searchboxControl = createSearchboxControl();
 
   var styleEditor = L.control.styleEditor({
     position: "topleft",
