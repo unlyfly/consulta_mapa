@@ -1,23 +1,36 @@
-// Define la URL de tu solicitud GetCapabilities de GeoServer
-var geoServerUrl =
-  "https://www.clustersig.com/geoserver/ows?service=WFS&version=1.1.0&request=GetCapabilities";
+function getWfsLayer(url, options) {
+  return new Promise((resolve, reject) => {
+    try {
+      const layer = L.Geoserver.wfs(url, options);
+      resolve(layer);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
 
-var baseLyrGroup = L.layerGroup();
+async function fetchData() {
+  try {
+    const geoServerUrl =
+      "https://www.clustersig.com/geoserver/ows?service=WFS&version=1.1.0&request=GetCapabilities";
 
-getLayerNamesFromGeoServer(geoServerUrl)
-  .then((typeNS) => {
-    var selectGroup = document.getElementById("layerSelects");
-    var baseLyrs;
-    typeNS.forEach((element) => {
+    const baseLyrGroup = L.layerGroup();
+
+    const typeNS = await getLayerNamesFromGeoServer(geoServerUrl);
+
+    const selectGroup = document.getElementById("layerSelects");
+    let baseLyrs;
+
+    for (const element of typeNS) {
       var grupo = document.createElement("li");
       var button = document.createElement("button");
       var divSwitches = document.createElement("div");
       var dropdownCont = document.createElement("div");
 
       // Separacion de nombres de dependencias y de capas.
-      var nomSeparado = element.split(":");
-      var nomDependecia = nomSeparado[0].split("_")[0];
-      var nomDependeciaFix =
+      const nomSeparado = element.split(":");
+      const nomDependecia = nomSeparado[0].split("_")[0];
+      const nomDependeciaFix =
         nomDependecia.charAt(0).toUpperCase() + nomDependecia.slice(1);
 
       var nomCapa = nomSeparado[1];
@@ -58,7 +71,7 @@ getLayerNamesFromGeoServer(geoServerUrl)
         grupo.appendChild(dropdownCont);
       }
 
-      var dropContainer = document.getElementById(
+      const dropContainer = document.getElementById(
         "container" + nomDependeciaFix
       );
 
@@ -66,13 +79,20 @@ getLayerNamesFromGeoServer(geoServerUrl)
       divSwitches.prepend(switchCapa);
 
       if (nomCapa === "colonias" || nomCapa === "delegaciones") {
-        var ele = L.Geoserver.wfs("https://www.clustersig.com/geoserver/wfs", {
-          layers: element,
-          fitLayer: false,
-        });
-        baseLyrGroup.addLayer(ele);
+        try {
+          const ele = await getWfsLayer(
+            "https://www.clustersig.com/geoserver/wfs",
+            {
+              layers: element,
+              fitLayer: false,
+            }
+          );
+          baseLyrGroup.addLayer(ele);
+        } catch (error) {
+          console.error("Error fetching WFS layer:", error);
+        }
       }
-    });
+    }
 
     baseLyrs = baseLyrGroup.getLayers();
 
@@ -191,137 +211,71 @@ getLayerNamesFromGeoServer(geoServerUrl)
         }
       });
     });
-  })
-  .then(() => {
-    // CONTROL DE BARRA DE BUSQUEDA
-    var lr = baseLyrGroup.getLayers();
 
     ctrlSearch = L.control
       .search({
-        layer: lr,
-        propertyName: "campo",
+        layer: baseLyrGroup,
+        propertyName: "busqueda",
         initial: false,
         position: "topright",
         textPlaceholder: "Buscar por...",
         textErr: "Busqueda no encontrada",
         textCancel: "Cancelar",
         marker: false,
+        buildTip: function (text, val) {
+          var type = val.layer.feature.id;
+          var typeSep = type.split('.');
+          var nombCapa = typeSep[0];
+
+          return (
+            '<a href="#" class="' +
+            nombCapa +
+            '">' +
+            text +
+            "<b>" +
+            nombCapa +
+            "</b></a>"
+          );
+        },
         moveToLocation: function (latlng, title, map) {
           map2.fitBounds(latlng.layer.getBounds());
         },
       })
       .addTo(map2);
 
+    ctrlSearch.on("search:expanded", function (e) {
+      const geoJSON = baseLyrGroup.toGeoJSON();
+      var features = geoJSON.features;
+
+      for (const feature of features) {
+        var props = feature.properties;
+
+        for (const prop in props) {
+          if (prop.includes("_1")) {
+            props["busqueda"] = props[prop];
+            delete props[prop];
+          }
+        }
+      }
+    });
+
     ctrlSearch.on("search:locationfound", function (e) {
       const geoJSON = baseLyrGroup.toGeoJSON();
-      const uniqueKeys = new Set();
+      //   const uniqueKeys = new Set();
 
-      geoJSON.features.forEach((feature) => {
-        const properties = feature.properties;
+      //   geoJSON.features.forEach((feature) => {
+      //     const properties = feature.properties;
 
-        Object.keys(properties).forEach((key) => {
-          uniqueKeys.add(key);
-        });
-      });
-      console.log(uniqueKeys);
+      //     Object.keys(properties).forEach((key) => {
+      //       uniqueKeys.add(key);
+      //     });
+      //   });
+
       coloniasLayers.clearLayers();
       e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3 });
       e.layer.addTo(coloniasLayers);
     });
-  })
-  .catch((error) => {
+  } catch (error) {
     console.error("Error:", error);
-  });
-
-// FUNCIONES GENERALES
-function procesandoData(geom, capa, layerName, conteo) {
-  $.ajax({
-    type: "POST",
-    url: "extractor.php",
-    data: { geom: JSON.stringify(geom), capa: capa },
-    success: function (data) {
-      const intersectedGeoJSON = JSON.parse(data);
-      if (intersectedGeoJSON.features.length === 0) {
-        $("#tablaEst").append(
-          `<h5 id='${conteo}'>${layerName}: ${intersectedGeoJSON.features.length}</h5>`
-        );
-        return;
-      }
-      const tipoDato = intersectedGeoJSON.features[0].geometry.type;
-      const styleConfig = getConfig(tipoDato, getRandomColor(), layerName);
-      if (styleConfig) {
-        L.geoJSON(intersectedGeoJSON, styleConfig).addTo(selectedFeatures);
-        $("#tablaEst").append(
-          `<h5 id='${conteo}'>${layerName}: ${intersectedGeoJSON.features.length}</h5>`
-        );
-      }
-    },
-    error: function (error) {
-      console.error("Error:", error);
-    },
-  });
-}
-
-function getRandomColor() {
-  return "#" + ((Math.random() * 0xffffff) << 0).toString(16);
-}
-
-const popupTable = function (feature, layer) {
-  const popupContent = document.createElement("div");
-  const table = document.createElement("table");
-  table.style.borderRadius = "0.6rem";
-  popupContent.appendChild(table);
-
-  for (const prop in feature.properties) {
-    const row = document.createElement("tr");
-    const cell1 = document.createElement("td");
-    const cell2 = document.createElement("td");
-    cell1.style.color = "white";
-    cell1.style.backgroundColor = "#CC7722";
-    cell1.textContent = prop.toUpperCase();
-    cell2.textContent = feature.properties[prop];
-    row.appendChild(cell1);
-    row.appendChild(cell2);
-    table.appendChild(row);
   }
-  layer.bindPopup(popupContent);
-};
-
-function getConfig(geomType, fillColor, name) {
-  const styleConfigs = {
-    Point: {
-      pointToLayer: function (feature, latlng) {
-        return L.circleMarker(latlng, {
-          radius: 3,
-          fillColor: fillColor,
-          color: "black",
-          weight: 1,
-          opacity: 1,
-          fillOpacity: 1,
-        });
-      },
-      name: name,
-      onEachFeature: popupTable,
-    },
-    MultiLineString: {
-      style: {
-        color: fillColor,
-      },
-      name: name,
-      onEachFeature: popupTable,
-    },
-    MultiPolygon: {
-      style: {
-        color: fillColor,
-        fillColor: fillColor,
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.3,
-      },
-      name: name,
-      onEachFeature: popupTable,
-    },
-  };
-
-  return styleConfigs[geomType];
 }

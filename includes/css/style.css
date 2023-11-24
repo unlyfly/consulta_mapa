@@ -111,3 +111,13 @@ h4{
 #btnAddLayer{
   border-radius: 6px;
 }
+
+.search-tip b {
+  color: white;
+  background: #66f;
+  display: inline-block;
+  clear: left;
+  padding: 0 4px;
+  margin-left: 4px;
+  border-radius: 4px;
+}

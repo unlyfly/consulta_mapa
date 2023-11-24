@@ -297,6 +297,8 @@ $(document).ready(function () {
     ctrlGraficas.show();
   });
 
+  fetchData();
+
   // FUNCIONES GENERALES
 
   function limpiarTodo() {
