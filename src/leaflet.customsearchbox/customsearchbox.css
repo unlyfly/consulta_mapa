@@ -203,7 +203,7 @@ ul {
   margin-right: 25px;
 }
 
-.panel-content a,
+/* .panel-content a,
 button,
 li:hover {
   color: #777;
@@ -218,7 +218,7 @@ li:hover {
 .panel-content a:hover,
 button:hover {
   color: blue;
-}
+} */
 
 .icon-folder {
   background: url("image/ic_folder_black_24dp_2x.png");

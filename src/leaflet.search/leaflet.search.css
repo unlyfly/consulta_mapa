@@ -13,6 +13,7 @@
 	z-index:1000;	
 	margin-left: 10px;
 	margin-top: 10px;
+	display: flex;
 }
 .leaflet-control-search.search-exp {/*expanded*/
 	background: #fff;
@@ -40,7 +41,7 @@
 	width:22px;
 	height:22px;
 	position:absolute;
-	right:42px;
+	right:86px;
 	margin:9px 0;
 	background: url('../../assets/images/search-icon.png') no-repeat 0 -46px;
 	text-decoration:none;
@@ -84,6 +85,34 @@
 	opacity: 0.8;
 
 }
+
+
+.leaflet-control-search .menu-button {
+    content: "";
+    display: flex;
+	align-items: center;
+	justify-content: center;
+    padding: 20px 20px;
+    float: left;
+    width: 28px;
+    height: 28px;    
+    background: #f4fafa;
+    background-size: 24px 24px;
+    background-position: center;
+    opacity: 0.5;
+}
+
+.leaflet-control-search .menu-button:hover {
+	padding: 20px 20px;
+	width:28px;
+	height:28px;
+	/* background: url('../../assets/image/ic_search_black_24dp_2x.png') no-repeat #f4fafa; */
+    background-size: 26px 26px;
+    background-position: center;
+	opacity: 0.8;
+
+}
+
 .leaflet-control-search .search-tooltip {
 	position:absolute;
 	top:100%;
@@ -92,7 +121,7 @@
 	float:left;
 	list-style: none;
 	padding-left: 0;
-	min-width:120px;
+	min-width:auto;
 	max-height:244px;
 	box-shadow: 1px 1px 6px rgba(0,0,0,0.4);
 	background-color: rgba(0, 0, 0, 0.25);
@@ -128,4 +157,28 @@
 	color:#e00;
 	font-weight:bold;
 	border-radius:.25em;
+}
+
+.menu-list {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.menu-item {
+	cursor:pointer;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+    display: block;
+}
+
+.menu-item:hover {
+    background-color: #f0f0f0;
 }

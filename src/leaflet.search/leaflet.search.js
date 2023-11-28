@@ -118,7 +118,7 @@
   
       initialize: function (options) {
         L.Util.setOptions(this, options || {})
-        this._inputMinSize = this.options.textPlaceholder ? this.options.textPlaceholder.length : 10
+        this._inputMinSize = this.options.textPlaceholder ? this.options.textPlaceholder.length : 26
         this._layer = this.options.layer || new L.LayerGroup()
         this._filterData = this.options.filterData || this._defaultFilterData
         this._formatData = this.options.formatData || this._defaultFormatData
@@ -136,6 +136,7 @@
         this._tooltip = this._createTooltip('search-tooltip')
         this._cancel = this._createCancel(this.options.textCancel, 'search-cancel')
         this._button = this._createButton(this.options.textPlaceholder, 'search-button')
+        this._menu = this._createMenu('menu-list')
         this._alert = this._createAlert('search-alert')
   
         if (this.options.collapsed === false) { this.expand(this.options.collapsed) }
@@ -278,7 +279,7 @@
   
         return alert
       },
-  
+
       _createInput: function (text, className) {
         const self = this
         const label = L.DomUtil.create('label', className, this._container)
@@ -338,6 +339,29 @@
           .on(button, 'blur', this.collapseDelayed, this)
   
         return button
+      },
+
+      _createMenu: function (className) {
+        const menu = L.DomUtil.create('div', 'search-menu', this._container);
+
+        // Create the button element with a FontAwesome icon
+        const button = L.DomUtil.create('button', 'menu-button', menu);
+        button.innerHTML = '<i class="fas fa-bars"></i>'; // Adjust the FontAwesome class based on your setup
+        button.title = 'Expand Menu';
+        
+        // Create the unordered list
+        const menuList = L.DomUtil.create('ul', 'menu-list', menu);
+        menuList.style.display = 'none'; // Hide the list initially
+        menuList.id = 'search-list';
+    
+        // Set up event listeners for the button
+        L.DomEvent.on(button, 'click', function () {
+            // Toggle the visibility of the menu list
+            const listDisplayStyle = menuList.style.display === 'none' ? 'block' : 'none';
+            menuList.style.display = listDisplayStyle;
+        });
+    
+        return menu;
       },
   
       _createTooltip: function (className) {

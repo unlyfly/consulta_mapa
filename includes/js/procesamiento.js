@@ -24,6 +24,8 @@ var arrayCapasActivas;
 var coloniasLayers;
 var usuarioLayers;
 var selectedFeatures;
+var baseLyrGroup;
+var dependeciaCapas;
 
 //  CREACION DE MAPA
 
@@ -173,6 +175,7 @@ $(document).ready(function () {
   selectionPolygon = L.layerGroup().addTo(map2);
   coloniasLayers = L.layerGroup().addTo(map2);
   usuarioLayers = L.layerGroup().addTo(map2);
+  baseLyrGroup = L.layerGroup();
 
   // VARIABLE PARA CONVERSION DE CAPAS A ESTA PROYECCION (POR EL MOMENTO ESTA EN DESUSO POR CAMBIOS EN EL GEOSERVER)
 
@@ -299,6 +302,116 @@ $(document).ready(function () {
     ctrlButtonGraphs.addTo(map2);
     ctrlGraficas.show();
   });
+
+  
+  ctrlSearch = L.control
+  .search({
+    layer: baseLyrGroup,
+    propertyName: "busqueda",
+    initial: false,
+    position: "topright",
+    textPlaceholder: "",
+    textErr: "Busqueda no encontrada",
+    textCancel: "Cancelar",
+    marker: false,
+    buildTip: function (text, val) {
+      var type = val.layer.feature.id;
+      var typeSep = type.split(".");
+      var nombCapa = typeSep[0];
+
+      return (
+        '<a href="#" class="' +
+        nombCapa +
+        '">' +
+        text +
+        "<b>" +
+        nombCapa +
+        "</b></a>"
+      );
+    },
+    moveToLocation: function (latlng, title, map) {
+      map2.fitBounds(latlng.layer.getBounds());
+    },
+  })
+  .addTo(map2);
+
+ctrlSearch.on("search:expanded", function (e) {
+  const geoJSON = baseLyrGroup.toGeoJSON();
+  var features = geoJSON.features;
+
+  for (const feature of features) {
+    var props = feature.properties;
+
+    for (const prop in props) {
+      if (prop.includes("_1")) {
+        props["busqueda"] = props[prop];
+        delete props[prop];
+      }
+    }
+  }
+});
+
+ctrlSearch.on("search:locationfound", function (e) {
+  const geoJSON = baseLyrGroup.toGeoJSON();
+  //   const uniqueKeys = new Set();
+
+  //   geoJSON.features.forEach((feature) => {
+  //     const properties = feature.properties;
+
+  //     Object.keys(properties).forEach((key) => {
+  //       uniqueKeys.add(key);
+  //     });
+  //   });
+
+  coloniasLayers.clearLayers();
+  e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3 });
+  e.layer.addTo(coloniasLayers);
+});
+
+var control = new searchboxControl({
+  sidebarTitleText: "Header",
+  sidebarMenuItems: {
+    Items: [
+      {
+        type: "link",
+        name: "Link 1 (github.com)",
+        href: "http://github.com",
+        icon: "icon-local-carwash",
+      },
+      {
+        type: "link",
+        name: "Link 2 (google.com)",
+        href: "http://google.com",
+        icon: "icon-cloudy",
+      },
+      {
+        type: "button",
+        name: "Button 1",
+        onclick: "alert('button 1 clicked !')",
+        icon: "icon-potrait",
+      },
+      {
+        type: "button",
+        name: "Button 2",
+        onclick: "button2_click();",
+        icon: "icon-local-dining",
+      },
+      {
+        type: "link",
+        name: "Link 3 (stackoverflow.com)",
+        href: "http://stackoverflow.com",
+        icon: "icon-bike",
+      },
+    ],
+  },
+});
+control._searchfunctionCallBack = function (searchkeywords) {
+  if (!searchkeywords) {
+    searchkeywords = "The search call back is clicked !!";
+  }
+  alert(searchkeywords);
+};
+map2.addControl(control);
 
   fetchData();
 

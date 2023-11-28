@@ -9,14 +9,14 @@ function getWfsLayer(url, options) {
   });
 }
 
+const geoServerUrl =
+  "https://www.clustersig.com/geoserver/ows?service=WFS&version=1.1.0&request=GetCapabilities";
+
 async function fetchData() {
   try {
-    const geoServerUrl =
-      "https://www.clustersig.com/geoserver/ows?service=WFS&version=1.1.0&request=GetCapabilities";
-
-    const baseLyrGroup = L.layerGroup();
-
     const typeNS = await getLayerNamesFromGeoServer(geoServerUrl);
+
+    dependeciaCapas = typeNS;
 
     const selectGroup = document.getElementById("layerSelects");
     let baseLyrs;
@@ -78,20 +78,27 @@ async function fetchData() {
       dropContainer.appendChild(divSwitches);
       divSwitches.prepend(switchCapa);
 
-      if (nomCapa === "colonias" || nomCapa === "delegaciones") {
-        try {
-          const ele = await getWfsLayer(
-            "https://www.clustersig.com/geoserver/wfs",
-            {
-              layers: element,
-              fitLayer: false,
-            }
-          );
-          baseLyrGroup.addLayer(ele);
-        } catch (error) {
-          console.error("Error fetching WFS layer:", error);
-        }
-      }
+      var searchSelect = document.getElementById("search-list");
+      var searchOption = document.createElement("li");
+      searchOption.innerHTML = nomCapa;
+      searchOption.classList.add("menu-item");
+
+      searchSelect.appendChild(searchOption);
+
+      // if (nomCapa === "colonias" || nomCapa === "delegaciones") {
+      //   try {
+      //     const ele = await getWfsLayer(
+      //       "https://www.clustersig.com/geoserver/wfs",
+      //       {
+      //         layers: element,
+      //         fitLayer: false,
+      //       }
+      //     );
+      //     baseLyrGroup.addLayer(ele);
+      //   } catch (error) {
+      //     console.error("Error fetching WFS layer:", error);
+      //   }
+      // }
     }
 
     baseLyrs = baseLyrGroup.getLayers();
@@ -212,91 +219,18 @@ async function fetchData() {
       });
     });
 
-    ctrlSearch = L.control
-      .search({
-        layer: baseLyrGroup,
-        propertyName: "busqueda",
-        initial: false,
-        position: "topright",
-        textPlaceholder: "Buscar...",
-        textErr: "Busqueda no encontrada",
-        textCancel: "Cancelar",
-        marker: false,
-        buildTip: function (text, val) {
-          var type = val.layer.feature.id;
-          var typeSep = type.split('.');
-          var nombCapa = typeSep[0];
+    arraySearchCapas = document.getElementsByClassName("menu-item");
 
-          return (
-            '<a href="#" class="' +
-            nombCapa +
-            '">' +
-            text +
-            "<b>" +
-            nombCapa +
-            "</b></a>"
-          );
-        },
-        moveToLocation: function (latlng, title, map) {
-          map2.fitBounds(latlng.layer.getBounds());
-        },
-      })
-      .addTo(map2);
-
-    ctrlSearch.on("search:expanded", function (e) {
-      const geoJSON = baseLyrGroup.toGeoJSON();
-      var features = geoJSON.features;
-
-      for (const feature of features) {
-        var props = feature.properties;
-
-        for (const prop in props) {
-          if (prop.includes("_1")) {
-            props["busqueda"] = props[prop];
-            delete props[prop];
-          }
-        }
-      }
+    Array.from(arraySearchCapas).forEach(function (element) {
+      element.addEventListener("click", (event) => {
+        // document.querySelector('[id*="searchtext"]').style.display = 'block';
+        // event.fire('search:expanded')
+        element.parentElement.style.display = 'none';
+        var searchName = element.innerText;
+        baseLyrGroup.clearLayers();
+        searchFilter(searchName);
+      });
     });
-
-    ctrlSearch.on("search:locationfound", function (e) {
-      const geoJSON = baseLyrGroup.toGeoJSON();
-      //   const uniqueKeys = new Set();
-
-      //   geoJSON.features.forEach((feature) => {
-      //     const properties = feature.properties;
-
-      //     Object.keys(properties).forEach((key) => {
-      //       uniqueKeys.add(key);
-      //     });
-      //   });
-
-      coloniasLayers.clearLayers();
-      e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3 });
-      e.layer.addTo(coloniasLayers);
-    });
-
-    var control = new searchboxControl({
-        sidebarTitleText: 'Header',
-        sidebarMenuItems: {
-            Items: [
-                { type: "link", name: "Link 1 (github.com)", href: "http://github.com", icon: "icon-local-carwash" },
-                { type: "link", name: "Link 2 (google.com)", href: "http://google.com", icon: "icon-cloudy" },
-                { type: "button", name: "Button 1", onclick: "alert('button 1 clicked !')", icon: "icon-potrait" },
-                { type: "button", name: "Button 2", onclick: "button2_click();", icon: "icon-local-dining" },
-                { type: "link", name: "Link 3 (stackoverflow.com)", href: 'http://stackoverflow.com', icon: "icon-bike" },
-            ]
-        }
-    });
-    control._searchfunctionCallBack = function (searchkeywords)
-    {
-        if (!searchkeywords) {
-            searchkeywords = "The search call back is clicked !!"
-        }
-        alert(searchkeywords);
-    }
-    map2.addControl(control);
-
   } catch (error) {
     console.error("Error:", error);
   }
@@ -395,3 +329,24 @@ function getConfig(geomType, fillColor, name) {
   return styleConfigs[geomType];
 }
 
+async function searchFilter(searchCapa) {
+  try {
+    for (const capa of dependeciaCapas) {
+      if (capa.includes(searchCapa)) {
+        try {
+          const ele = await getWfsLayer("https://www.clustersig.com/geoserver/wfs",
+            {
+              layers: capa,
+              fitLayer: false,
+            }
+          );
+          baseLyrGroup.addLayer(ele);
+        } catch (error) {
+          console.error("Error fetching WFS layer:", error);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching TypeNS:", error);
+  }
+}
