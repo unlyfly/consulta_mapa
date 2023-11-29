@@ -124,8 +124,6 @@ $(document).ready(function () {
     ],
   });
 
-  searchboxControl = createSearchboxControl();
-
   var styleEditor = L.control.styleEditor({
     position: "topleft",
     markers: ["circle-stroked", "circle", "square-stroked", "square"],
@@ -173,7 +171,6 @@ $(document).ready(function () {
 
   selectedFeatures = L.layerGroup().addTo(map2);
   selectionPolygon = L.layerGroup().addTo(map2);
-  coloniasLayers = L.layerGroup().addTo(map2);
   usuarioLayers = L.layerGroup().addTo(map2);
   baseLyrGroup = L.layerGroup();
 
@@ -352,68 +349,12 @@ ctrlSearch.on("search:expanded", function (e) {
 });
 
 ctrlSearch.on("search:locationfound", function (e) {
-  const geoJSON = baseLyrGroup.toGeoJSON();
-  //   const uniqueKeys = new Set();
-
-  //   geoJSON.features.forEach((feature) => {
-  //     const properties = feature.properties;
-
-  //     Object.keys(properties).forEach((key) => {
-  //       uniqueKeys.add(key);
-  //     });
-  //   });
-
-  coloniasLayers.clearLayers();
+  limpiarTodo();
   e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3 });
-  e.layer.addTo(coloniasLayers);
+  e.layer.addTo(selectionPolygon);
 });
 
-var control = new searchboxControl({
-  sidebarTitleText: "Header",
-  sidebarMenuItems: {
-    Items: [
-      {
-        type: "link",
-        name: "Link 1 (github.com)",
-        href: "http://github.com",
-        icon: "icon-local-carwash",
-      },
-      {
-        type: "link",
-        name: "Link 2 (google.com)",
-        href: "http://google.com",
-        icon: "icon-cloudy",
-      },
-      {
-        type: "button",
-        name: "Button 1",
-        onclick: "alert('button 1 clicked !')",
-        icon: "icon-potrait",
-      },
-      {
-        type: "button",
-        name: "Button 2",
-        onclick: "button2_click();",
-        icon: "icon-local-dining",
-      },
-      {
-        type: "link",
-        name: "Link 3 (stackoverflow.com)",
-        href: "http://stackoverflow.com",
-        icon: "icon-bike",
-      },
-    ],
-  },
-});
-control._searchfunctionCallBack = function (searchkeywords) {
-  if (!searchkeywords) {
-    searchkeywords = "The search call back is clicked !!";
-  }
-  alert(searchkeywords);
-};
-map2.addControl(control);
-
-  fetchData();
+fetchData();
 
   // FUNCIONES GENERALES
 

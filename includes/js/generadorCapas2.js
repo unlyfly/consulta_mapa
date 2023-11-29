@@ -84,21 +84,6 @@ async function fetchData() {
       searchOption.classList.add("menu-item");
 
       searchSelect.appendChild(searchOption);
-
-      // if (nomCapa === "colonias" || nomCapa === "delegaciones") {
-      //   try {
-      //     const ele = await getWfsLayer(
-      //       "https://www.clustersig.com/geoserver/wfs",
-      //       {
-      //         layers: element,
-      //         fitLayer: false,
-      //       }
-      //     );
-      //     baseLyrGroup.addLayer(ele);
-      //   } catch (error) {
-      //     console.error("Error fetching WFS layer:", error);
-      //   }
-      // }
     }
 
     baseLyrs = baseLyrGroup.getLayers();
@@ -335,11 +320,12 @@ async function searchFilter(searchCapa) {
       if (capa.includes(searchCapa)) {
         try {
           const ele = await getWfsLayer("https://www.clustersig.com/geoserver/wfs",
-            {
-              layers: capa,
-              fitLayer: false,
-            }
+          {
+            layers: capa,
+            fitLayer: false,
+          }
           );
+          console.log(ele.toGeoJSON());
           baseLyrGroup.addLayer(ele);
         } catch (error) {
           console.error("Error fetching WFS layer:", error);

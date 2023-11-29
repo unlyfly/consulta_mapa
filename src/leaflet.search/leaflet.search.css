@@ -26,7 +26,7 @@
 	background: #fff;
 	border:1px solid #666;
 	border-radius:2px;
-	height:32px;
+	height:35px;
 	padding:0 20px 0 2px;
 	margin:3px 3px 3px 3px;
 }
@@ -42,7 +42,7 @@
 	height:22px;
 	position:absolute;
 	right:86px;
-	margin:9px 0;
+	margin:11px 0;
 	background: url('../../assets/images/search-icon.png') no-repeat 0 -46px;
 	text-decoration:none;
 	filter: alpha(opacity=80);
@@ -157,6 +157,9 @@
 	color:#e00;
 	font-weight:bold;
 	border-radius:.25em;
+	position: absolute;
+	left: 5px;
+	bottom: -2px;
 }
 
 .menu-list {

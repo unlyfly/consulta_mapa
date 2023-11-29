@@ -121,3 +121,58 @@ h4{
   margin-left: 4px;
   border-radius: 4px;
 }
+
+﻿#controlbox
+{
+    position: absolute;
+    left: 0px;
+    margin: 16px;
+    top: 0px;
+    transition: left 0.5s;
+    -webkit-transform: translateX(0px);
+    transform: translateX(0px);
+    transition-property: -webkit-transform,transform,visibility,opacity;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.0,0.0,0.2,1);
+}
+
+#controlcontainer
+{
+    top: 0;
+    position: absolute;
+    z-index: 4;
+    margin:0px !important;
+    bottom:0;
+    height:100%;
+}
+
+
+#omnibox.vasquette-margin-enabled {
+    margin: 8px 0 8px 8px;
+}
+
+a, button, h6, input, ol, p, textarea, th, ul {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font: inherit;
+    vertical-align: baseline;
+    background: transparent;
+    list-style: none;
+    overflow: visible;
+}
+
+.menu-item:hover
+{
+    color:#777;
+    cursor:pointer;
+    /* font-size: 14px; */
+    line-height:22px;
+    vertical-align:top;
+}
+
+button:hover
+{
+    color:black;
+}
