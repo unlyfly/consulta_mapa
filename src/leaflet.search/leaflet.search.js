@@ -301,7 +301,11 @@
   
         L.DomEvent
           .disableClickPropagation(input)
-          .on(input, 'keyup', this._handleKeypress, this)
+          .on(input, 'keyup', async function (e) {
+            const cqlFilter = e.target.value.trim();
+            await searchFilter(searchCapaSelected, cqlFilter);
+            self._handleKeypress(e);
+        }, this)
           .on(input, 'paste', function (e) {
             setTimeout(function (e) {
               self._handleKeypress(e)

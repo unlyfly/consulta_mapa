@@ -13,7 +13,6 @@ var ctrlGraficas;
 var ctrlButtonGraphs;
 var ctrlButtonUbicacion;
 var ctrlSearch;
-var searchboxControl;
 var ctrlLoadlayers;
 var objBasemaps;
 var mrkCurrentLocation;
@@ -21,11 +20,11 @@ var arrayColonias = [];
 var selectionPolygon;
 var crs32611;
 var arrayCapasActivas;
-var coloniasLayers;
 var usuarioLayers;
 var selectedFeatures;
 var baseLyrGroup;
 var dependeciaCapas;
+var searchCapaSelected;
 
 //  CREACION DE MAPA
 
@@ -33,6 +32,7 @@ $(document).ready(function () {
   map2 = L.map("mapdiv", {
     center: [32.487112, -116.964755],
     zoom: 13,
+    preferCanvas: true,
   });
 
   // SECCION DONDE SE ENCUENTRAN LOS CONTROLES QUE SE UTILIZAN  EN LA INTERFAZ DEL MAPA
@@ -52,6 +52,7 @@ $(document).ready(function () {
     cutPolygon: false,
     removalMode: false,
     rotateMode: false,
+    renderer: L.canvas(),
   });
 
   // CONTROLES DE SIDE BAR, EN LA IZQUIERDA EL DE CAPAS DISPONIBLES Y EN LA DERECHA EL DE ESTADISTICAS (POR DEFINIR MAS USOS)

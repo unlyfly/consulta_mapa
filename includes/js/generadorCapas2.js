@@ -212,8 +212,8 @@ async function fetchData() {
         // event.fire('search:expanded')
         element.parentElement.style.display = 'none';
         var searchName = element.innerText;
-        baseLyrGroup.clearLayers();
-        searchFilter(searchName);
+        searchCapaSelected = searchName;
+        getColumsFromGeoServer(searchName);
       });
     });
   } catch (error) {
@@ -314,7 +314,7 @@ function getConfig(geomType, fillColor, name) {
   return styleConfigs[geomType];
 }
 
-async function searchFilter(searchCapa) {
+async function searchFilter(searchCapa, filter) {
   try {
     for (const capa of dependeciaCapas) {
       if (capa.includes(searchCapa)) {
@@ -323,9 +323,9 @@ async function searchFilter(searchCapa) {
           {
             layers: capa,
             fitLayer: false,
+            cqlFilter: propertyName +'ILIKE \'%' + filter + '%\'',
           }
           );
-          console.log(ele.toGeoJSON());
           baseLyrGroup.addLayer(ele);
         } catch (error) {
           console.error("Error fetching WFS layer:", error);
