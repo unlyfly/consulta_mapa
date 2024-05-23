@@ -10,7 +10,11 @@ function generarTabla(layer) {
   table.classList.add("table", "table-striped");
   tr.classList.add("table-dark");
   exportTable.innerText = "Exportar Tabla a Excel";
-  exportTable.classList.add("btnExport");
+  exportTable.classList.add("btn-export");
+  exportTable.addEventListener("click", (event) => {
+    var wb = XLSX.utils.table_to_book(exportTable.previousElementSibling);
+    XLSX.writeFile(wb, "SheetJSTable.xlsx");
+  });
 
   var properties = Object.keys(features[0].properties);
 

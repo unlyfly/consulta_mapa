@@ -12,6 +12,7 @@ var ctrlButtonEstats;
 var ctrlGraficas;
 var ctrlButtonGraphs;
 var ctrlButtonUbicacion;
+var ctrlColonias;
 var ctrlSearch;
 var ctrlLoadlayers;
 var objBasemaps;
@@ -24,7 +25,11 @@ var usuarioLayers;
 var selectedFeatures;
 var baseLyrGroup;
 var dependeciaCapas;
-var searchCapaSelected;
+var searchCapaSelected = [1, "colonia_1"];
+var searchLayer;
+
+
+
 
 //  CREACION DE MAPA
 
@@ -34,6 +39,9 @@ $(document).ready(function () {
     zoom: 13,
     preferCanvas: true,
   });
+
+
+
 
   // SECCION DONDE SE ENCUENTRAN LOS CONTROLES QUE SE UTILIZAN  EN LA INTERFAZ DEL MAPA
   // CONTROL DE HERRAMINETAS DE DIBUJO GEOMAN
@@ -55,7 +63,9 @@ $(document).ready(function () {
     renderer: L.canvas(),
   });
 
-  // CONTROLES DE SIDE BAR, EN LA IZQUIERDA EL DE CAPAS DISPONIBLES Y EN LA DERECHA EL DE ESTADISTICAS (POR DEFINIR MAS USOS)
+
+
+  // CONTROLES DE SIDEBAR, EN LA IZQUIERDA EL DE CAPAS DISPONIBLES Y EN LA DERECHA EL DE ESTADISTICAS (POR DEFINIR MAS USOS)
 
   ctrlButtonUbicacion = L.easyButton({
     position: "topleft",
@@ -67,6 +77,35 @@ $(document).ready(function () {
         },
         title: "Seleccion por ubicacion",
         icon: "fas fa-location-crosshairs",
+      },
+    ],
+  }).addTo(map2);
+
+  ctrlColonias = L.easyButton({
+    position: "topleft",
+    states: [
+      {
+        stateName: "colonias",
+        onClick: function () {
+          baseLyrGroup.eachLayer(function (layer) {
+            if (layer.options.layers === "catastro:colonias") {
+              if (map2.hasLayer(layer) === false) {
+                layer
+                  .setStyle({
+                    fillColor: "white",
+                    color: "#C07F00",
+                    fillOpacity: 0.1,
+                    weight: 2,
+                  })
+                  .addTo(map2);
+              } else {
+                map2.removeLayer(layer);
+              }
+            }
+          });
+        },
+        title: "Seleccion por colonias",
+        icon: "fa-solid fa-earth-americas",
       },
     ],
   }).addTo(map2);
@@ -87,7 +126,7 @@ $(document).ready(function () {
         icon: "fas fa-layer-group",
       },
     ],
-  }).addTo(map2);
+  });
 
   ctrlEstadisticas = L.control
     .sidebar("estadisticas-bar", { closeButton: true, position: "right" })
@@ -130,13 +169,16 @@ $(document).ready(function () {
     markers: ["circle-stroked", "circle", "square-stroked", "square"],
   });
 
+
+
+
   // PLUGIN DE INTERCAMBIO DE BASE MAPS
 
   new L.basemapsSwitcher(
     [
       {
         layer: L.tileLayer(
-          "http://mt1.google.com/vt/lyrs=s&hl=pl&x={x}&y={y}&z={z}",
+          "https://mt1.google.com/vt/lyrs=s&hl=pl&x={x}&y={y}&z={z}",
           { attribution: "Google" }
         ).addTo(map2),
         icon: "./assets/img/google_sate_switch.png",
@@ -144,7 +186,7 @@ $(document).ready(function () {
       },
       {
         layer: L.tileLayer(
-          "http://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
+          "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
           { attribution: "Google" }
         ),
         icon: "./assets/img/google_roads_switch.png",
@@ -168,12 +210,19 @@ $(document).ready(function () {
     button: document.getElementById("btnAddLayer"),
   }).addTo(map2);
 
+
+
+
   // SE DECLARAN LA CREACION DE LOS LAYER GROUPS DONDE VAMOS A ALMACENAR LOS LAYERS
 
   selectedFeatures = L.layerGroup().addTo(map2);
   selectionPolygon = L.layerGroup().addTo(map2);
   usuarioLayers = L.layerGroup().addTo(map2);
   baseLyrGroup = L.layerGroup();
+  searchLayer = L.layerGroup();
+
+
+
 
   // VARIABLE PARA CONVERSION DE CAPAS A ESTA PROYECCION (POR EL MOMENTO ESTA EN DESUSO POR CAMBIOS EN EL GEOSERVER)
 
@@ -182,11 +231,14 @@ $(document).ready(function () {
     "+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs +type=crs"
   );
 
+
+  
   // ACCIONES DE SELECCION DE ELEMENTOS DE CAPAS (AL SELECCIONAR COLONIA, CREAR POLIGONO O ENCONTRAR LOCALIZACION)
 
   map2.on("pm:create", function (e) {
     selectionPolygon.addLayer(e.layer.showMeasurements());
     map2.addControl(styleEditor);
+    ctrlButtonSidebar.addTo(map2);
     ctrlSidebar.show();
     $("#btnClear").show();
   });
@@ -218,14 +270,19 @@ $(document).ready(function () {
         selectionPolygon.addLayer(layer.showMeasurements());
       },
     });
-    $("#btnClear").show();
+    ctrlButtonSidebar.addTo(map2);
     ctrlSidebar.show();
+    $("#btnClear").show();
   });
 
   map2.on("locationerror", function (e) {
     console.log(e);
     alert("Lacalizacion no encontrada");
   });
+
+
+
+
 
   // EVENTOS ACTIVADOS POR ELEMENTOS EN EL DOM (RADIO, BOTONES, CLICKS)
 
@@ -246,14 +303,6 @@ $(document).ready(function () {
       if (geoJSON.features.length !== 0) {
         simulateProcess(geoJSON, generarTabla);
       }
-    });
-
-    var botonesExp = document.getElementsByClassName("btnExport");
-    Array.from(botonesExp).forEach((element) => {
-      element.addEventListener("click", (event) => {
-        var wb = XLSX.utils.table_to_book(element.previousElementSibling);
-        XLSX.writeFile(wb, "SheetJSTable.xlsx");
-      });
     });
     ctrlButtonEstats.addTo(map2);
     ctrlEstadisticas.show();
@@ -301,61 +350,69 @@ $(document).ready(function () {
     ctrlGraficas.show();
   });
 
-  
   ctrlSearch = L.control
-  .search({
-    layer: baseLyrGroup,
-    propertyName: "busqueda",
-    initial: false,
-    position: "topright",
-    textPlaceholder: "",
-    textErr: "Busqueda no encontrada",
-    textCancel: "Cancelar",
-    marker: false,
-    buildTip: function (text, val) {
-      var type = val.layer.feature.id;
-      var typeSep = type.split(".");
-      var nombCapa = typeSep[0];
+    .search({
+      layer: searchLayer,
+      propertyName: `${searchCapaSelected[1]}`,
+      initial: false,
+      position: "topright",
+      textPlaceholder: "",
+      textErr: "Busqueda no encontrada",
+      textCancel: "Cancelar",
+      marker: false,
+      buildTip: function (text, val) {
+        var type = val.layer.feature.id;
+        var typeSep = type.split(".");
+        var nombCapa = typeSep[0];
 
-      return (
-        '<a href="#" class="' +
-        nombCapa +
-        '">' +
-        text +
-        "<b>" +
-        nombCapa +
-        "</b></a>"
-      );
-    },
-    moveToLocation: function (latlng, title, map) {
-      map2.fitBounds(latlng.layer.getBounds());
-    },
-  })
-  .addTo(map2);
+        return (
+          '<a href="#" class="' +
+          nombCapa +
+          '">' +
+          text +
+          "<b>" +
+          nombCapa +
+          "</b></a>"
+        );
+      },
+      moveToLocation: function (latlng, title, map) {
+        if (latlng.layer.feature.geometry.type === "Point") {
+          map2.setView(latlng.layer.getLatLng(), map2.getZoom());
+        } else {
+          map2.fitBounds(latlng.layer.getBounds());
+        }
+      },
+    })
+    .addTo(map2);
 
-ctrlSearch.on("search:expanded", function (e) {
-  const geoJSON = baseLyrGroup.toGeoJSON();
-  var features = geoJSON.features;
+  ctrlSearch.on("search:locationfound", function (e) {
+    limpiarTodo(); // Clear existing layers or elements
 
-  for (const feature of features) {
-    var props = feature.properties;
+    // Check the geometry type of the layer
+    if (e.layer.feature.geometry.type === "Point") {
 
-    for (const prop in props) {
-      if (prop.includes("_1")) {
-        props["busqueda"] = props[prop];
-        delete props[prop];
-      }
+      e.layer.addTo(selectionPolygon).openPopup();
+
+      // Move map to the location of the point
+      map2.setView(e.layer.getLatLng(), map2.getZoom());
+    } else {
+      // For other geometries, style and add it to the selectionPolygon
+      e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3 });
+      e.layer.addTo(selectionPolygon).openPopup();
+
+      // Fit map bounds to the geometry
+      map2.fitBounds(e.layer.getBounds());
     }
-  }
-});
 
-ctrlSearch.on("search:locationfound", function (e) {
-  limpiarTodo();
-  e.layer.setStyle({ fillColor: "none", color: "#FF0000", weight: 3 });
-  e.layer.addTo(selectionPolygon);
-});
+    ctrlButtonSidebar.addTo(map2);
+    ctrlSidebar.show();
+    $("#btnClear").show();
+  });
 
-fetchData();
+  fetchData();
+
+
+
 
   // FUNCIONES GENERALES
 
@@ -365,6 +422,9 @@ fetchData();
     var layersToClear = [selectionPolygon, selectedFeatures];
 
     layersToClear.forEach((layer) => layer.clearLayers());
+
+    // map2.removeLayer(baseLyrGroup.getLayers()[0]);
+    // map2.removeLayer(baseLyrGroup.getLayers()[1]);
 
     const toggleButtons = document.getElementsByClassName("layers");
     Array.from(toggleButtons).forEach((button) => (button.checked = false));
@@ -376,7 +436,9 @@ fetchData();
 
     $("#btnClear").hide();
     $("#radioDiv").hide();
+    ctrlSidebar.hide();
     $("#tablaEst, #statsTables, #chartContenedor").empty();
+    if (ctrlButtonSidebar) ctrlButtonSidebar.remove();
     if (ctrlButtonEstats) ctrlButtonEstats.remove();
     if (mrkCurrentLocation) mrkCurrentLocation.remove();
     if (lyrCurrentLoc) lyrCurrentLoc.remove();

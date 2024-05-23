@@ -1,5 +1,5 @@
 <?php
-function connectToDB() {
+function connectToDB($database) {
 
     $dotenv = Dotenv\Dotenv::createImmutable(__DIR__. '/config');
     $dotenv->load();
@@ -10,7 +10,7 @@ function connectToDB() {
     $username = $_ENV['DB_USER'];
     $password = $_ENV['DB_PASSWORD'];
 
-    $db = pg_pconnect("host=$host port=$port dbname=$dbname user=$username password=$password");
+    $db = pg_pconnect("host=$host port=$port dbname=$database user=$username password=$password");
     if(!$db) {
         return false;
     } else {

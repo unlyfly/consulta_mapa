@@ -9,26 +9,45 @@ use GeoPHP\Feature\Geometry;
 use Brick\Geo\IO\GeoJSONReader;
 use Brick\Geo\IO\GeoJSONWriter;
 
-
-
-//Connect to data base
-$db = connectToDB(); 
-
 // Get the selected coordinates from the AJAX request
-$geom = $_POST['geom'];
-$capa = $_POST['capa'];
+$geom = $_POST['geom'] ?? null;
+$capa = $_POST['capa'] ?? null;
+$database = $_POST['db'] ?? null;
 
-// Convert the data reseived in GeoJason to a Geometry
+// Check if all required parameters are present
+if (!$geom || !$capa || !$database) {
+    echo json_encode(['error' => 'Missing parameters']);
+    exit;
+}
+
+//Connect to database
+$db = connectToDB($database);
+
+if (!$db) {
+    echo json_encode(['error' => 'Failed to connect to database']);
+    exit;
+}
+
+// Convert the data received in GeoJson to a Geometry
 $reader = new GeoJSONReader();
-$polygon = $reader->read($geom);
+try {
+    $polygon = $reader->read($geom);
+} catch (Exception $e) {
+    echo json_encode(['error' => 'Failed to parse geometry: ' . $e->getMessage()]);
+    exit;
+}
 
-// echo $polygon->SRID();
-
+// Construct the query
 $selectedGeom = $polygon->asText();
+$query = "SELECT b.* FROM $capa as b WHERE ST_Intersects(ST_GeomFromText('$selectedGeom', 4326), b.geom)";
 
-$query = "SELECT b.* FROM $capa as b, ST_GeomFromText('$selectedGeom') as a WHERE ST_Intersects(ST_GeomFromText('$selectedGeom', 4326), b.geom)";
-
+// Execute the query
 $result = pg_query($db, $query);
+
+if (!$result) {
+    echo json_encode(['error' => 'Query failed: ' . pg_last_error($db)]);
+    exit;
+}
 
 $GeoJSON = array('type' => 'FeatureCollection', 'features' => array());
 
@@ -39,7 +58,12 @@ while ($row = pg_fetch_assoc($result)) {
 
     $wkb = hex2bin($row['geom']);
 
-    $point = geoPHP::load($wkb, 'wkb');
+    try {
+        $point = geoPHP::load($wkb, 'wkb');
+    } catch (Exception $e) {
+        echo json_encode(['error' => 'Failed to load geometry: ' . $e->getMessage()]);
+        exit;
+    }
 
     // Convert the Point to GeoJSON
     $pointGeoJson = $point->out('json');
@@ -55,4 +79,3 @@ while ($row = pg_fetch_assoc($result)) {
 
 // Return the GeoJSON as a JSON response
 echo json_encode($GeoJSON);
-?>
